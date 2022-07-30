@@ -1,0 +1,24 @@
+{
+  "rootDir": "./",
+  "transform": {
+    "^.+\\.(t|j)sx?$": "ts-jest/legacy"
+  },
+  "verbose": true,
+  "fakeTimers": {
+    "enableGlobally": true 
+  },
+  "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?|js?|ts?)$",
+  "testPathIgnorePatterns": ["<rootDir>/lib"],
+  "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json", "node"],
+  "collectCoverage": true,
+  "collectCoverageFrom": [
+    "<rootDir>/__tests__/*.test.ts",
+    "<rootDir>/src/**/**/**/*.ts"
+  ],
+  "coveragePathIgnorePatterns": [
+    "<rootDir>/node_modules/"
+  ],
+  "coverageReporters": ["json", "text", "lcov", "jest-badges"],
+  "coverageDirectory": "coverage",
+  "errorOnDeprecated": true
+}

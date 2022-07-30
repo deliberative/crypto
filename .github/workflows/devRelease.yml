@@ -1,0 +1,90 @@
+name: "pre-release"
+
+on:
+  push:
+    branches:
+      - "master"
+
+jobs:
+  pre-release:
+    name: "Pre Release"
+    runs-on: "ubuntu-latest"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+
+      - name: Cache LLVM and Clang
+        id: cache-llvm
+        uses: actions/cache@v2
+        with:
+          path: |
+            C:/Program Files/LLVM
+            ./llvm
+          key: llvm-13
+
+      - name: Install LLVM and Clang
+        uses: KyleMayes/install-llvm-action@v1.5.1
+        with:
+          version: "13"
+          cached: ${{ steps.cache-llvm.outputs.cache-hit }}
+
+      - name: Setup emsdk
+        uses: mymindstorm/setup-emsdk@v11
+        with:
+          # Make sure to set a version number!
+          version: 3.1.9
+          # This is the name of the cache folder.
+          # The cache folder will be placed in the build directory,
+          #  so make sure it doesn't conflict with anything!
+          actions-cache-folder: 'emsdk-cache'
+
+      - name: Verify
+        run: emcc -v
+
+      - name: Setup
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
+      - name: Jest
+        run: npm test
+
+      - name: get-npm-version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@master
+
+      # Setup .npmrc file to publish to npm
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+          registry-url: 'https://registry.npmjs.org'
+          tag: '{{ steps.package-version.outputs.current-version}}-alpha'
+
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      
+      # Setup .npmrc file to publish to GitHub Packages
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+          registry-url: 'https://npm.pkg.github.com'
+          tag: '{{ steps.package-version.outputs.current-version}}-alpha'
+
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+      # - name: Codecov
+      #   uses: codecov/codecov-action@v2
+      #   with:
+      #     # token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+      #     # files: ./coverage1.xml,./coverage2.xml # optional
+      #     directory: ./coverage
+      #     # flags: unittests # optional
+      #     # name: codecov-umbrella # optional
+      #     fail_ci_if_error: true
+      #     # verbose: true # optional (default = false)

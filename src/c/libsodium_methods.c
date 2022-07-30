@@ -1,0 +1,253 @@
+// Copyright (C) 2022 Deliberative Technologies P.C.
+// SPDX-License-Identifier: Apache-2.0
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// 	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "../../libsodium/src/libsodium/randombytes/randombytes.c"
+#include "../../libsodium/src/libsodium/sodium/core.c"
+#include "../../libsodium/src/libsodium/sodium/utils.c"
+
+// SHA512
+#include "../../libsodium/src/libsodium/crypto_hash/sha512/cp/hash_sha512_cp.c"
+
+// Ed25519
+#include "../../libsodium/src/libsodium/crypto_core/ed25519/ref10/ed25519_ref10.c"
+#include "../../libsodium/src/libsodium/crypto_sign/ed25519/ref10/keypair.c"
+#include "../../libsodium/src/libsodium/crypto_sign/ed25519/ref10/open.c"
+#include "../../libsodium/src/libsodium/crypto_sign/ed25519/ref10/sign.c"
+#include "../../libsodium/src/libsodium/crypto_verify/sodium/verify.c"
+
+// AEAD Chacha20Poly1305
+#include "../../libsodium/src/libsodium/crypto_aead/chacha20poly1305/sodium/aead_chacha20poly1305.c"
+#include "../../libsodium/src/libsodium/crypto_generichash/blake2b/ref/blake2b-compress-ref.c"
+#include "../../libsodium/src/libsodium/crypto_generichash/blake2b/ref/blake2b-ref.c"
+#include "../../libsodium/src/libsodium/crypto_generichash/blake2b/ref/generichash_blake2b.c"
+#include "../../libsodium/src/libsodium/crypto_generichash/crypto_generichash.c"
+#include "../../libsodium/src/libsodium/crypto_onetimeauth/poly1305/donna/poly1305_donna.c"
+#include "../../libsodium/src/libsodium/crypto_onetimeauth/poly1305/onetimeauth_poly1305.c"
+#include "../../libsodium/src/libsodium/crypto_stream/chacha20/ref/chacha20_ref.c"
+#include "../../libsodium/src/libsodium/crypto_stream/chacha20/stream_chacha20.c"
+
+// Diffie Hellman
+#include "../../libsodium/src/libsodium/crypto_kx/crypto_kx.c"
+#include "../../libsodium/src/libsodium/crypto_scalarmult/crypto_scalarmult.c"
+#include "../../libsodium/src/libsodium/crypto_scalarmult/curve25519/ref10/x25519_ref10.c"
+#include "../../libsodium/src/libsodium/crypto_scalarmult/curve25519/scalarmult_curve25519.c"
+#include "../../libsodium/src/libsodium/crypto_scalarmult/ed25519/ref10/scalarmult_ed25519_ref10.c"
+
+__attribute__((used)) int
+sha512(const int DATA_LEN, const uint8_t data[DATA_LEN],
+       uint8_t hash[crypto_hash_sha512_BYTES])
+{
+  return crypto_hash_sha512(hash, data, DATA_LEN);
+}
+
+__attribute__((used)) int
+sign_data(const int DATA_LEN, const uint8_t data[DATA_LEN],
+          uint8_t signature[crypto_sign_ed25519_BYTES],
+          const uint8_t secret_key[crypto_sign_ed25519_SECRETKEYBYTES])
+{
+  unsigned long long SIGNATURE_LEN = crypto_sign_ed25519_BYTES;
+
+  return crypto_sign_ed25519_detached(signature, &SIGNATURE_LEN, data, DATA_LEN,
+                                      secret_key);
+}
+
+__attribute__((used)) bool
+verify_data(const int DATA_LEN, const uint8_t data[DATA_LEN],
+            const uint8_t signature[crypto_sign_ed25519_BYTES],
+            const uint8_t public_key[crypto_sign_ed25519_PUBLICKEYBYTES])
+{
+  int verified = crypto_sign_ed25519_verify_detached(signature, data, DATA_LEN,
+                                                     public_key);
+
+  return verified == 0; // -1 if false
+}
+
+__attribute__((used)) void
+calculate_nonce(
+    uint8_t nonce[crypto_aead_chacha20poly1305_ietf_NPUBBYTES],
+    const uint8_t ephemeral_x25519_pk[crypto_scalarmult_curve25519_BYTES],
+    const uint8_t x25519_pk[crypto_scalarmult_curve25519_BYTES])
+{
+  int NONCE_RANDOM_X_LEN = crypto_aead_chacha20poly1305_ietf_NPUBBYTES
+                           + crypto_scalarmult_curve25519_BYTES;
+  int NONCE_VECTOR_LEN
+      = NONCE_RANDOM_X_LEN + crypto_scalarmult_curve25519_BYTES;
+  uint8_t *nonce_vector
+      = (uint8_t *)sodium_malloc(NONCE_VECTOR_LEN * sizeof(uint8_t));
+
+  randombytes_buf(nonce_vector, crypto_aead_chacha20poly1305_ietf_NPUBBYTES);
+  memcpy(nonce_vector + crypto_aead_chacha20poly1305_ietf_NPUBBYTES,
+         ephemeral_x25519_pk, crypto_scalarmult_curve25519_BYTES);
+  memcpy(nonce_vector + NONCE_RANDOM_X_LEN, x25519_pk,
+         crypto_scalarmult_curve25519_BYTES);
+
+  uint8_t *nonce_sha512
+      = (uint8_t *)malloc(crypto_hash_sha512_BYTES * sizeof(uint8_t));
+  crypto_hash_sha512(nonce_sha512, nonce_vector, NONCE_VECTOR_LEN);
+  sodium_free(nonce_vector);
+
+  memcpy(nonce, nonce_sha512, crypto_aead_chacha20poly1305_ietf_NPUBBYTES);
+  free(nonce_sha512);
+}
+
+/* Returns (ephemeral_pk || nonce || encrypted_data || auth tag || signature of
+ * ephemeral_pk)  */
+__attribute__((used)) int
+encrypt_data(
+    const int DATA_LEN, const uint8_t data[DATA_LEN],
+    const uint8_t public_key[crypto_sign_ed25519_PUBLICKEYBYTES],
+    const int ADDITIONAL_DATA_LEN,
+    const uint8_t additional_data[ADDITIONAL_DATA_LEN],
+    uint8_t encrypted[crypto_scalarmult_curve25519_BYTES
+                      + crypto_aead_chacha20poly1305_ietf_NPUBBYTES + DATA_LEN
+                      + crypto_aead_chacha20poly1305_ietf_ABYTES])
+{
+  /* if (DATA_LEN > 2^12) return -2; // Encrypted data larger than expected
+   */
+
+  unsigned long long CIPHERTEXT_LEN
+      = DATA_LEN + crypto_aead_chacha20poly1305_ietf_ABYTES;
+  uint8_t *ciphertext
+      = (uint8_t *)sodium_malloc(CIPHERTEXT_LEN * sizeof(uint8_t));
+
+  uint8_t *ephemeral_x25519_pk
+      = malloc(crypto_scalarmult_curve25519_BYTES * sizeof(uint8_t));
+  uint8_t *ephemeral_x25519_sk = sodium_malloc(
+      crypto_scalarmult_curve25519_SCALARBYTES * sizeof(uint8_t));
+  crypto_kx_keypair(ephemeral_x25519_pk, ephemeral_x25519_sk);
+
+  uint8_t *x25519_pk
+      = malloc(crypto_scalarmult_curve25519_BYTES * sizeof(uint8_t));
+  int converted = crypto_sign_ed25519_pk_to_curve25519(x25519_pk, public_key);
+  if (converted != 0)
+  {
+    free(x25519_pk);
+    sodium_free(ciphertext);
+    free(ephemeral_x25519_pk);
+    sodium_free(ephemeral_x25519_sk);
+
+    return -1;
+  }
+
+  uint8_t *server_tx = sodium_malloc(crypto_kx_SESSIONKEYBYTES);
+  int created = crypto_kx_server_session_keys(
+      NULL, server_tx, ephemeral_x25519_pk, ephemeral_x25519_sk, x25519_pk);
+  sodium_free(ephemeral_x25519_sk);
+  if (created != 0)
+  {
+    free(x25519_pk);
+    sodium_free(ciphertext);
+    free(ephemeral_x25519_pk);
+    sodium_free(server_tx);
+
+    return -2;
+  }
+
+  uint8_t *nonce
+      = malloc(crypto_aead_chacha20poly1305_ietf_NPUBBYTES * sizeof(uint8_t));
+  calculate_nonce(nonce, ephemeral_x25519_pk, x25519_pk);
+  free(x25519_pk);
+
+  crypto_aead_chacha20poly1305_ietf_encrypt(
+      ciphertext, &CIPHERTEXT_LEN, data, DATA_LEN, additional_data,
+      ADDITIONAL_DATA_LEN, NULL, nonce, server_tx);
+  sodium_free(server_tx);
+
+  memcpy(encrypted, ephemeral_x25519_pk, crypto_scalarmult_curve25519_BYTES);
+  free(ephemeral_x25519_pk);
+
+  memcpy(encrypted + crypto_scalarmult_curve25519_BYTES, nonce,
+         crypto_aead_chacha20poly1305_ietf_NPUBBYTES);
+  free(nonce);
+
+  int KEY_NONCE_LEN = crypto_scalarmult_curve25519_BYTES
+                      + crypto_aead_chacha20poly1305_ietf_NPUBBYTES;
+  memcpy(encrypted + KEY_NONCE_LEN, ciphertext, CIPHERTEXT_LEN);
+  sodium_free(ciphertext);
+
+  return 0;
+}
+
+__attribute__((used)) int
+decrypt_data(
+    const int ENCRYPTED_LEN, const uint8_t encrypted_data[ENCRYPTED_LEN],
+    const uint8_t secret_key[crypto_sign_ed25519_SECRETKEYBYTES],
+    const int ADDITIONAL_DATA_LEN,
+    const uint8_t additional_data[ADDITIONAL_DATA_LEN],
+    uint8_t data[ENCRYPTED_LEN - crypto_aead_chacha20poly1305_ietf_NPUBBYTES
+                 - crypto_aead_chacha20poly1305_ietf_ABYTES
+                 - crypto_scalarmult_curve25519_BYTES])
+{
+  int EPHEMERAL_NONCE_LEN = crypto_scalarmult_curve25519_BYTES
+                            + crypto_aead_chacha20poly1305_ietf_NPUBBYTES;
+
+  unsigned long long DATA_LEN = ENCRYPTED_LEN - EPHEMERAL_NONCE_LEN
+                                - crypto_aead_chacha20poly1305_ietf_ABYTES
+                                - crypto_sign_ed25519_BYTES;
+
+  if (DATA_LEN <= 0) return -1;
+
+  uint8_t *ephemeral_x25519_pk
+      = malloc(crypto_scalarmult_curve25519_BYTES * sizeof(uint8_t));
+  memcpy(ephemeral_x25519_pk, encrypted_data,
+         crypto_scalarmult_curve25519_BYTES);
+
+  uint8_t *nonce
+      = malloc(crypto_aead_chacha20poly1305_ietf_NPUBBYTES * sizeof(uint8_t));
+  memcpy(nonce, encrypted_data + crypto_scalarmult_curve25519_BYTES,
+         crypto_aead_chacha20poly1305_ietf_NPUBBYTES);
+
+  uint8_t *x25519_pk
+      = malloc(crypto_aead_chacha20poly1305_KEYBYTES * sizeof(uint8_t));
+  uint8_t *x25519_sk
+      = sodium_malloc(crypto_scalarmult_curve25519_BYTES * sizeof(uint8_t));
+  crypto_sign_ed25519_sk_to_curve25519(x25519_sk, secret_key);
+  crypto_scalarmult_curve25519_base(x25519_pk, x25519_sk);
+
+  uint8_t *client_rx = sodium_malloc(crypto_kx_SESSIONKEYBYTES);
+  int created = crypto_kx_client_session_keys(client_rx, NULL, x25519_pk,
+                                              x25519_sk, ephemeral_x25519_pk);
+  free(x25519_pk);
+  sodium_free(x25519_sk);
+  free(ephemeral_x25519_pk);
+  if (created != 0)
+  {
+    free(nonce);
+    sodium_free(client_rx);
+
+    return -2;
+  }
+
+  int CIPHERTEXT_LEN = ENCRYPTED_LEN - EPHEMERAL_NONCE_LEN;
+  uint8_t *ciphertext = malloc(CIPHERTEXT_LEN * sizeof(uint8_t));
+  memcpy(ciphertext, encrypted_data + EPHEMERAL_NONCE_LEN, CIPHERTEXT_LEN);
+
+  int decrypted = crypto_aead_chacha20poly1305_ietf_decrypt(
+      data, &DATA_LEN, NULL, ciphertext, CIPHERTEXT_LEN, additional_data,
+      ADDITIONAL_DATA_LEN, nonce, client_rx);
+
+  free(ciphertext);
+  sodium_free(client_rx);
+  free(nonce);
+
+  if (decrypted == 0) return 0;
+
+  return -4;
+}
