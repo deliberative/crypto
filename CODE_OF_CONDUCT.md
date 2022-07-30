@@ -6,7 +6,7 @@ Towards this end, certain behaviors and practices will not be tolerated.
 ## tl;dr
 
 - Be respectful.
-- We're here to help: abuse@deliberative.eu
+- We're here to help: abuse@deliberative.io
 - Abusive behavior is never tolerated.
 - Violations of this code may result in swift and permanent expulsion from the deliberative.eu community.
 - "Too long, didn't read" is not a valid excuse for not knowing what is in this document.

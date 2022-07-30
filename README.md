@@ -1,4 +1,4 @@
-# delib-js
+# @deliberative/crypto
 
 [![codecov][codecov-image]][codecov-url]
 <br>

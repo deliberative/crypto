@@ -1,8 +1,8 @@
 build
 lib
 coverage
-valgrind.txt
-test.o
+*.o
+*valgrind*.txt
 
 # Logs
 logs
