@@ -13,19 +13,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import * as bip39 from "bip39";
-import * as nacl from "tweetnacl";
+export interface SignKeyPair {
+  publicKey: Uint8Array;
+  secretKey: Uint8Array;
+}
 
-const keypairFromMnemonic = async (mnemonic: string) => {
-  const isValid = bip39.validateMnemonic(mnemonic);
-  if (!isValid) throw new Error("Invalid mnemonic.");
-
-  const seed = await bip39.mnemonicToSeed(mnemonic);
-  const privateKeySeed = new Uint8Array(seed.toJSON().data.slice(0, 32));
-  const keypair = nacl.sign.keyPair.fromSeed(privateKeySeed);
-  if (!keypair) throw new Error("Invalid seed from mnemonic.");
-
-  return keypair;
-};
-
-export default keypairFromMnemonic;
+export const crypto_hash_sha512_BYTES = 64;
+export const crypto_secretbox_KEYBYTES = 32;
+export const crypto_secretbox_NONCEBYTES = 24;
+export const crypto_box_poly1305_AUTHTAGBYTES = 16;
+export const crypto_box_x25519_PUBLICKEYBYTES = 32;
+export const crypto_box_x25519_SECRETKEYBYTES = 32;
+export const crypto_box_x25519_NONCEBYTES = 12;
+export const crypto_sign_ed25519_BYTES = 64;
+export const crypto_sign_ed25519_SEEDBYTES = 32;
+export const crypto_sign_ed25519_PUBLICKEYBYTES = 32;
+export const crypto_sign_ed25519_SECRETKEYBYTES = 64;

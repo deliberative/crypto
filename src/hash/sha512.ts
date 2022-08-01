@@ -13,11 +13,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import * as nacl from "tweetnacl";
-
 import utils from "../utils";
 
 import loadLibsodium from "../wasmLoaders/libsodium";
+
+import { crypto_hash_sha512_BYTES } from "../interfaces";
 
 const sha512 = async (
   data: string | object | Uint8Array,
@@ -41,7 +41,7 @@ const sha512 = async (
   const arrayLen = array.length;
 
   const memoryLen =
-    (arrayLen + nacl.hash.hashLength) * Uint8Array.BYTES_PER_ELEMENT;
+    (arrayLen + crypto_hash_sha512_BYTES) * Uint8Array.BYTES_PER_ELEMENT;
   wasm = wasm ? wasm : await loadLibsodium(memoryLen);
   const sha = wasm.sha512 as CallableFunction;
   const memory = wasm.memory as WebAssembly.Memory;
@@ -51,9 +51,11 @@ const sha512 = async (
   arr.set([...array]);
 
   offset += arrayLen;
-  const hash = new Uint8Array(memory.buffer, offset, nacl.hash.hashLength).fill(
-    0,
-  );
+  const hash = new Uint8Array(
+    memory.buffer,
+    offset,
+    crypto_hash_sha512_BYTES,
+  ).fill(0);
 
   const result = sha(arrayLen, arr.byteOffset, hash.byteOffset) as number;
 

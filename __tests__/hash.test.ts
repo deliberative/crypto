@@ -1,10 +1,6 @@
-import * as nacl from "tweetnacl";
-
 import dcrypto from "../src";
 
 describe("Sha512 and Merkle root test suite.", () => {
-  const mnemonic = dcrypto.generateMnemonic();
-
   const stringMessage = "Some random message to sign";
 
   enum someEnum {
@@ -30,6 +26,7 @@ describe("Sha512 and Merkle root test suite.", () => {
   };
 
   test("Public key SHA512 hash works.", async () => {
+    const mnemonic = await dcrypto.generateMnemonic();
     const keypair = await dcrypto.keypairFromMnemonic(mnemonic);
     const hash = await dcrypto.sha512(keypair.publicKey);
     expect(hash.length).toBe(64);
@@ -49,7 +46,7 @@ describe("Sha512 and Merkle root test suite.", () => {
   test("Merkle root works.", async () => {
     const tree: Uint8Array[] = [];
     for (let i = 0; i < 201; i++) {
-      const rand = nacl.randomBytes(128);
+      const rand = await dcrypto.randomBytes(128);
       tree.push(rand);
     }
 

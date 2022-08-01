@@ -18,18 +18,44 @@ import hash from "./hash";
 import shamir from "./shamir";
 import utils from "./utils";
 
-import type { SignKeyPair } from "tweetnacl";
+import type { SignKeyPair } from "./interfaces";
 
 export interface DeliberativeCrypto {
   /**
+   * Generates a Uint8Array of random bytes
+   */
+  randomBytes: (n: number, wasm?: WebAssembly.Exports) => Promise<Uint8Array>;
+
+  /**
+   * Generate a new Ed25519 keypair
+   */
+  keyPair: (wasm?: WebAssembly.Exports) => Promise<SignKeyPair>;
+
+  /**
    * Generates a 12-natural-language-word representation of an Ed25519 private key.
    */
-  generateMnemonic: () => string;
+  generateMnemonic: () => Promise<string>;
+
+  /**
+   * Generate a new Ed25519 keypair from a given seed
+   */
+  keyPairFromSeed: (
+    seed: Uint8Array,
+    wasm?: WebAssembly.Exports,
+  ) => Promise<SignKeyPair>;
 
   /**
    * Generates an Ed25519 keypair from a 12-natural-language-word mnemonic.
    */
   keypairFromMnemonic: (mnemonic: string) => Promise<SignKeyPair>;
+
+  /**
+   * Generate a new Ed25519 keypair from an Ed25519 secret key
+   */
+  keyPairFromSecretKey: (
+    secretKey: Uint8Array,
+    wasm?: WebAssembly.Exports,
+  ) => Promise<SignKeyPair>;
 
   /**
    * Generates a digital signature for the message using the private key.
@@ -81,8 +107,12 @@ export interface DeliberativeCrypto {
 }
 
 const dcrypto: DeliberativeCrypto = {
-  generateMnemonic: asymmetric.generateMnemonic,
-  keypairFromMnemonic: asymmetric.keypairFromMnemonic,
+  randomBytes: asymmetric.randomBytes,
+  keyPair: asymmetric.keyPair.newKeyPair,
+  generateMnemonic: asymmetric.keyPair.generateMnemonic,
+  keyPairFromSeed: asymmetric.keyPair.keyPairFromSeed,
+  keypairFromMnemonic: asymmetric.keyPair.keyPairFromMnemonic,
+  keyPairFromSecretKey: asymmetric.keyPair.keyPairFromSecretKey,
   sign: asymmetric.sign,
   verify: asymmetric.verify,
   encrypt: asymmetric.encrypt,

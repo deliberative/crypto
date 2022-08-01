@@ -13,9 +13,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import * as nacl from "tweetnacl";
-
 import loadLibsodium from "../wasmLoaders/libsodium";
+
+import {
+  crypto_box_x25519_NONCEBYTES,
+  crypto_box_x25519_PUBLICKEYBYTES,
+  crypto_box_x25519_SECRETKEYBYTES,
+  crypto_box_poly1305_AUTHTAGBYTES,
+  crypto_sign_ed25519_PUBLICKEYBYTES,
+} from "../interfaces";
 
 const encrypt = async (
   message: Uint8Array,
@@ -27,20 +33,20 @@ const encrypt = async (
   const additionalLen = additionalData.length;
 
   const sealedBoxLen =
-    nacl.box.publicKeyLength + // ephemeral x25519 public key
-    1 * (nacl.box.nonceLength - 12) + // xchacha uses 24 byte nonce while ietf 12
+    crypto_box_x25519_PUBLICKEYBYTES + // ephemeral x25519 public key
+    crypto_box_x25519_NONCEBYTES + // xchacha uses 24 byte nonce while ietf 12
     len +
-    nacl.box.overheadLength; // 16 bytes poly1305 auth tag
+    crypto_box_poly1305_AUTHTAGBYTES; // 16 bytes poly1305 auth tag
 
   const memoryLen =
     (len +
-      nacl.sign.publicKeyLength +
+      crypto_sign_ed25519_PUBLICKEYBYTES +
       additionalLen +
       sealedBoxLen +
-      1 * (len + nacl.box.overheadLength) + // malloc'd
-      2 * nacl.box.publicKeyLength + // malloc'd
-      2 * nacl.box.secretKeyLength + // malloc'd
-      nacl.box.nonceLength) * // malloc'd
+      1 * (len + crypto_box_poly1305_AUTHTAGBYTES) + // malloc'd
+      2 * crypto_box_x25519_PUBLICKEYBYTES + // malloc'd
+      2 * crypto_box_x25519_SECRETKEYBYTES + // malloc'd
+      crypto_box_x25519_NONCEBYTES) * // malloc'd
     Uint8Array.BYTES_PER_ELEMENT;
 
   wasm = wasm || (await loadLibsodium(memoryLen));
@@ -52,10 +58,14 @@ const encrypt = async (
   dataArray.set([...message]);
 
   offset += len;
-  const pub = new Uint8Array(memory.buffer, offset, nacl.sign.publicKeyLength);
+  const pub = new Uint8Array(
+    memory.buffer,
+    offset,
+    crypto_sign_ed25519_PUBLICKEYBYTES,
+  );
   pub.set([...publicKey]);
 
-  offset += nacl.sign.publicKeyLength;
+  offset += crypto_sign_ed25519_PUBLICKEYBYTES;
   const additional = new Uint8Array(memory.buffer, offset, additionalLen);
   additional.set([...additionalData]);
 

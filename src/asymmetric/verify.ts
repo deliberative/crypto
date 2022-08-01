@@ -13,11 +13,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import * as nacl from "tweetnacl";
-
 import utils from "../utils/base64";
 
 import loadLibsodium from "../wasmLoaders/libsodium";
+
+import {
+  crypto_sign_ed25519_BYTES,
+  crypto_sign_ed25519_PUBLICKEYBYTES,
+} from "../interfaces";
 
 const verify = async (
   message: string | object | Uint8Array,
@@ -44,7 +47,7 @@ const verify = async (
   const len = data.length;
 
   const memoryLen =
-    (len + nacl.sign.signatureLength + nacl.sign.publicKeyLength) *
+    (len + crypto_sign_ed25519_BYTES + crypto_sign_ed25519_PUBLICKEYBYTES) *
     Uint8Array.BYTES_PER_ELEMENT;
   wasm = wasm || (await loadLibsodium(memoryLen));
   const validate = wasm.verify_data as CallableFunction;
@@ -66,7 +69,7 @@ const verify = async (
   }
 
   offset += len;
-  const sig = new Uint8Array(memory.buffer, offset, nacl.sign.signatureLength);
+  const sig = new Uint8Array(memory.buffer, offset, crypto_sign_ed25519_BYTES);
   sig.set([...signatureBuffer]);
 
   let publicKeyBuffer: Uint8Array;
@@ -80,8 +83,12 @@ const verify = async (
     publicKeyBuffer = publicKey;
   }
 
-  offset += nacl.sign.signatureLength;
-  const key = new Uint8Array(memory.buffer, offset, nacl.sign.publicKeyLength);
+  offset += crypto_sign_ed25519_BYTES;
+  const key = new Uint8Array(
+    memory.buffer,
+    offset,
+    crypto_sign_ed25519_PUBLICKEYBYTES,
+  );
   key.set([...publicKeyBuffer]);
 
   const result = validate(

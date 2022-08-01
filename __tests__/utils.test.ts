@@ -27,8 +27,8 @@ describe("Utils test suite.", () => {
     expect(areNotEqual).toBe(false);
   });
 
-  const mnemonic = dcrypto.generateMnemonic();
   test("Encode Uint8Array to base64 url-safe string works.", async () => {
+    const mnemonic = await dcrypto.generateMnemonic();
     const keypair = await dcrypto.keypairFromMnemonic(mnemonic);
     const publicKeyString = utils.encodeToBase64(keypair.publicKey);
     expect(typeof publicKeyString === "string").toBe(true);
@@ -36,6 +36,7 @@ describe("Utils test suite.", () => {
   });
 
   test("Decode base64 url-safe string to Uint8Array works.", async () => {
+    const mnemonic = await dcrypto.generateMnemonic();
     const keypair = await dcrypto.keypairFromMnemonic(mnemonic);
     const publicKeyString = utils.encodeToBase64(keypair.publicKey);
     const publicKey = utils.decodeFromBase64(publicKeyString);

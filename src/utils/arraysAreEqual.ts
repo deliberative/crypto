@@ -24,32 +24,4 @@ const arraysAreEqual = (array1: Uint8Array, array2: Uint8Array) => {
   return true;
 };
 
-// import loadArrayMethods from "./loadArrayMethods";
-//
-// const arraysAreEqual = async (
-//   arr1: Uint8Array,
-//   arr2: Uint8Array,
-//   wasm?: WebAssembly.Exports,
-// ): Promise<boolean> => {
-//   const len = arr1.length;
-//   if (len !== arr2.length) return false;
-//
-//   const memoryLen = 2 * len * Uint8Array.BYTES_PER_ELEMENT;
-//   wasm = wasm ? wasm : await loadArrayMethods(memoryLen);
-//   const areEqual = wasm.arrays_are_equal as CallableFunction;
-//   const memory = wasm.memory as WebAssembly.Memory;
-//
-//   let offset = 0;
-//   const array1 = new Uint8Array(memory.buffer, offset, len);
-//   array1.set([...arr1]);
-//
-//   offset += len * Uint8Array.BYTES_PER_ELEMENT;
-//   const array2 = new Uint8Array(memory.buffer, offset, len);
-//   array2.set([...arr2]);
-//
-//   const result = areEqual(len, array1.byteOffset, array2.byteOffset) as number;
-//
-//   return result === 1;
-// };
-
 export default arraysAreEqual;

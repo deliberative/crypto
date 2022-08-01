@@ -13,14 +13,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import * as nacl from "tweetnacl";
+import keyPair from "./keyPair";
+
+import utils from "../utils";
 
 import loadLibsodium from "../wasmLoaders/libsodium";
 
-import keypairFromMnemonic from "./keypairFromMnemonic";
-import utils from "../utils";
-
-import type { SignKeyPair } from "tweetnacl";
+import {
+  SignKeyPair,
+  crypto_sign_ed25519_BYTES,
+  crypto_sign_ed25519_SECRETKEYBYTES,
+  crypto_hash_sha512_BYTES,
+} from "../interfaces";
 
 /**
  * @function
@@ -49,21 +53,21 @@ const sign = async (
   }
 
   const dLen = d.length;
-  const extra = nacl.sign.signatureLength; // isShare ? nacl.sign.signatureLength : 0;
+  const extra = crypto_sign_ed25519_BYTES; // isShare ? nacl.sign.signatureLength : 0;
 
   let keypair: SignKeyPair;
   if (typeof mnemonicOrSecretKey === "string") {
-    keypair = await keypairFromMnemonic(mnemonicOrSecretKey);
+    keypair = await keyPair.keyPairFromMnemonic(mnemonicOrSecretKey);
   } else {
-    keypair = nacl.sign.keyPair.fromSecretKey(mnemonicOrSecretKey);
+    keypair = await keyPair.keyPairFromSecretKey(mnemonicOrSecretKey);
   }
 
   const memoryLen =
     (dLen +
       extra +
-      nacl.sign.signatureLength +
-      nacl.sign.secretKeyLength +
-      nacl.hash.hashLength) *
+      crypto_sign_ed25519_BYTES +
+      crypto_sign_ed25519_SECRETKEYBYTES +
+      crypto_hash_sha512_BYTES) *
     Uint8Array.BYTES_PER_ELEMENT;
 
   const wasm = await loadLibsodium(memoryLen);
@@ -78,11 +82,15 @@ const sign = async (
   const signature = new Uint8Array(
     memory.buffer,
     offset,
-    nacl.sign.signatureLength,
+    crypto_sign_ed25519_BYTES,
   );
 
-  offset += nacl.sign.signatureLength;
-  const sk = new Uint8Array(memory.buffer, offset, nacl.sign.secretKeyLength);
+  offset += crypto_sign_ed25519_BYTES;
+  const sk = new Uint8Array(
+    memory.buffer,
+    offset,
+    crypto_sign_ed25519_SECRETKEYBYTES,
+  );
   sk.set([...keypair.secretKey]);
 
   signData(dLen, dataArray.byteOffset, signature.byteOffset, sk.byteOffset);
@@ -98,11 +106,15 @@ const sign = async (
   const blockAuthorSignature = new Uint8Array(
     memory.buffer,
     offset,
-    nacl.sign.signatureLength,
+    crypto_sign_ed25519_BYTES,
   );
 
-  offset += nacl.sign.signatureLength;
-  const skk = new Uint8Array(memory.buffer, offset, nacl.sign.secretKeyLength);
+  offset += crypto_sign_ed25519_BYTES;
+  const skk = new Uint8Array(
+    memory.buffer,
+    offset,
+    crypto_sign_ed25519_SECRETKEYBYTES,
+  );
   skk.set([...blockAuthorSecretKey]);
 
   signData(

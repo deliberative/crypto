@@ -13,16 +13,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { generateMnemonic } from "bip39";
-import keypairFromMnemonic from "./keypairFromMnemonic";
+import randomBytes from "./randomBytes";
+import keyPair from "./keyPair";
 import sign from "./sign";
 import verify from "./verify";
 import encrypt from "./encrypt";
 import decrypt from "./decrypt";
 
 export default {
-  generateMnemonic,
-  keypairFromMnemonic,
+  randomBytes,
+  keyPair,
   sign,
   verify,
   encrypt,

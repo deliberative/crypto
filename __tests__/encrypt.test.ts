@@ -1,25 +1,26 @@
-import * as nacl from "tweetnacl";
-
 import dcrypto from "../src";
+
+// import utils from "../src/utils";
+
+import { crypto_hash_sha512_BYTES } from "../src/interfaces";
 
 describe("Encryption and decryption with Ed25519 derived keys test suite.", () => {
   test("Encryption and decryption work.", async () => {
-    const message = nacl.randomBytes(32);
-    // const keypair1 = nacl.sign.keyPair();
-    const keypair2 = nacl.sign.keyPair();
+    const message = await dcrypto.randomBytes(32);
+    const keypair = await dcrypto.keyPair();
 
-    const previousBlockHash = nacl.randomBytes(nacl.hash.hashLength);
+    const previousBlockHash = await dcrypto.randomBytes(
+      crypto_hash_sha512_BYTES,
+    );
     const encrypted = await dcrypto.encrypt(
       message,
-      keypair2.publicKey,
-      // keypair1.secretKey,
+      keypair.publicKey,
       previousBlockHash,
     );
 
     const decrypted = await dcrypto.decrypt(
       encrypted,
-      // keypair1.publicKey,
-      keypair2.secretKey,
+      keypair.secretKey,
       previousBlockHash,
     );
 
@@ -28,20 +29,23 @@ describe("Encryption and decryption with Ed25519 derived keys test suite.", () =
     expect(decrypted[31]).toBe(message[31]);
   });
 
-  test("Merkle root works.", async () => {
-    const tree: Uint8Array[] = [];
-    for (let i = 0; i < 201; i++) {
-      const rand = nacl.randomBytes(128);
-      tree.push(rand);
-    }
+  it("Should be impossible to decrypt with wrong key", async () => {
+    const message = await dcrypto.randomBytes(32);
+    const keypair = await dcrypto.keyPair();
 
-    const root = await dcrypto.getMerkleRoot(tree);
+    const previousBlockHash = await dcrypto.randomBytes(
+      crypto_hash_sha512_BYTES,
+    );
+    const encrypted = await dcrypto.encrypt(
+      message,
+      keypair.publicKey,
+      previousBlockHash,
+    );
 
-    const root2 = await dcrypto.getMerkleRoot(tree);
+    const anotherKeypair = await dcrypto.keyPair();
 
-    expect(root.length).toBe(64);
-    expect(root[0]).toBe(root2[0]);
-    expect(root[1]).toBe(root2[1]);
-    expect(root[63]).toBe(root2[63]);
+    await expect(
+      dcrypto.decrypt(encrypted, anotherKeypair.secretKey, previousBlockHash),
+    ).rejects.toThrow("Unsuccessful decryption attempt");
   });
 });

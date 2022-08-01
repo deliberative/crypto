@@ -13,11 +13,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import * as nacl from "tweetnacl";
-
 import loadLibsodium from "../wasmLoaders/libsodium";
 
 import sha512 from "./sha512";
+
+import { crypto_hash_sha512_BYTES } from "../interfaces";
 
 const getMerkleRoot = async (tree: Uint8Array[]): Promise<Uint8Array> => {
   const treeLength = tree.length;
@@ -26,15 +26,15 @@ const getMerkleRoot = async (tree: Uint8Array[]): Promise<Uint8Array> => {
   const maxDataLen = lengths.indexOf(Math.max(...lengths));
 
   const initialMemoryLen =
-    (maxDataLen + nacl.hash.hashLength) * Uint8Array.BYTES_PER_ELEMENT;
+    (maxDataLen + crypto_hash_sha512_BYTES) * Uint8Array.BYTES_PER_ELEMENT;
   const wasmInitial = await loadLibsodium(initialMemoryLen);
 
   const subsequentMemoryLen =
-    3 * nacl.hash.hashLength * Uint8Array.BYTES_PER_ELEMENT;
+    3 * crypto_hash_sha512_BYTES * Uint8Array.BYTES_PER_ELEMENT;
   const wasm = await loadLibsodium(subsequentMemoryLen);
 
   const hashes: Uint8Array[] = [];
-  const concatHashes = new Uint8Array(2 * nacl.hash.hashLength);
+  const concatHashes = new Uint8Array(2 * crypto_hash_sha512_BYTES);
 
   let leaves = treeLength;
   let oddLeaves;

@@ -1,19 +1,20 @@
-import * as nacl from "tweetnacl";
-
 import dcrypto from "../src";
 
 import utils from "../src/utils";
 
+import { crypto_sign_ed25519_SECRETKEYBYTES } from "../src/interfaces";
+
 describe("Starting the Shamir test suite.", () => {
-  const mnemonic = dcrypto.generateMnemonic();
-  test("Splitting a mnemonic to Shamir shares works.", async () => {
+  test("Splitting a secret key to Shamir shares works.", async () => {
+    const mnemonic = await dcrypto.generateMnemonic();
     const keypair = await dcrypto.keypairFromMnemonic(mnemonic);
     const shares = await dcrypto.splitSecret(keypair.secretKey, 100, 60);
     expect(shares.length).toBe(100);
-    expect(shares[99].length).toBe(nacl.sign.secretKeyLength + 1);
+    expect(shares[99].length).toBe(crypto_sign_ed25519_SECRETKEYBYTES + 1);
   });
 
   test("Combining Shamir shares to recreate a secret key works.", async () => {
+    const mnemonic = await dcrypto.generateMnemonic();
     const keypair = await dcrypto.keypairFromMnemonic(mnemonic);
     const sharesLen = 5;
     const threshold = 3;

@@ -25,14 +25,16 @@ This package is stable but it has not undergone external security audits. Use at
 
 ## Introduction
 
-This package does heavy usage of the [libsodium](https://github.com/jedisct1/libsodium) library in WebAssembly format.
+This package relies heavily on the [libsodium](https://github.com/jedisct1/libsodium) library and does a custom compilation in WebAssembly.
 Instead of implementing our own crypto we decided to use a battle-tested implementation of Ed25519 schemes.
 We also introduced a Shamir secret sharing utility because we could not find many well-tested open-source implementations
-and we utilize it heavily on our Deliberative Ledger protocol.
-Finally we introduced some utility functions that make random shuffles, pick random subsets of Uint8Arrays etc.
+and we use it heavily in the Deliberative Ledger protocol.
+Finally we introduced some utility functions that do random shuffles, pick random subsets of Uint8Arrays etc.
 
 The [libsodium](https://github.com/deliberative/libsodium) directory contains a fork of libsodium that can compile to wasm
 with Emscripten with only the methods that we need.
+The only differences with the master branch of libsodium are name changes to the implementation structs and
+removal of any non-js randombytes implementation.
 
 The [asymmetric](src/asymmetric) directory contains asymmetric key cryptography functions and mnemonic generation.
 

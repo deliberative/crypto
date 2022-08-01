@@ -13,9 +13,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import * as nacl from "tweetnacl";
-
 import loadLibsodium from "../wasmLoaders/libsodium";
+
+import {
+  crypto_box_x25519_NONCEBYTES,
+  crypto_box_x25519_PUBLICKEYBYTES,
+  crypto_box_x25519_SECRETKEYBYTES,
+  crypto_box_poly1305_AUTHTAGBYTES,
+  crypto_sign_ed25519_SECRETKEYBYTES,
+} from "../interfaces";
 
 const decrypt = async (
   encrypted: Uint8Array,
@@ -27,18 +33,18 @@ const decrypt = async (
   const additionalLen = additionalData.length;
   const decryptedLen =
     len -
-    nacl.box.publicKeyLength - // x25519 ephemeral
-    1 * (nacl.box.nonceLength - 12) - // nonce
-    nacl.box.overheadLength; // authTag
+    crypto_box_x25519_PUBLICKEYBYTES - // x25519 ephemeral
+    crypto_box_x25519_NONCEBYTES - // nonce
+    crypto_box_poly1305_AUTHTAGBYTES; // authTag
 
   const memoryLen =
     (len +
-      nacl.sign.secretKeyLength +
+      crypto_sign_ed25519_SECRETKEYBYTES +
       additionalLen +
       decryptedLen +
-      2 * nacl.box.publicKeyLength + // malloc'd
-      1 * (nacl.box.nonceLength - 12) + // malloc'd
-      nacl.box.secretKeyLength) * // malloc'd
+      2 * crypto_box_x25519_PUBLICKEYBYTES + // malloc'd
+      crypto_box_x25519_NONCEBYTES + // malloc'd
+      crypto_box_x25519_SECRETKEYBYTES) * // malloc'd
     Uint8Array.BYTES_PER_ELEMENT;
   wasm = wasm || (await loadLibsodium(memoryLen));
   const decr = wasm.decrypt_data as CallableFunction;
@@ -49,10 +55,14 @@ const decrypt = async (
   encryptedArray.set([...encrypted]);
 
   offset += len;
-  const sec = new Uint8Array(memory.buffer, offset, nacl.sign.secretKeyLength);
+  const sec = new Uint8Array(
+    memory.buffer,
+    offset,
+    crypto_sign_ed25519_SECRETKEYBYTES,
+  );
   sec.set([...secretKey]);
 
-  offset += nacl.sign.secretKeyLength;
+  offset += crypto_sign_ed25519_SECRETKEYBYTES;
   const additional = new Uint8Array(memory.buffer, offset, additionalLen);
   additional.set([...additionalData]);
 
