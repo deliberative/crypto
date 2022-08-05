@@ -13,24 +13,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import loadLibsodium from "../wasmLoaders/libsodium";
+import libsodiumMemory from "./memory";
+
+import libsodiumMethodsModule from "../../build/libsodiumMethodsModule";
+
+import type { LibsodiumMethodsModule } from "../../build/libsodiumMethodsModule";
 
 import {
   crypto_box_x25519_NONCEBYTES,
   crypto_box_x25519_PUBLICKEYBYTES,
-  crypto_box_x25519_SECRETKEYBYTES,
   crypto_box_poly1305_AUTHTAGBYTES,
   crypto_sign_ed25519_PUBLICKEYBYTES,
-} from "../interfaces";
+} from "../utils/interfaces";
 
 const encrypt = async (
   message: Uint8Array,
   publicKey: Uint8Array,
   additionalData: Uint8Array,
-  wasm?: WebAssembly.Exports,
+  module?: LibsodiumMethodsModule,
 ): Promise<Uint8Array> => {
   const len = message.length;
   const additionalLen = additionalData.length;
+
+  const wasmMemory = module
+    ? module.wasmMemory
+    : libsodiumMemory.encryptMemory(len, additionalLen);
 
   const sealedBoxLen =
     crypto_box_x25519_PUBLICKEYBYTES + // ephemeral x25519 public key
@@ -38,56 +45,44 @@ const encrypt = async (
     len +
     crypto_box_poly1305_AUTHTAGBYTES; // 16 bytes poly1305 auth tag
 
-  const memoryLen =
-    (len +
-      crypto_sign_ed25519_PUBLICKEYBYTES +
-      additionalLen +
-      sealedBoxLen +
-      1 * (len + crypto_box_poly1305_AUTHTAGBYTES) + // malloc'd
-      2 * crypto_box_x25519_PUBLICKEYBYTES + // malloc'd
-      2 * crypto_box_x25519_SECRETKEYBYTES + // malloc'd
-      crypto_box_x25519_NONCEBYTES) * // malloc'd
-    Uint8Array.BYTES_PER_ELEMENT;
-
-  wasm = wasm || (await loadLibsodium(memoryLen));
-  const encr = wasm.encrypt_data as CallableFunction;
-  const memory = wasm.memory as WebAssembly.Memory;
-
   let offset = 0;
-  const dataArray = new Uint8Array(memory.buffer, offset, len);
+  const dataArray = new Uint8Array(wasmMemory.buffer, offset, len);
   dataArray.set([...message]);
 
   offset += len;
   const pub = new Uint8Array(
-    memory.buffer,
+    wasmMemory.buffer,
     offset,
     crypto_sign_ed25519_PUBLICKEYBYTES,
   );
   pub.set([...publicKey]);
 
   offset += crypto_sign_ed25519_PUBLICKEYBYTES;
-  const additional = new Uint8Array(memory.buffer, offset, additionalLen);
+  const additional = new Uint8Array(wasmMemory.buffer, offset, additionalLen);
   additional.set([...additionalData]);
 
   offset += additionalLen;
   const encrypted = new Uint8Array(
-    memory.buffer,
+    wasmMemory.buffer,
     offset,
     sealedBoxLen * Uint8Array.BYTES_PER_ELEMENT,
   );
 
-  const result = encr(
+  const libsodiumModule =
+    module || (await libsodiumMethodsModule({ wasmMemory }));
+
+  const result = libsodiumModule._encrypt_data(
     len,
     dataArray.byteOffset,
     pub.byteOffset,
     additionalLen,
     additional.byteOffset,
     encrypted.byteOffset,
-  ) as number;
+  );
 
   switch (result) {
     case 0: {
-      return encrypted;
+      return new Uint8Array([...encrypted]);
     }
 
     case -1: {

@@ -1,45 +1,10 @@
 import dcrypto from "../src";
 
 describe("Sha512 and Merkle root test suite.", () => {
-  const stringMessage = "Some random message to sign";
-
-  enum someEnum {
-    Hell,
-    Yes,
-  }
-
-  const objectMessage = {
-    data1: "yeah",
-    data2: 3,
-    data3: someEnum,
-    data4: {
-      otherData1: "one",
-      otherData2: 2,
-    },
-    data5: [
-      {
-        otherOtherData1: 3,
-        otherOtherData2: "Nice",
-        otherOtherData3: someEnum,
-      },
-    ],
-  };
-
   test("Public key SHA512 hash works.", async () => {
     const mnemonic = await dcrypto.generateMnemonic();
     const keypair = await dcrypto.keypairFromMnemonic(mnemonic);
     const hash = await dcrypto.sha512(keypair.publicKey);
-    expect(hash.length).toBe(64);
-  });
-
-  test("Sha512 on objects works.", async () => {
-    const hash = await dcrypto.sha512(objectMessage);
-    expect(hash.length).toBe(64);
-  });
-
-  test("Sha512 on strings works.", async () => {
-    const data = JSON.stringify(stringMessage);
-    const hash = await dcrypto.sha512(data);
     expect(hash.length).toBe(64);
   });
 

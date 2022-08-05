@@ -1,8 +1,8 @@
 import dcrypto from "../src";
 
-// import utils from "../src/utils";
+import { crypto_hash_sha512_BYTES } from "../src/utils/interfaces";
 
-import { crypto_hash_sha512_BYTES } from "../src/interfaces";
+import arraysAreEqual from "../src/utils/arraysAreEqual";
 
 describe("Encryption and decryption with Ed25519 derived keys test suite.", () => {
   test("Encryption and decryption work.", async () => {
@@ -12,6 +12,7 @@ describe("Encryption and decryption with Ed25519 derived keys test suite.", () =
     const previousBlockHash = await dcrypto.randomBytes(
       crypto_hash_sha512_BYTES,
     );
+
     const encrypted = await dcrypto.encrypt(
       message,
       keypair.publicKey,
@@ -24,9 +25,39 @@ describe("Encryption and decryption with Ed25519 derived keys test suite.", () =
       previousBlockHash,
     );
 
+    const encryptionMemory = dcrypto.loadAsymmetricMemory.encrypt(
+      message.length,
+      crypto_hash_sha512_BYTES,
+    );
+    const encryptionModule = await dcrypto.loadLibsodiumModule({
+      wasmMemory: encryptionMemory,
+    });
+    const encryptedWithModule = await dcrypto.encrypt(
+      message,
+      keypair.publicKey,
+      previousBlockHash,
+      encryptionModule,
+    );
+
+    const decryptionMemory = dcrypto.loadAsymmetricMemory.decrypt(
+      encrypted.length,
+      crypto_hash_sha512_BYTES,
+    );
+    const decryptionModule = await dcrypto.loadLibsodiumModule({
+      wasmMemory: decryptionMemory,
+    });
+    const decryptedWithModule = await dcrypto.decrypt(
+      encrypted,
+      keypair.secretKey,
+      previousBlockHash,
+      decryptionModule,
+    );
+
     expect(decrypted[0]).toBe(message[0]);
     expect(decrypted[1]).toBe(message[1]);
     expect(decrypted[31]).toBe(message[31]);
+    expect(arraysAreEqual(encryptedWithModule, encrypted)).toBe(false);
+    expect(arraysAreEqual(decryptedWithModule, decrypted)).toBe(true);
   });
 
   it("Should be impossible to decrypt with wrong key", async () => {

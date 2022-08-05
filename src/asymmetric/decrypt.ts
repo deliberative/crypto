@@ -13,76 +13,74 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import loadLibsodium from "../wasmLoaders/libsodium";
+import libsodiumMemory from "./memory";
+
+import libsodiumMethodsModule from "../../build/libsodiumMethodsModule";
+
+import type { LibsodiumMethodsModule } from "../../build/libsodiumMethodsModule";
 
 import {
   crypto_box_x25519_NONCEBYTES,
   crypto_box_x25519_PUBLICKEYBYTES,
-  crypto_box_x25519_SECRETKEYBYTES,
   crypto_box_poly1305_AUTHTAGBYTES,
   crypto_sign_ed25519_SECRETKEYBYTES,
-} from "../interfaces";
+} from "../utils/interfaces";
 
 const decrypt = async (
   encrypted: Uint8Array,
   secretKey: Uint8Array,
   additionalData: Uint8Array,
-  wasm?: WebAssembly.Exports,
+  module?: LibsodiumMethodsModule,
 ): Promise<Uint8Array> => {
   const len = encrypted.length;
   const additionalLen = additionalData.length;
+
+  const wasmMemory = module
+    ? module.wasmMemory
+    : libsodiumMemory.decryptMemory(len, additionalLen);
+
   const decryptedLen =
     len -
     crypto_box_x25519_PUBLICKEYBYTES - // x25519 ephemeral
     crypto_box_x25519_NONCEBYTES - // nonce
     crypto_box_poly1305_AUTHTAGBYTES; // authTag
 
-  const memoryLen =
-    (len +
-      crypto_sign_ed25519_SECRETKEYBYTES +
-      additionalLen +
-      decryptedLen +
-      2 * crypto_box_x25519_PUBLICKEYBYTES + // malloc'd
-      crypto_box_x25519_NONCEBYTES + // malloc'd
-      crypto_box_x25519_SECRETKEYBYTES) * // malloc'd
-    Uint8Array.BYTES_PER_ELEMENT;
-  wasm = wasm || (await loadLibsodium(memoryLen));
-  const decr = wasm.decrypt_data as CallableFunction;
-  const memory = wasm.memory as WebAssembly.Memory;
-
   let offset = 0;
-  const encryptedArray = new Uint8Array(memory.buffer, offset, len);
+  const encryptedArray = new Uint8Array(wasmMemory.buffer, offset, len);
   encryptedArray.set([...encrypted]);
 
   offset += len;
   const sec = new Uint8Array(
-    memory.buffer,
+    wasmMemory.buffer,
     offset,
     crypto_sign_ed25519_SECRETKEYBYTES,
   );
   sec.set([...secretKey]);
 
   offset += crypto_sign_ed25519_SECRETKEYBYTES;
-  const additional = new Uint8Array(memory.buffer, offset, additionalLen);
+  const additional = new Uint8Array(wasmMemory.buffer, offset, additionalLen);
   additional.set([...additionalData]);
 
   offset += additionalLen;
   const decrypted = new Uint8Array(
-    memory.buffer,
+    wasmMemory.buffer,
     offset,
     decryptedLen * Uint8Array.BYTES_PER_ELEMENT,
   );
 
-  const res = decr(
+  const libsodiumModule =
+    module || (await libsodiumMethodsModule({ wasmMemory }));
+
+  const result = libsodiumModule._decrypt_data(
     len,
     encryptedArray.byteOffset,
     sec.byteOffset,
     additionalLen,
     additional.byteOffset,
     decrypted.byteOffset,
-  ) as number;
+  );
 
-  switch (res) {
+  switch (result) {
     case 0:
       return decrypted;
     case -1:

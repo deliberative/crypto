@@ -16,74 +16,75 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
-/* #include <string.h> */
 
 #include "./shamir/polynomial.c"
 
-/* #include "../../libsodium/src/libsodium/randombytes/randombytes.c" */
-extern uint32_t randombytes_js();
+#include "../../libsodium/src/libsodium/randombytes/randombytes.c"
 
 __attribute__((used)) int
-split_secret(const int sharesLen, const int threshold, const int secretLen,
-             const uint8_t secret[secretLen],
-             uint8_t shares[sharesLen][secretLen + 1])
+split_secret(const int SHARES_LEN, const int THRESHOLD, const int SECRET_LEN,
+             const uint8_t secret[SECRET_LEN],
+             uint8_t shares[SHARES_LEN * (SECRET_LEN + 1)])
 {
   size_t i, j;
 
-  if (sharesLen > FIELD - 1) return -3;
-  if (sharesLen < threshold) return -2;
-  if (threshold < 2) return -1;
+  if (SHARES_LEN > FIELD - 1) return -3;
+  if (SHARES_LEN < THRESHOLD) return -2;
+  if (THRESHOLD < 2) return -1;
 
-  uint8_t coefficients[threshold];
-  /* uint8_t *coefficients = malloc(threshold * sizeof(uint8_t)); */
+  uint8_t *coefficients = malloc(THRESHOLD * sizeof(uint8_t));
 
-  for (i = 0; i < secretLen; i++)
+  for (i = 0; i < SECRET_LEN; i++)
   {
-    /* randombytes_buf(coefficients, threshold); */
+    randombytes_buf(coefficients, THRESHOLD);
     coefficients[0] = secret[i];
-    for (j = 1; j < threshold; j++)
-    {
-      coefficients[j] = (uint8_t)randombytes_js();
-    }
 
-    for (j = 0; j < sharesLen; j++)
+    for (j = 0; j < SHARES_LEN; j++)
     {
-      shares[j][i] = evaluate(threshold, coefficients, j + 1);
+      shares[j * (SECRET_LEN + 1) + i]
+          = evaluate(THRESHOLD, coefficients, j + 1);
+      /* shares[j][i] = evaluate(THRESHOLD, coefficients, j + 1); */
 
-      if (i == secretLen - 1) shares[j][secretLen] = j + 1;
+      if (i == SECRET_LEN - 1)
+      {
+        shares[j * (SECRET_LEN + 1) + SECRET_LEN] = j + 1;
+        /* shares[j][SECRET_LEN] = j + 1; */
+      }
     }
   }
 
-  /* free(coefficients); */
+  free(coefficients);
 
   return 0;
 }
 
 __attribute__((used)) int
-restore_secret(const int sharesLen, const int secretLen,
-               const uint8_t shares[sharesLen][secretLen + 1],
-               uint8_t secret[secretLen])
+restore_secret(const int SHARES_LEN, const int SECRET_LEN,
+               const uint8_t shares[SHARES_LEN * (SECRET_LEN + 1)],
+               uint8_t secret[SECRET_LEN])
 {
   size_t i, j;
 
-  if (sharesLen < 2)
+  if (SHARES_LEN < 2)
     return -2; // throw new Error('Not enough shares provided');
-  if (sharesLen > FIELD - 1)
+  if (SHARES_LEN > FIELD - 1)
     return -1; // throw new Error(`Need at most ${utils.FIELD - 1}
                // shares`);
 
-  /* uint8_t points[sharesLen][2]; */
-  uint8_t(*points)[2] = malloc(sharesLen * sizeof(uint8_t));
+  /* uint8_t(*points)[2] = malloc(SHARES_LEN * sizeof(*points)); */
+  uint8_t *points = malloc(SHARES_LEN * 2 * sizeof(uint8_t));
 
-  for (i = 0; i < secretLen; i++)
+  for (i = 0; i < SECRET_LEN; i++)
   {
-    for (j = 0; j < sharesLen; j++)
+    for (j = 0; j < SHARES_LEN; j++)
     {
-      points[j][0] = shares[j][secretLen];
-      points[j][1] = shares[j][i];
+      points[j * 2] = shares[j * (SECRET_LEN + 1) + SECRET_LEN];
+      /* points[j][0] = shares[j][SECRET_LEN]; */
+      points[j * 2 + 1] = shares[j * (SECRET_LEN + 1) + i];
+      /* points[j][1] = shares[j][i]; */
     }
 
-    secret[i] = interpolate(sharesLen, points);
+    secret[i] = interpolate(SHARES_LEN, points);
   }
 
   free(points);

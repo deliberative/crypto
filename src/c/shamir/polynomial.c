@@ -19,7 +19,8 @@
 #include "ring.c"
 
 int
-interpolate(const size_t sharesLen, const uint8_t points[sharesLen][2])
+/* interpolate(const size_t sharesLen, const uint8_t points[sharesLen][2]) */
+interpolate(const size_t SHARES_LEN, const uint8_t points[SHARES_LEN * 2])
 {
   size_t i, j;
 
@@ -27,18 +28,21 @@ interpolate(const size_t sharesLen, const uint8_t points[sharesLen][2])
 
   int result = 0;
 
-  for (i = 0; i < sharesLen; i++)
+  for (i = 0; i < SHARES_LEN; i++)
   {
     int weight = 1;
 
-    const int aX = points[i][0];
-    const int aY = points[i][1];
+    const int aX = points[i * 2];
+    /* const int aX = points[i][0]; */
+    const int aY = points[i * 2 + 1];
+    /* const int aY = points[i][1]; */
 
-    for (j = 0; j < sharesLen; j++)
+    for (j = 0; j < SHARES_LEN; j++)
     {
       if (i == j) continue;
 
-      const int bX = points[j][0];
+      const int bX = points[j * 2];
+      /* const int bX = points[j][0]; */
 
       weight = multiply(weight, divide(subtract(x, bX), subtract(aX, bX)));
     }

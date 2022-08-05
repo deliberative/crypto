@@ -13,19 +13,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-const { exec } = require("child_process");
+import fs from "fs";
+import { exec } from "child_process";
 
-const {
-  libsodiumIncludePath,
-  libsodiumIncludePrivatePath,
-} = require("./utils");
+import { libsodiumIncludePath, libsodiumIncludePrivatePath } from "./utils.js";
 
-function testWithValgrind(testPath, testFilename) {
+const testWithValgrind = (testPath, testFilename) => {
   const outputPath = testPath.replace(`${testFilename}.c`, `${testFilename}.o`);
   const valgrindReportPath = outputPath.replace(
     `${testFilename}.o`,
     `${testFilename}-valgrind-report.txt`,
   );
+
+  if (fs.existsSync(outputPath)) fs.rmSync(outputPath);
+  if (fs.existsSync(valgrindReportPath)) fs.rmSync(valgrindReportPath);
 
   exec(
     `gcc -Wall -std=c11 -g -ggdb3 -Og \
@@ -73,8 +74,6 @@ ${outputPath}`,
       );
     },
   );
-}
-
-module.exports = {
-  testWithValgrind,
 };
+
+export default testWithValgrind;

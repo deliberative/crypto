@@ -15,8 +15,10 @@
 
 import sha512 from "./sha512";
 import getMerkleRoot from "./getMerkleRoot";
+import memory from "./memory";
 
 export default {
   sha512,
   getMerkleRoot,
+  memory,
 };

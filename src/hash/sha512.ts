@@ -13,51 +13,43 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import utils from "../utils";
+import libsodiumMemory from "./memory";
 
-import loadLibsodium from "../wasmLoaders/libsodium";
+import libsodiumMethodsModule from "../../build/libsodiumMethodsModule";
 
-import { crypto_hash_sha512_BYTES } from "../interfaces";
+import type { LibsodiumMethodsModule } from "../../build/libsodiumMethodsModule";
+
+import { crypto_hash_sha512_BYTES } from "../utils/interfaces";
 
 const sha512 = async (
-  data: string | object | Uint8Array,
-  wasm?: WebAssembly.Exports,
+  data: Uint8Array,
+  module?: LibsodiumMethodsModule,
 ): Promise<Uint8Array> => {
-  let array: Uint8Array;
-  if (typeof data === "string") {
-    if (utils.isBase64(data)) {
-      array = utils.decodeFromBase64(data);
-    } else {
-      const dataBuffer = Buffer.from(data, "utf8");
-      array = Uint8Array.from(dataBuffer);
-    }
-  } else if ("byteOffset" in data) {
-    array = data;
-  } else {
-    const dataToString = JSON.stringify(data);
-    const dataBuffer = Buffer.from(dataToString, "utf8");
-    array = Uint8Array.from(dataBuffer);
-  }
-  const arrayLen = array.length;
+  const dataLen = data.length;
 
-  const memoryLen =
-    (arrayLen + crypto_hash_sha512_BYTES) * Uint8Array.BYTES_PER_ELEMENT;
-  wasm = wasm ? wasm : await loadLibsodium(memoryLen);
-  const sha = wasm.sha512 as CallableFunction;
-  const memory = wasm.memory as WebAssembly.Memory;
+  const wasmMemory = module
+    ? module.wasmMemory
+    : libsodiumMemory.sha512Memory(dataLen);
 
   let offset = 0;
-  const arr = new Uint8Array(memory.buffer, offset, arrayLen);
-  arr.set([...array]);
+  const arr = new Uint8Array(wasmMemory.buffer, offset, dataLen);
+  arr.set([...data]);
 
-  offset += arrayLen;
+  offset += dataLen;
   const hash = new Uint8Array(
-    memory.buffer,
+    wasmMemory.buffer,
     offset,
     crypto_hash_sha512_BYTES,
-  ).fill(0);
+  );
 
-  const result = sha(arrayLen, arr.byteOffset, hash.byteOffset) as number;
+  const libsodiumModule =
+    module || (await libsodiumMethodsModule({ wasmMemory }));
+
+  const result = libsodiumModule._sha512(
+    dataLen,
+    arr.byteOffset,
+    hash.byteOffset,
+  );
 
   if (result === 0) {
     return new Uint8Array([...hash]);

@@ -13,18 +13,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import randomBytes from "./randomBytes";
 import keyPair from "./keyPair";
 import sign from "./sign";
 import verify from "./verify";
 import encrypt from "./encrypt";
 import decrypt from "./decrypt";
+import memory from "./memory";
 
 export default {
-  randomBytes,
   keyPair,
   sign,
   verify,
   encrypt,
   decrypt,
+  memory,
 };

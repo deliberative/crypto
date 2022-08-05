@@ -15,41 +15,48 @@
 
 import * as bip39 from "bip39";
 
-import randomBytes from "./randomBytes";
+import randomBytes from "../utils/randomBytes";
 
-import loadLibsodium from "../wasmLoaders/libsodium";
+import libsodiumMemory from "./memory";
+
+import libsodiumMethodsModule from "../../build/libsodiumMethodsModule";
+
+import type { LibsodiumMethodsModule } from "../../build/libsodiumMethodsModule";
 
 import {
   SignKeyPair,
   crypto_sign_ed25519_PUBLICKEYBYTES,
   crypto_sign_ed25519_SECRETKEYBYTES,
   crypto_sign_ed25519_SEEDBYTES,
-} from "../interfaces";
+} from "../utils/interfaces";
 
-const newKeyPair = async (wasm?: WebAssembly.Exports): Promise<SignKeyPair> => {
-  const memoryLen =
-    (crypto_sign_ed25519_PUBLICKEYBYTES + crypto_sign_ed25519_SECRETKEYBYTES) *
-    Uint8Array.BYTES_PER_ELEMENT;
-
-  wasm = wasm || (await loadLibsodium(memoryLen));
-  const kpr = wasm.new_keypair as CallableFunction;
-  const memory = wasm.memory as WebAssembly.Memory;
+const newKeyPair = async (
+  module?: LibsodiumMethodsModule,
+): Promise<SignKeyPair> => {
+  const wasmMemory = module
+    ? module.wasmMemory
+    : libsodiumMemory.newKeyPairMemory();
 
   let offset = 0;
   const publicKey = new Uint8Array(
-    memory.buffer,
+    wasmMemory.buffer,
     offset,
     crypto_sign_ed25519_PUBLICKEYBYTES,
   );
 
   offset += crypto_sign_ed25519_PUBLICKEYBYTES;
   const secretKey = new Uint8Array(
-    memory.buffer,
+    wasmMemory.buffer,
     offset,
     crypto_sign_ed25519_SECRETKEYBYTES,
   );
 
-  const result = kpr(publicKey.byteOffset, secretKey.byteOffset) as number;
+  const libsodiumModule = await libsodiumMethodsModule({ wasmMemory });
+
+  const result = libsodiumModule._new_keypair(
+    publicKey.byteOffset,
+    secretKey.byteOffset,
+  );
 
   switch (result) {
     case 0: {
@@ -75,45 +82,42 @@ const generateMnemonic = async () => {
 
 const keyPairFromSeed = async (
   seed: Uint8Array,
-  wasm?: WebAssembly.Exports,
+  module?: LibsodiumMethodsModule,
 ): Promise<SignKeyPair> => {
-  const memoryLen =
-    (crypto_sign_ed25519_PUBLICKEYBYTES +
-      crypto_sign_ed25519_SECRETKEYBYTES +
-      crypto_sign_ed25519_SEEDBYTES) *
-    Uint8Array.BYTES_PER_ELEMENT;
-
-  wasm = wasm || (await loadLibsodium(memoryLen));
-  const kprFrmSeed = wasm.keypair_from_seed as CallableFunction;
-  const memory = wasm.memory as WebAssembly.Memory;
+  const wasmMemory = module
+    ? module.wasmMemory
+    : libsodiumMemory.keyPairFromSeedMemory();
 
   let offset = 0;
   const publicKey = new Uint8Array(
-    memory.buffer,
+    wasmMemory.buffer,
     offset,
     crypto_sign_ed25519_PUBLICKEYBYTES,
   );
 
   offset += crypto_sign_ed25519_PUBLICKEYBYTES;
   const secretKey = new Uint8Array(
-    memory.buffer,
+    wasmMemory.buffer,
     offset,
     crypto_sign_ed25519_SECRETKEYBYTES,
   );
 
   offset += crypto_sign_ed25519_SECRETKEYBYTES;
   const seedBytes = new Uint8Array(
-    memory.buffer,
+    wasmMemory.buffer,
     offset,
     crypto_sign_ed25519_SEEDBYTES,
   );
   seedBytes.set([...seed]);
 
-  const result = kprFrmSeed(
+  const libsodiumModule =
+    module || (await libsodiumMethodsModule({ wasmMemory }));
+
+  const result = libsodiumModule._keypair_from_seed(
     publicKey.byteOffset,
     secretKey.byteOffset,
     seedBytes.byteOffset,
-  ) as number;
+  );
 
   switch (result) {
     case 0: {
@@ -140,32 +144,33 @@ const keyPairFromMnemonic = async (mnemonic: string) => {
 
 const keyPairFromSecretKey = async (
   secretKey: Uint8Array,
-  wasm?: WebAssembly.Exports,
+  module?: LibsodiumMethodsModule,
 ): Promise<SignKeyPair> => {
-  const memoryLen =
-    (crypto_sign_ed25519_PUBLICKEYBYTES + crypto_sign_ed25519_SECRETKEYBYTES) *
-    Uint8Array.BYTES_PER_ELEMENT;
-
-  wasm = wasm || (await loadLibsodium(memoryLen));
-  const kpr = wasm.keypair_from_secret_key as CallableFunction;
-  const memory = wasm.memory as WebAssembly.Memory;
+  const wasmMemory = module
+    ? module.wasmMemory
+    : libsodiumMemory.keyPairFromSecretKeyMemory();
 
   let offset = 0;
   const publicKey = new Uint8Array(
-    memory.buffer,
+    wasmMemory.buffer,
     offset,
     crypto_sign_ed25519_PUBLICKEYBYTES,
   );
 
   offset += crypto_sign_ed25519_PUBLICKEYBYTES;
   const sk = new Uint8Array(
-    memory.buffer,
+    wasmMemory.buffer,
     offset,
     crypto_sign_ed25519_SECRETKEYBYTES,
   );
   sk.set([...secretKey]);
 
-  const result = kpr(publicKey.byteOffset, sk.byteOffset) as number;
+  const libsodiumModule = await libsodiumMethodsModule({ wasmMemory });
+
+  const result = libsodiumModule._keypair_from_secret_key(
+    publicKey.byteOffset,
+    secretKey.byteOffset,
+  );
 
   switch (result) {
     case 0: {

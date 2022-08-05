@@ -102,15 +102,13 @@ sign_data(const int DATA_LEN, const uint8_t data[DATA_LEN],
                                       secret_key);
 }
 
-__attribute__((used)) bool
+__attribute__((used)) int
 verify_data(const int DATA_LEN, const uint8_t data[DATA_LEN],
             const uint8_t signature[crypto_sign_ed25519_BYTES],
             const uint8_t public_key[crypto_sign_ed25519_PUBLICKEYBYTES])
 {
-  int verified = crypto_sign_ed25519_verify_detached(signature, data, DATA_LEN,
-                                                     public_key);
-
-  return verified == 0; // -1 if false
+  return crypto_sign_ed25519_verify_detached(signature, data, DATA_LEN,
+                                             public_key);
 }
 
 __attribute__((used)) void

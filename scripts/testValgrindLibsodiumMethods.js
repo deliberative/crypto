@@ -13,13 +13,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-const path = require("path");
+import path from "path";
 
-const { testWithValgrind } = require("./testWithValgrind");
+import testWithValgrind from "./testWithValgrind.js";
 
 const testPath = path.join(
-  __dirname,
-  "..",
+  process.cwd(),
   "examples",
   "c",
   "libsodium_methods.c",

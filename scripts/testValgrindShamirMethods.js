@@ -13,12 +13,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import loadLibsodium from "./libsodium";
-import loadShamir from "./shamir";
-import loadUtils from "./utils";
+import path from "path";
 
-export default {
-  loadLibsodium,
-  loadShamir,
-  loadUtils,
-};
+import testWithValgrind from "./testWithValgrind.js";
+
+const testPath = path.join(process.cwd(), "examples", "c", "shamir_methods.c");
+
+testWithValgrind(testPath, "shamir_methods");

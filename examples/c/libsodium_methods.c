@@ -10,9 +10,18 @@
 int
 main()
 {
-  int DATA_LEN = 1024;
+  int DATA_LEN = crypto_sign_ed25519_SEEDBYTES;
   uint8_t *random_array = malloc(DATA_LEN * sizeof(uint8_t));
-  randombytes_buf(random_array, DATA_LEN);
+  int res = random_bytes(DATA_LEN, random_array);
+  if (res != 0)
+  {
+    free(random_array);
+
+    printf("Could not generate random data\n");
+
+    return -1;
+  }
+
   uint8_t *hash = malloc(crypto_hash_sha512_BYTES * sizeof(uint8_t));
 
   sha512(DATA_LEN, random_array, hash);
@@ -21,7 +30,9 @@ main()
       = malloc(crypto_sign_ed25519_PUBLICKEYBYTES * sizeof(uint8_t));
   uint8_t *ed25519_sk
       = sodium_malloc(crypto_sign_ed25519_SECRETKEYBYTES * sizeof(uint8_t));
-  crypto_sign_ed25519_keypair(ed25519_pk, ed25519_sk);
+  new_keypair(ed25519_pk, ed25519_sk);
+  keypair_from_seed(ed25519_pk, ed25519_sk, random_array);
+  keypair_from_secret_key(ed25519_pk, ed25519_sk);
   uint8_t *sig = malloc(crypto_sign_ed25519_BYTES * sizeof(uint8_t));
 
   sign_data(DATA_LEN, random_array, sig, ed25519_sk);
@@ -69,7 +80,7 @@ main()
     free(encrypted);
     free(decrypted);
 
-    printf("Could not decrypt encrypted data \n");
+    printf("Could not decrypt encrypted data\n");
 
     return -1;
   }
@@ -84,6 +95,8 @@ main()
   sodium_free(another_ed25519_sk);
   free(encrypted);
   free(decrypted);
+
+  printf("SUCCESS\n");
 
   return 0;
 }

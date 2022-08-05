@@ -13,118 +13,62 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import keyPair from "./keyPair";
+import libsodiumMemory from "./memory";
 
-import utils from "../utils";
+import libsodiumMethodsModule from "../../build/libsodiumMethodsModule";
 
-import loadLibsodium from "../wasmLoaders/libsodium";
+import type { LibsodiumMethodsModule } from "../../build/libsodiumMethodsModule";
 
 import {
-  SignKeyPair,
   crypto_sign_ed25519_BYTES,
   crypto_sign_ed25519_SECRETKEYBYTES,
-  crypto_hash_sha512_BYTES,
-} from "../interfaces";
+} from "../utils/interfaces";
 
 /**
  * @function
  * Returns the signature of the data provided.
  */
 const sign = async (
-  message: string | object | Uint8Array,
-  mnemonicOrSecretKey: string | Uint8Array,
-  blockAuthorSecretKey?: Uint8Array, // for ValidatorShare
+  message: Uint8Array,
+  secretKey: Uint8Array,
+  module?: LibsodiumMethodsModule,
 ): Promise<Uint8Array> => {
-  let d = new Uint8Array();
-  if (typeof message === "string") {
-    if (utils.isBase64(message)) {
-      d = utils.decodeFromBase64(message);
-    } else {
-      const messageBuffer = Buffer.from(message, "utf8");
-      d = Uint8Array.from(messageBuffer);
-    }
-  } else if ("byteOffset" in message) {
-    d = message;
-  } else {
-    // generic object
-    const messageString = JSON.stringify(message);
-    const messageBuffer = Buffer.from(messageString, "utf8");
-    d = Uint8Array.from(messageBuffer);
-  }
+  const messageLen = message.length;
 
-  const dLen = d.length;
-  const extra = crypto_sign_ed25519_BYTES; // isShare ? nacl.sign.signatureLength : 0;
-
-  let keypair: SignKeyPair;
-  if (typeof mnemonicOrSecretKey === "string") {
-    keypair = await keyPair.keyPairFromMnemonic(mnemonicOrSecretKey);
-  } else {
-    keypair = await keyPair.keyPairFromSecretKey(mnemonicOrSecretKey);
-  }
-
-  const memoryLen =
-    (dLen +
-      extra +
-      crypto_sign_ed25519_BYTES +
-      crypto_sign_ed25519_SECRETKEYBYTES +
-      crypto_hash_sha512_BYTES) *
-    Uint8Array.BYTES_PER_ELEMENT;
-
-  const wasm = await loadLibsodium(memoryLen);
-  const signData = wasm.sign_data as CallableFunction;
-  const memory = wasm.memory as WebAssembly.Memory;
+  const wasmMemory = module
+    ? module.wasmMemory
+    : libsodiumMemory.signMemory(messageLen);
 
   let offset = 0;
-  const dataArray = new Uint8Array(memory.buffer, offset, dLen);
-  dataArray.set([...d]);
+  const dataArray = new Uint8Array(wasmMemory.buffer, offset, messageLen);
+  dataArray.set([...message]);
 
-  offset += dLen;
+  offset += messageLen;
   const signature = new Uint8Array(
-    memory.buffer,
+    wasmMemory.buffer,
     offset,
     crypto_sign_ed25519_BYTES,
   );
 
   offset += crypto_sign_ed25519_BYTES;
   const sk = new Uint8Array(
-    memory.buffer,
+    wasmMemory.buffer,
     offset,
     crypto_sign_ed25519_SECRETKEYBYTES,
   );
-  sk.set([...keypair.secretKey]);
+  sk.set([...secretKey]);
 
-  signData(dLen, dataArray.byteOffset, signature.byteOffset, sk.byteOffset);
+  const libsodiumModule =
+    module || (await libsodiumMethodsModule({ wasmMemory }));
 
-  if (blockAuthorSecretKey == null) return new Uint8Array([...signature]);
-
-  // need to sign with blockAuthorSecretKey too
-  offset = 0;
-  const newDataArray = new Uint8Array(memory.buffer, offset, dLen + extra);
-  newDataArray.set([...d, ...signature]);
-
-  offset += dLen + extra;
-  const blockAuthorSignature = new Uint8Array(
-    memory.buffer,
-    offset,
-    crypto_sign_ed25519_BYTES,
-  );
-
-  offset += crypto_sign_ed25519_BYTES;
-  const skk = new Uint8Array(
-    memory.buffer,
-    offset,
-    crypto_sign_ed25519_SECRETKEYBYTES,
-  );
-  skk.set([...blockAuthorSecretKey]);
-
-  signData(
-    dLen,
+  libsodiumModule._sign_data(
+    messageLen,
     dataArray.byteOffset,
-    blockAuthorSignature.byteOffset,
-    skk.byteOffset,
+    signature.byteOffset,
+    sk.byteOffset,
   );
 
-  return new Uint8Array([...signature, ...blockAuthorSignature]);
+  return new Uint8Array([...signature]);
 };
 
 export default sign;

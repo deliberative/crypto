@@ -13,20 +13,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import randomBytes from "./randomBytes";
 import randomNumberInRange from "./randomNumberInRange";
 import arrayRandomShuffle from "./arrayRandomShuffle";
 import arrayRandomSubset from "./arrayRandomSubset";
-import arraysAreEqual from "./arraysAreEqual";
-import isBrowser from "./isBrowser";
-import base64 from "./base64";
+import memory from "./memory";
 
 export default {
+  randomBytes,
   randomNumberInRange,
   arrayRandomShuffle,
   arrayRandomSubset,
-  arraysAreEqual,
-  isBrowser,
-  isBase64: base64.isBase64,
-  encodeToBase64: base64.encodeToBase64,
-  decodeFromBase64: base64.decodeFromBase64,
+  memory,
 };

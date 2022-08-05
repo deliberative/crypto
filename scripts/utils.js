@@ -1,12 +1,11 @@
-const path = require("path");
+import path from "path";
 
-const srcPath = path.join(__dirname, "..", "src");
-const buildPath = path.join(__dirname, "..", "build");
-const distPath = path.join(__dirname, "..", "dist");
+export const srcPath = path.join(process.cwd(), "src");
+export const buildPath = path.join(process.cwd(), "build");
+export const distPath = path.join(process.cwd(), "dist");
 
-const libsodiumIncludePath = path.join(
-  __dirname,
-  "..",
+export const libsodiumIncludePath = path.join(
+  process.cwd(),
   "libsodium",
   "src",
   "libsodium",
@@ -14,9 +13,8 @@ const libsodiumIncludePath = path.join(
   "sodium",
 );
 
-const libsodiumIncludePrivatePath = path.join(
-  __dirname,
-  "..",
+export const libsodiumIncludePrivatePath = path.join(
+  process.cwd(),
   "libsodium",
   "src",
   "libsodium",
@@ -25,9 +23,13 @@ const libsodiumIncludePrivatePath = path.join(
   "private",
 );
 
-const libraryPath = path.join(__dirname, "..", "src", "emscriptenLibrary.js");
+export const libraryPath = path.join(
+  process.cwd(),
+  "src",
+  "emscriptenLibrary.js",
+);
 
-const licenseApache = `
+export const licenseApache = `
 // Copyright (C) 2022 Deliberative Technologies P.C.
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -44,22 +46,66 @@ const licenseApache = `
 // limitations under the License.
 `;
 
-const emcc = `emcc \
---no-entry \
--O3 \
--IMPORTED_MEMORY \
--s RESERVED_FUNCTION_POINTERS=8 \
--s ASSERTIONS=0 \
--s AGGRESSIVE_VARIABLE_ELIMINATION=1 \
--s ALIASING_FUNCTION_POINTERS=1 \
--s ELIMINATE_DUPLICATE_FUNCTIONS=1 \
--s DISABLE_EXCEPTION_CATCHING=1 \
--s ELIMINATE_DUPLICATE_FUNCTIONS=1 \
--s ERROR_ON_UNDEFINED_SYMBOLS=0 \
--s FILESYSTEM=0 \
+const testing = ``;
+// const testing = `\
+// -g3 \
+// --profiling \
+// --memoryprofiler \
+// -gsource-map \
+// -s ASSERTIONS=2 \
+// -fsanitize=address \
+// -s RUNTIME_LOGGING=1 \
+// -s RUNTIME_DEBUG=1 \
+// -s STACK_OVERFLOW_CHECK=2 \
+// -s LOAD_SOURCE_MAP=1 \
+// -s ABORT_ON_WASM_EXCEPTIONS=1 \
+// `;
+// const testing = `\
+// -g3 \
+// --profiling \
+// --memoryprofiler \
+// -gsource-map \
+// -fsanitize=undefined \
+// -s ASSERTIONS=2 \
+// -s RUNTIME_LOGGING=1 \
+// -s RUNTIME_DEBUG=1 \
+// -s STACK_OVERFLOW_CHECK=2 \
+// -s SAFE_HEAP=2 \
+// -s LOAD_SOURCE_MAP=1 \
+// -s ABORT_ON_WASM_EXCEPTIONS=1 \
+// `;
+
+const withJS = ` \
+-s WASM=1 \
+-s MODULARIZE=1 \
+-s MAIN_MODULE=2 \
+-s STRICT_JS=1 \
+-s EXPORT_ES6=1 \
+-s USE_ES6_IMPORT_META=0 \
+-s POLYFILL=0 \
 `;
 
-const clangOpts = `--target=wasm32-unknown-unknown-wasm \
+const memory = `\
+-s IMPORTED_MEMORY=1 \
+-s INITIAL_MEMORY=16mb \
+-s TOTAL_STACK=10mb \
+`;
+
+export const emcc = `\
+emcc \
+-O3 \
+--no-entry \
+-s STRICT \
+${testing} \
+${memory} \
+-s LLD_REPORT_UNDEFINED \
+-s NODEJS_CATCH_EXIT=0 \
+-s NODEJS_CATCH_REJECTION=0 \
+${withJS} \
+`;
+
+export const clangOpts = `\
+--target=wasm32-unknown-unknown-wasm \
 -std=c11 \
 -flto \
 -Wl,--lto-O3 \
@@ -70,15 +116,3 @@ const clangOpts = `--target=wasm32-unknown-unknown-wasm \
 -Wl,--export-all \
 -Wl,--allow-undefined \
 `;
-
-module.exports = {
-  srcPath,
-  buildPath,
-  distPath,
-  libsodiumIncludePath,
-  libsodiumIncludePrivatePath,
-  libraryPath,
-  licenseApache,
-  emcc,
-  clangOpts,
-};

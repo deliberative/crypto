@@ -13,32 +13,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import loadLibsodium from "../wasmLoaders/libsodium";
+import utilsMemory from "./memory";
+
+import libsodiumMethodsModule from "../../build/libsodiumMethodsModule";
+
+import type { LibsodiumMethodsModule } from "../../build/libsodiumMethodsModule";
 
 const randomBytes = async (
   n: number,
-  wasm?: WebAssembly.Exports,
+  module?: LibsodiumMethodsModule,
 ): Promise<Uint8Array> => {
-  const memoryLen = n * Uint8Array.BYTES_PER_ELEMENT;
+  const wasmMemory = module
+    ? module.wasmMemory
+    : utilsMemory.randomBytesMemory(n);
 
-  wasm = wasm || (await loadLibsodium(memoryLen));
-  const rnd = wasm.random_bytes as CallableFunction;
-  const memory = wasm.memory as WebAssembly.Memory;
+  const bytes = new Uint8Array(wasmMemory.buffer, 0, n);
 
-  const offset = 0;
-  const bytes = new Uint8Array(memory.buffer, offset, n);
+  const libsodiumModule =
+    module ||
+    (await libsodiumMethodsModule({
+      wasmMemory,
+    }));
 
-  const result = rnd(n, bytes.byteOffset) as number;
+  const result = libsodiumModule._random_bytes(n, bytes.byteOffset);
 
-  switch (result) {
-    case 0: {
-      return bytes;
-    }
+  if (result === 0) return new Uint8Array([...bytes]);
 
-    default: {
-      throw new Error("An unexpected error occured.");
-    }
-  }
+  throw new Error("Could not generate random data");
 };
 
 export default randomBytes;

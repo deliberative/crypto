@@ -1,137 +1,137 @@
+import * as bip39 from "bip39";
+
 import dcrypto from "../src";
 
-import utils from "../src/utils";
+import arraysAreEqual from "../src/utils/arraysAreEqual";
+
+import {
+  crypto_sign_ed25519_PUBLICKEYBYTES,
+  crypto_sign_ed25519_SECRETKEYBYTES,
+  crypto_sign_ed25519_SEEDBYTES,
+} from "../src/utils/interfaces";
 
 describe("Signing and verifying with Ed25519 keys test suite.", () => {
-  const stringMessage = "Some random message to sign";
-
-  enum someEnum {
-    Hell,
-    Yes,
-  }
-
-  const objectMessage = {
-    data1: "yeah",
-    data2: 3,
-    data3: someEnum,
-    data4: {
-      otherData1: "one",
-      otherData2: 2,
-    },
-    data5: [
-      {
-        otherOtherData1: 3,
-        otherOtherData2: "Nice",
-        otherOtherData3: someEnum,
-      },
-    ],
-  };
-
-  test("Signing a utf8 message works.", async () => {
+  test("Mnemonic generation works.", async () => {
     const mnemonic = await dcrypto.generateMnemonic();
-    const signature = await dcrypto.sign(stringMessage, mnemonic);
-    expect(signature !== null).toBe(true);
-    expect(signature.length).toBe(64);
+    expect(bip39.validateMnemonic(mnemonic)).toBe(true);
   });
 
-  test("Signing an object message works.", async () => {
+  test("Generating a new keypair from mnemonic seed works.", async () => {
     const mnemonic = await dcrypto.generateMnemonic();
-    const signature = await dcrypto.sign(objectMessage, mnemonic);
-    expect(signature !== null).toBe(true);
-    expect(signature.length).toBe(64);
+    const keypair = await dcrypto.keypairFromMnemonic(mnemonic);
+    expect(typeof keypair === "object").toBe(true);
+    expect(keypair.secretKey.length).toBe(crypto_sign_ed25519_SECRETKEYBYTES);
+    expect(keypair.publicKey.length).toBe(crypto_sign_ed25519_PUBLICKEYBYTES);
+  });
+
+  test("Generating a new keypair works.", async () => {
+    const keypair = await dcrypto.keyPair();
+
+    const wasmMemory = dcrypto.loadAsymmetricMemory.newKeyPair();
+    const module = await dcrypto.loadLibsodiumModule({ wasmMemory });
+    const someOtherKeypair = await dcrypto.keyPair(module);
+
+    expect(typeof keypair === "object").toBe(true);
+    expect(keypair.secretKey.length).toBe(crypto_sign_ed25519_SECRETKEYBYTES);
+    expect(keypair.publicKey.length).toBe(crypto_sign_ed25519_PUBLICKEYBYTES);
+
+    expect(arraysAreEqual(keypair.secretKey, someOtherKeypair.secretKey)).toBe(
+      false,
+    );
+  });
+
+  test("Generating a new keypair from a random seed works.", async () => {
+    const seed = await dcrypto.randomBytes(crypto_sign_ed25519_SEEDBYTES);
+    const keypair = await dcrypto.keyPairFromSeed(seed);
+
+    const wasmMemory = dcrypto.loadAsymmetricMemory.keyPairFromSeed();
+    const module = await dcrypto.loadLibsodiumModule({ wasmMemory });
+    const sameKeypair = await dcrypto.keyPairFromSeed(seed, module);
+
+    expect(typeof keypair === "object").toBe(true);
+    expect(keypair.secretKey.length).toBe(crypto_sign_ed25519_SECRETKEYBYTES);
+    expect(keypair.publicKey.length).toBe(crypto_sign_ed25519_PUBLICKEYBYTES);
+
+    expect(arraysAreEqual(sameKeypair.secretKey, keypair.secretKey)).toBe(true);
+  });
+
+  test("Generating a new keypair from a secret key works.", async () => {
+    const original = await dcrypto.keyPair();
+    const keypair = await dcrypto.keyPairFromSecretKey(original.secretKey);
+
+    const wasmMemory = dcrypto.loadAsymmetricMemory.keyPairFromSecretKey();
+    const module = await dcrypto.loadLibsodiumModule({ wasmMemory });
+    const sameKeypair = await dcrypto.keyPairFromSecretKey(
+      original.secretKey,
+      module,
+    );
+
+    expect(typeof keypair === "object").toBe(true);
+    expect(keypair.secretKey.length).toBe(crypto_sign_ed25519_SECRETKEYBYTES);
+    expect(keypair.publicKey.length).toBe(crypto_sign_ed25519_PUBLICKEYBYTES);
+    expect(arraysAreEqual(original.publicKey, keypair.publicKey)).toBe(true);
+
+    expect(arraysAreEqual(sameKeypair.secretKey, original.secretKey)).toBe(
+      true,
+    );
   });
 
   test("Signing a Uint8Array message works.", async () => {
-    const mnemonic = await dcrypto.generateMnemonic();
+    const keyPair = await dcrypto.keyPair();
     const randomMessage = await dcrypto.randomBytes(256);
-    const signature = await dcrypto.sign(randomMessage, mnemonic);
+    const signature = await dcrypto.sign(randomMessage, keyPair.secretKey);
+
+    const wasmMemory = dcrypto.loadAsymmetricMemory.sign(randomMessage.length);
+    const module = await dcrypto.loadLibsodiumModule({ wasmMemory });
+    const otherSignature = await dcrypto.sign(
+      randomMessage,
+      keyPair.secretKey,
+      module,
+    );
+
     expect(signature !== null).toBe(true);
     expect(signature.length).toBe(64);
-  });
 
-  test("Signing the base64 version of a random message works", async () => {
-    const randomMessage = await dcrypto.randomBytes(256);
-    const b64 = utils.encodeToBase64(randomMessage);
-    const mnemonic = await dcrypto.generateMnemonic();
-    const signature = await dcrypto.sign(b64, mnemonic);
-    expect(signature !== null).toBe(true);
-    expect(signature.length).toBe(64);
-  });
-
-  test("Verifying the signature of a utf8 message works.", async () => {
-    const mnemonic = await dcrypto.generateMnemonic();
-    const keypair = await dcrypto.keypairFromMnemonic(mnemonic);
-    const signature = await dcrypto.sign(stringMessage, mnemonic);
-    const verification = await dcrypto.verify(
-      stringMessage,
-      signature,
-      keypair.publicKey,
-    );
-    expect(verification).toBe(true);
-  });
-
-  test("Verifying the signature of an object message works.", async () => {
-    const mnemonic = await dcrypto.generateMnemonic();
-    const keypair = await dcrypto.keypairFromMnemonic(mnemonic);
-    const signature = await dcrypto.sign(objectMessage, mnemonic);
-    const verification = await dcrypto.verify(
-      objectMessage,
-      signature,
-      keypair.publicKey,
-    );
-    expect(verification).toBe(true);
+    expect(arraysAreEqual(signature, otherSignature)).toBe(true);
   });
 
   test("Verifying the signature of a Uint8Array message works.", async () => {
     const mnemonic = await dcrypto.generateMnemonic();
     const keypair = await dcrypto.keypairFromMnemonic(mnemonic);
     const randomMessage = await dcrypto.randomBytes(256);
-    const signature = await dcrypto.sign(randomMessage, mnemonic);
+    const signature = await dcrypto.sign(randomMessage, keypair.secretKey);
     const verification = await dcrypto.verify(
       randomMessage,
       signature,
       keypair.publicKey,
     );
-    expect(verification).toBe(true);
-  });
 
-  test("Verifying the signature of a base64 version of a random message works.", async () => {
-    const randomMessage = await dcrypto.randomBytes(256);
-    const b64 = utils.encodeToBase64(randomMessage);
-    const mnemonic = await dcrypto.generateMnemonic();
-    const keypair = await dcrypto.keypairFromMnemonic(mnemonic);
-    const signature = await dcrypto.sign(b64, mnemonic);
-    const verification = await dcrypto.verify(
-      b64,
+    const wasmMemory = dcrypto.loadAsymmetricMemory.verify(
+      randomMessage.length,
+    );
+    const module = await dcrypto.loadLibsodiumModule({ wasmMemory });
+    const otherVerification = await dcrypto.verify(
+      randomMessage,
       signature,
       keypair.publicKey,
+      module,
     );
-    expect(verification).toBe(true);
-  });
 
-  test("Signing the stringified version of an object and verifying with the object message works.", async () => {
-    const mnemonic = await dcrypto.generateMnemonic();
-    const keypair = await dcrypto.keypairFromMnemonic(mnemonic);
-    const stringifiedObjectMessage = JSON.stringify(objectMessage);
-    const signature = await dcrypto.sign(stringifiedObjectMessage, mnemonic);
-    const verification = await dcrypto.verify(
-      objectMessage,
-      signature,
-      keypair.publicKey,
-    );
     expect(verification).toBe(true);
+    expect(otherVerification).toBe(true);
   });
 
   test("Verifying signature with wrong key should return false.", async () => {
-    const mnemonic = await dcrypto.generateMnemonic();
-    const keypair = await dcrypto.keypairFromMnemonic(mnemonic);
-    const signature = await dcrypto.sign(objectMessage, keypair.secretKey);
-    const wrongKeypair = await dcrypto.keyPair();
+    const rightKeyPair = await dcrypto.keyPair();
+    const wrongKeyPair = await dcrypto.keyPair();
+    const randomMessage = await dcrypto.randomBytes(10240);
+    const signature = await dcrypto.sign(randomMessage, rightKeyPair.secretKey);
     const verification = await dcrypto.verify(
-      objectMessage,
+      randomMessage,
       signature,
-      wrongKeypair.publicKey,
+      wrongKeyPair.publicKey,
     );
+
     expect(verification).toBe(false);
   });
 });

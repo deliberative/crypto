@@ -13,47 +13,54 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-const fs = require("fs");
-const path = require("path");
-const { exec } = require("child_process");
+import fs from "fs";
+import path from "path";
+import { exec } from "child_process";
 
-const {
+import {
   srcPath,
   buildPath,
   distPath,
   libsodiumIncludePath,
   libsodiumIncludePrivatePath,
-  libraryPath,
   licenseApache,
   emcc,
-  // clangOpts,
-} = require("./utils");
+} from "./utils.js";
 
 const methodsPath = path.join(srcPath, "c", "utils_methods.c");
-const wasmPath = path.join(buildPath, "utils_methods.wasm");
+const wasmPath = path.join(buildPath, "utilsMethodsModule.js");
 const base64Path = path.join(distPath, "utilsMethods.ts");
+const typesPath = path.join(
+  process.cwd(),
+  "scripts",
+  "utilsMethodsModule.d.ts",
+);
+const types = fs.readFileSync(typesPath);
+fs.writeFileSync(wasmPath.replace("le.js", "le.d.ts"), types);
 
 exec(
-  //   `clang \
-  // ${methodsPath} \
-  // ${clangOpts} \
-  // --output ${wasmPath}`,
-  `${emcc} \
+  `\
+${emcc} \
+-s EXPORTED_FUNCTIONS=_random_number_in_range \
+-s EXPORT_NAME=utilsMethodsModule \
+--closure 1 \
 -I${libsodiumIncludePath} \
 -I${libsodiumIncludePrivatePath} \
---js-library ${libraryPath} \
 -o ${wasmPath} \
 ${methodsPath}`,
   (error, stdout, stderr) => {
     if (error) {
       console.error(error.message);
       return;
-    } else if (stderr) {
-      console.error(`stderr: ${stderr}`);
-      return;
     }
 
-    console.log(`stdout: Successfully compiled Utils wasm module! ${stdout}`);
+    if (stderr) {
+      console.error(`stderr: ${stderr}`);
+    }
+
+    console.log(
+      `stdout: Successfully compiled utils methods wasm module! ${stdout}`,
+    );
 
     const wasmSrc = fs.readFileSync(wasmPath);
     const wasmBuffer = Buffer.from(wasmSrc, "binary").toString("base64");

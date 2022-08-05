@@ -13,92 +13,59 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import utils from "../utils/base64";
+import libsodiumMemory from "./memory";
 
-import loadLibsodium from "../wasmLoaders/libsodium";
+import libsodiumMethodsModule from "../../build/libsodiumMethodsModule";
+
+import type { LibsodiumMethodsModule } from "../../build/libsodiumMethodsModule";
 
 import {
   crypto_sign_ed25519_BYTES,
   crypto_sign_ed25519_PUBLICKEYBYTES,
-} from "../interfaces";
+} from "../utils/interfaces";
 
 const verify = async (
-  message: string | object | Uint8Array,
-  signature: string | Uint8Array,
-  publicKey: string | Uint8Array,
-  wasm?: WebAssembly.Exports,
+  message: Uint8Array,
+  signature: Uint8Array,
+  publicKey: Uint8Array,
+  module?: LibsodiumMethodsModule,
 ): Promise<boolean> => {
-  let data: Uint8Array;
-  if (typeof message === "string") {
-    if (utils.isBase64(message)) {
-      data = utils.decodeFromBase64(message);
-    } else {
-      const messageBuffer = Buffer.from(message, "utf8");
-      data = Uint8Array.from(messageBuffer);
-    }
-  } else if ("byteOffset" in message) {
-    data = message;
-  } else {
-    const messageString = JSON.stringify(message);
-    const messageBuffer = Buffer.from(messageString, "utf8");
-    data = Uint8Array.from(messageBuffer);
-  }
+  const len = message.length;
 
-  const len = data.length;
-
-  const memoryLen =
-    (len + crypto_sign_ed25519_BYTES + crypto_sign_ed25519_PUBLICKEYBYTES) *
-    Uint8Array.BYTES_PER_ELEMENT;
-  wasm = wasm || (await loadLibsodium(memoryLen));
-  const validate = wasm.verify_data as CallableFunction;
-  const memory = wasm.memory as WebAssembly.Memory;
+  const wasmMemory = module
+    ? module.wasmMemory
+    : libsodiumMemory.verifyMemory(len);
 
   let offset = 0;
-  const dataArray = new Uint8Array(memory.buffer, offset, len);
-  dataArray.set([...data]);
-
-  let signatureBuffer: Uint8Array;
-  if (typeof signature === "string") {
-    if (utils.isBase64(signature)) {
-      signatureBuffer = utils.decodeFromBase64(signature);
-    } else {
-      signatureBuffer = Buffer.from(signature, "utf8");
-    }
-  } else {
-    signatureBuffer = signature;
-  }
+  const dataArray = new Uint8Array(wasmMemory.buffer, offset, len);
+  dataArray.set([...message]);
 
   offset += len;
-  const sig = new Uint8Array(memory.buffer, offset, crypto_sign_ed25519_BYTES);
-  sig.set([...signatureBuffer]);
-
-  let publicKeyBuffer: Uint8Array;
-  if (typeof publicKey === "string") {
-    if (utils.isBase64(publicKey)) {
-      publicKeyBuffer = utils.decodeFromBase64(publicKey);
-    } else {
-      publicKeyBuffer = Buffer.from(publicKey, "hex");
-    }
-  } else {
-    publicKeyBuffer = publicKey;
-  }
+  const sig = new Uint8Array(
+    wasmMemory.buffer,
+    offset,
+    crypto_sign_ed25519_BYTES,
+  );
+  sig.set([...signature]);
 
   offset += crypto_sign_ed25519_BYTES;
   const key = new Uint8Array(
-    memory.buffer,
+    wasmMemory.buffer,
     offset,
     crypto_sign_ed25519_PUBLICKEYBYTES,
   );
-  key.set([...publicKeyBuffer]);
+  key.set([...publicKey]);
 
-  const result = validate(
+  const libsodiumModule = await libsodiumMethodsModule({ wasmMemory });
+
+  const result = libsodiumModule._verify_data(
     len,
     dataArray.byteOffset,
     sig.byteOffset,
     key.byteOffset,
-  ) as number;
+  );
 
-  return result === 1;
+  return result === 0;
 };
 
 export default verify;

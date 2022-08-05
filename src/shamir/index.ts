@@ -15,8 +15,10 @@
 
 import splitSecret from "./splitSecret";
 import restoreSecret from "./restoreSecret";
+import memory from "./memory";
 
 export default {
   splitSecret,
   restoreSecret,
+  memory,
 };

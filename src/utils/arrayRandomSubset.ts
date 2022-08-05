@@ -23,12 +23,8 @@ const arrayRandomSubset = async <T>(
   const n = array.length;
 
   // Sanity check
-  if (n < elements) return array;
-
-  // If array has <2 items, there is nothing to do
-  if (n < 2) return array;
-
-  if (n === elements) return array;
+  if (n < elements || n < 2)
+    throw new Error("Not enough elements in the array");
 
   const shuffled = await arrayRandomShuffle(array);
 

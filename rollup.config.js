@@ -1,84 +1,107 @@
 import commonjs from "@rollup/plugin-commonjs";
 import resolve from "@rollup/plugin-node-resolve";
+import babel from "@rollup/plugin-babel";
 import replace from "@rollup/plugin-replace";
 import typescript from "@rollup/plugin-typescript";
 import { wasm } from "@rollup/plugin-wasm";
 import json from "@rollup/plugin-json";
 import { terser } from "rollup-plugin-terser";
+import gzipPlugin from "rollup-plugin-gzip";
 import analyzer from "rollup-plugin-analyzer";
 
+import pkg from "./package.json";
+
 const production = !process.env.ROLLUP_WATCH;
+const dir = "lib";
+const input = "src/index.ts";
 
-export default {
-  input: "src/index.ts",
-  output: {
-    sourcemap: !production,
-    format: "es",
-    name: "deliberative",
-    dir: production ? "lib" : "build",
-    // manualChunks: (moduleName) => {
-    //   // Every module whose name includes `node_modules` should be in vendor:
-    //   if (moduleName.includes('node_modules')) {
-    //     return 'vendor';
-    //   }
-    //   // Every other module will be in the chunk based on its entry point!
-    // },
-  },
-  plugins: [
-    replace({
-      preventAssignment: true,
-      "process.env.NODE_ENV": JSON.stringify(production),
-    }),
+const plugins = [
+  resolve({
+    browser: true,
+    preferBuiltins: false,
+  }),
 
-    wasm(),
+  commonjs(),
 
-    json({
-      compact: true,
-      exclude: [
-        "./node_modules/bip39/wordlists/czech.json",
-        "./node_modules/bip39/wordlists/chinese_simplified.json",
-        "./node_modules/bip39/wordlists/chinese_traditional.json",
-        "./node_modules/bip39/wordlists/korean.json",
-        "./node_modules/bip39/wordlists/french.json",
-        "./node_modules/bip39/wordlists/italian.json",
-        "./node_modules/bip39/wordlists/spanish.json",
-        "./node_modules/bip39/wordlists/japanese.json",
-        "./node_modules/bip39/wordlists/portuguese.json",
-      ],
-      preferConst: true,
-    }),
+  replace({
+    preventAssignment: true,
+    "process.env.NODE_ENV": JSON.stringify(production),
+  }),
 
-    typescript({
-      sourceMap: !production,
-      inlineSources: !production,
-      declarationMap: !production,
-      exclude: ["__tests__", "__tests__/*.test.ts"],
-      outDir: production ? "lib" : "build",
-    }),
+  wasm(),
 
-    // If you have external dependencies installed from
-    // npm, you'll most likely need these plugins. In
-    // some cases you'll need additional configuration -
-    // consult the documentation for details:
-    // https://github.com/rollup/plugins/tree/master/packages/commonjs
-    resolve({
-      browser: true,
-      preferBuiltins: false,
-    }),
+  json({
+    compact: true,
+    preferConst: true,
+  }),
 
-    commonjs(),
+  typescript({
+    sourceMap: true,
+    inlineSources: !production,
+    declarationMap: true,
+    exclude: [
+      "__tests__",
+      "__tests__/*.test.ts",
+      "node_modules/bip39/wordlists/czech.json",
+      "node_modules/bip39/wordlists/chinese_simplified.json",
+      "node_modules/bip39/wordlists/chinese_traditional.json",
+      "node_modules/bip39/wordlists/korean.json",
+      "node_modules/bip39/wordlists/french.json",
+      "node_modules/bip39/wordlists/italian.json",
+      "node_modules/bip39/wordlists/spanish.json",
+      "node_modules/bip39/wordlists/japanese.json",
+      "node_modules/bip39/wordlists/portuguese.json",
+    ],
+    outDir: `${dir}`,
+  }),
 
-    analyzer(),
+  analyzer(),
+];
 
-    // If we're building for production (npm run build
-    // instead of npm run dev), minify
-    production &&
-      terser({
-        compress: production,
-        mangle: production,
+export default [
+  // UMD
+  {
+    input,
+    plugins: [
+      ...plugins,
+      babel({
+        babelHelpers: "bundled",
       }),
-  ],
-  watch: {
-    clearScreen: false,
+      production &&
+        terser({
+          compress: true,
+          mangle: true,
+        }),
+
+      production && gzipPlugin(),
+    ],
+    output: {
+      name: "dcrypto",
+      file: pkg.browser,
+      format: "umd",
+      esModule: false,
+      exports: "named",
+      sourcemap: true,
+    },
   },
-};
+
+  // ESM and CJS
+  {
+    input,
+    plugins,
+    output: [
+      {
+        file: pkg.module,
+        format: "es",
+        exports: "named",
+        sourcemap: true,
+      },
+      {
+        file: pkg.main,
+        format: "cjs",
+        exports: "named",
+        sourcemap: true,
+      },
+    ],
+  },
+];

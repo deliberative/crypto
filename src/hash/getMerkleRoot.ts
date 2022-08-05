@@ -13,11 +13,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import loadLibsodium from "../wasmLoaders/libsodium";
-
 import sha512 from "./sha512";
 
-import { crypto_hash_sha512_BYTES } from "../interfaces";
+import libsodiumMemory from "./memory";
+
+import libsodiumMethodsModule from "../../build/libsodiumMethodsModule";
+
+import { crypto_hash_sha512_BYTES } from "../utils/interfaces";
 
 const getMerkleRoot = async (tree: Uint8Array[]): Promise<Uint8Array> => {
   const treeLength = tree.length;
@@ -25,13 +27,14 @@ const getMerkleRoot = async (tree: Uint8Array[]): Promise<Uint8Array> => {
   const lengths = tree.map((a) => a.length);
   const maxDataLen = lengths.indexOf(Math.max(...lengths));
 
-  const initialMemoryLen =
-    (maxDataLen + crypto_hash_sha512_BYTES) * Uint8Array.BYTES_PER_ELEMENT;
-  const wasmInitial = await loadLibsodium(initialMemoryLen);
-
-  const subsequentMemoryLen =
-    3 * crypto_hash_sha512_BYTES * Uint8Array.BYTES_PER_ELEMENT;
-  const wasm = await loadLibsodium(subsequentMemoryLen);
+  const { initialMemory, subsequentMemory } =
+    libsodiumMemory.merkleRootMemory(maxDataLen);
+  const libsodiumInitialModule = await libsodiumMethodsModule({
+    wasmMemory: initialMemory,
+  });
+  const libsodiumSubsequentModule = await libsodiumMethodsModule({
+    wasmMemory: subsequentMemory,
+  });
 
   const hashes: Uint8Array[] = [];
   const concatHashes = new Uint8Array(2 * crypto_hash_sha512_BYTES);
@@ -45,7 +48,7 @@ const getMerkleRoot = async (tree: Uint8Array[]): Promise<Uint8Array> => {
     let i = 0;
     if (leaves === treeLength) {
       do {
-        const hash = await sha512(tree[i++], wasmInitial);
+        const hash = await sha512(tree[i++], libsodiumInitialModule);
         hashes.push(hash);
       } while (i < leaves);
     }
@@ -58,7 +61,7 @@ const getMerkleRoot = async (tree: Uint8Array[]): Promise<Uint8Array> => {
         concatHashes.set([...hashes[i * 2], ...hashes[i * 2 + 1]]);
       }
 
-      const hash = await sha512(concatHashes, wasm);
+      const hash = await sha512(concatHashes, libsodiumSubsequentModule);
 
       hashes[i++].set([...hash]);
     } while (i * 2 + 1 < leaves);

@@ -16,7 +16,8 @@
     "<rootDir>/src/**/**/**/*.ts"
   ],
   "coveragePathIgnorePatterns": [
-    "<rootDir>/node_modules/"
+    "<rootDir>/node_modules/",
+    "<rootDir>/src/wasmLoaders/emscriptenImports.ts"
   ],
   "coverageReporters": ["json", "text", "lcov", "jest-badges"],
   "coverageDirectory": "coverage",

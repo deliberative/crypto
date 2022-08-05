@@ -13,39 +13,61 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-const fs = require("fs");
-const path = require("path");
-const { exec } = require("child_process");
+import fs from "fs";
+import path from "path";
+import { exec } from "child_process";
 
-const {
+import {
   srcPath,
   buildPath,
   distPath,
   libsodiumIncludePath,
   libsodiumIncludePrivatePath,
-  libraryPath,
   licenseApache,
   emcc,
-} = require("./utils");
+} from "./utils.js";
 
 const methodsPath = path.join(srcPath, "c", "libsodium_methods.c");
-const wasmPath = path.join(buildPath, "libsodium_methods.wasm");
+const wasmPath = path.join(buildPath, "libsodiumMethodsModule.js");
 const base64Path = path.join(distPath, "libsodiumMethods.ts");
+const typesPath = path.join(
+  process.cwd(),
+  "scripts",
+  "libsodiumMethodsModule.d.ts",
+);
+const types = fs.readFileSync(typesPath);
+fs.writeFileSync(wasmPath.replace("le.js", "le.d.ts"), types);
+
+// -s INITIAL_MEMORY=128kb \ 2 pages
+// -s TOTAL_STACK=65kb \ 2 pages
 
 exec(
-  `${emcc} \
+  `\
+${emcc} \
+-s EXPORTED_FUNCTIONS=\
+_sha512,\
+_random_bytes,\
+_new_keypair,\
+_keypair_from_seed,\
+_keypair_from_secret_key,\
+_sign_data,\
+_verify_data,\
+_encrypt_data,\
+_decrypt_data \
+-s EXPORT_NAME=libsodiumMethodsModule \
+--closure 1 \
 -I${libsodiumIncludePath} \
 -I${libsodiumIncludePrivatePath} \
---js-library ${libraryPath} \
 -o ${wasmPath} \
 ${methodsPath}`,
   (error, stdout, stderr) => {
     if (error) {
       console.error(error.message);
       return;
-    } else if (stderr) {
+    }
+
+    if (stderr) {
       console.error(`stderr: ${stderr}`);
-      return;
     }
 
     console.log(

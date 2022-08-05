@@ -13,32 +13,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import loadShamir from "../wasmLoaders/shamir";
+import shamirMemory from "./memory";
+
+import shamirMethodsModule from "../../build/shamirMethodsModule";
+
+import type { ShamirMethodsModule } from "../../build/shamirMethodsModule";
 
 const restoreSecret = async (
   shares: Uint8Array[],
-  wasm?: WebAssembly.Exports,
+  module?: ShamirMethodsModule,
 ) => {
   const sharesLen = shares.length;
-  if (sharesLen < 2) throw new Error("Not enough shares provided");
-  if (sharesLen > 255) throw new Error(`Need at most 255 shares`);
 
   const shareItemLen = shares[0].length;
   const lengthVerification = shares.every((v) => v.length === shareItemLen);
-  if (!lengthVerification) throw new Error("Shares length varies");
+  if (!lengthVerification) throw new Error("Shares length varies.");
 
   const secretLen = shareItemLen - 1;
 
-  const memoryLen =
-    (sharesLen * (secretLen + 1) + secretLen + 2 * sharesLen) *
-    Uint8Array.BYTES_PER_ELEMENT;
-  wasm = wasm || (await loadShamir(memoryLen));
-  const restore = wasm.restore_secret as CallableFunction;
-  const memory = wasm.memory as WebAssembly.Memory;
+  const wasmMemory = module
+    ? module.wasmMemory
+    : shamirMemory.restoreSecretMemory(secretLen, sharesLen);
 
   let offset = 0;
   const sharesArray = new Uint8Array(
-    memory.buffer,
+    wasmMemory.buffer,
     offset,
     sharesLen * (secretLen + 1),
   );
@@ -47,23 +46,33 @@ const restoreSecret = async (
   }
 
   offset += sharesLen * (secretLen + 1);
-  const secretArray = new Uint8Array(memory.buffer, offset, secretLen);
+  const secretArray = new Uint8Array(wasmMemory.buffer, offset, secretLen);
 
-  const result = restore(
+  const shamirModule = await shamirMethodsModule({ wasmMemory });
+
+  const result = shamirModule._restore_secret(
     sharesLen,
     secretLen,
     sharesArray.byteOffset,
     secretArray.byteOffset,
-  ) as number;
+  );
 
-  if (result === 0) {
-    return new Uint8Array([...secretArray]);
-  } else if (result === -2) {
-    throw new Error("Not enough shares provided.");
-  } else if (result === -1) {
-    throw new Error("Need at most 255 shares.");
-  } else {
-    throw new Error("Uncaught error.");
+  switch (result) {
+    case 0: {
+      return new Uint8Array([...secretArray]);
+    }
+
+    case -1: {
+      throw new Error("Need at most 255 shares.");
+    }
+
+    case -2: {
+      throw new Error("Not enough shares provided.");
+    }
+
+    default: {
+      throw new Error("An unexpected error occured.");
+    }
   }
 };
 

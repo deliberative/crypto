@@ -13,21 +13,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import loadUtils from "../wasmLoaders/utils";
+// import loadUtils from "../wasmLoaders/utils";
+
+import utilsMemory from "./memory";
+
+import utilsMethodsModule from "../../build/utilsMethodsModule";
+
+import type { UtilsMethodsModule } from "../../build/utilsMethodsModule";
 
 const randomNumberInRange = async (
   min: number,
   max: number,
-  wasm?: WebAssembly.Exports,
+  // wasm?: WebAssembly.Exports,
+  module?: UtilsMethodsModule,
 ): Promise<number> => {
-  const bytesNeeded = Math.ceil(Math.log2(max - min) / 8);
-  const memoryLen = (bytesNeeded + 3 * 4) * Uint8Array.BYTES_PER_ELEMENT;
-  wasm = wasm || (await loadUtils(memoryLen));
-  const random = wasm.random_number_in_range as CallableFunction;
+  if (module) return module._random_number_in_range(min, max);
 
-  const result = random(min, max) as number;
+  const wasmMemory = utilsMemory.randomNumberInRangeMemory(min, max);
 
-  return result;
+  const utilsModule = await utilsMethodsModule({ wasmMemory });
+
+  return utilsModule._random_number_in_range(min, max);
 };
 
 // import * as nacl from "tweetnacl";

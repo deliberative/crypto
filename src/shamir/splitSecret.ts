@@ -13,42 +13,45 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import loadShamir from "../wasmLoaders/shamir";
+import shamirMemory from "./memory";
+
+import shamirMethodsModule from "../../build/shamirMethodsModule";
+
+import type { ShamirMethodsModule } from "../../build/shamirMethodsModule";
 
 const splitSecret = async (
   secret: Uint8Array,
   sharesLen: number,
   threshold: number,
-  wasm?: WebAssembly.Exports,
+  module?: ShamirMethodsModule,
 ) => {
   const secretLen = secret.length;
-  if (secretLen < 1) throw new Error("Need more data.");
+  if (secretLen < 2) throw new Error("Need more data.");
 
-  const memoryLen =
-    (sharesLen * (secretLen + 1) + secretLen + threshold) *
-    Uint8Array.BYTES_PER_ELEMENT;
-  wasm = wasm || (await loadShamir(memoryLen));
-  const split = wasm.split_secret as CallableFunction;
-  const memory = wasm.memory as WebAssembly.Memory;
+  const wasmMemory = module
+    ? module.wasmMemory
+    : shamirMemory.splitSecretMemory(secretLen, sharesLen, threshold);
 
   let offset = 0;
-  const secretArray = new Uint8Array(memory.buffer, offset, secretLen);
+  const secretArray = new Uint8Array(wasmMemory.buffer, offset, secretLen);
   secretArray.set([...secret]);
 
   offset += secretLen;
   const sharesArray = new Uint8Array(
-    memory.buffer,
+    wasmMemory.buffer,
     offset,
     sharesLen * (secretLen + 1),
   );
 
-  const result = split(
+  const shamirModule = module || (await shamirMethodsModule({ wasmMemory }));
+
+  const result = shamirModule._split_secret(
     sharesLen,
     threshold,
     secretLen,
     secretArray.byteOffset,
     sharesArray.byteOffset,
-  ) as number;
+  );
 
   const values: Uint8Array[] = [];
 
