@@ -14,6 +14,8 @@
     "downlevelIteration": false,
     "noImplicitThis": true,
     "noImplicitAny": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
     "noUnusedLocals": true,

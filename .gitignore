@@ -1,5 +1,5 @@
 build
-lib
+dist
 coverage
 *.o
 *valgrind*.txt

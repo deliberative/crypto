@@ -14,6 +14,7 @@
 // limitations under the License.
 
 import asymmetric from "./asymmetric";
+import mnemonic from "./mnemonic";
 import hash from "./hash";
 import shamir from "./shamir";
 import utils from "./utils";
@@ -69,22 +70,12 @@ export interface DeliberativeCrypto {
   keyPair: (module?: LibsodiumMethodsModule) => Promise<SignKeyPair>;
 
   /**
-   * Generates a 12-natural-language-word representation of an Ed25519 private key.
-   */
-  generateMnemonic: () => Promise<string>;
-
-  /**
    * Generate a new Ed25519 keypair from a given seed
    */
   keyPairFromSeed: (
     seed: Uint8Array,
     module?: LibsodiumMethodsModule,
   ) => Promise<SignKeyPair>;
-
-  /**
-   * Generates an Ed25519 keypair from a 12-natural-language-word mnemonic.
-   */
-  keypairFromMnemonic: (mnemonic: string) => Promise<SignKeyPair>;
 
   /**
    * Generate a new Ed25519 keypair from an Ed25519 secret key
@@ -133,6 +124,21 @@ export interface DeliberativeCrypto {
     additionalData: Uint8Array,
     module?: LibsodiumMethodsModule,
   ) => Promise<Uint8Array>;
+
+  /**
+   * Generates a 12-natural-language-word representation of an Ed25519 private key.
+   */
+  generateMnemonic: (strength?: 128 | 160 | 192 | 224 | 256) => Promise<string>;
+
+  /**
+   * Validates that a natural-language-word representation of an Ed25519 private key is accurate
+   */
+  validateMnemonic: (mnemonic: string) => Promise<boolean>;
+
+  /**
+   * Generates an Ed25519 keypair from a 12-natural-language-word mnemonic.
+   */
+  keypairFromMnemonic: (mnemonic: string) => Promise<SignKeyPair>;
 
   loadAsymmetricMemory: {
     newKeyPair: () => WebAssembly.Memory;
@@ -208,14 +214,17 @@ const dcrypto: DeliberativeCrypto = {
   loadUtilsModule: utilsMethodsModule,
 
   keyPair: asymmetric.keyPair.newKeyPair,
-  generateMnemonic: asymmetric.keyPair.generateMnemonic,
   keyPairFromSeed: asymmetric.keyPair.keyPairFromSeed,
-  keypairFromMnemonic: asymmetric.keyPair.keyPairFromMnemonic,
   keyPairFromSecretKey: asymmetric.keyPair.keyPairFromSecretKey,
   sign: asymmetric.sign,
   verify: asymmetric.verify,
   encrypt: asymmetric.encrypt,
   decrypt: asymmetric.decrypt,
+
+  generateMnemonic: mnemonic.generateMnemonic,
+  validateMnemonic: mnemonic.validateMnemonic,
+  keypairFromMnemonic: mnemonic.keyPairFromMnemonic,
+
   loadAsymmetricMemory: {
     newKeyPair: asymmetric.memory.newKeyPairMemory,
     keyPairFromSeed: asymmetric.memory.keyPairFromSeedMemory,

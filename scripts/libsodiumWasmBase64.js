@@ -20,16 +20,13 @@ import { exec } from "child_process";
 import {
   srcPath,
   buildPath,
-  distPath,
   libsodiumIncludePath,
   libsodiumIncludePrivatePath,
-  licenseApache,
   emcc,
 } from "./utils.js";
 
 const methodsPath = path.join(srcPath, "c", "libsodium_methods.c");
 const wasmPath = path.join(buildPath, "libsodiumMethodsModule.js");
-const base64Path = path.join(distPath, "libsodiumMethods.ts");
 const typesPath = path.join(
   process.cwd(),
   "scripts",
@@ -73,15 +70,5 @@ ${methodsPath}`,
     console.log(
       `stdout: Successfully compiled libsodium methods wasm module! ${stdout}`,
     );
-
-    const wasmSrc = fs.readFileSync(wasmPath);
-    const wasmBuffer = Buffer.from(wasmSrc, "binary").toString("base64");
-    const data = `
-${licenseApache}
-
-const libsodiumMethods = '${wasmBuffer}';
-
-export default libsodiumMethods;`;
-    fs.writeFileSync(base64Path, data);
   },
 );

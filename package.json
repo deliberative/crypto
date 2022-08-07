@@ -75,9 +75,6 @@
     "preversion": "npm-run-all -s lint format",
     "docs": "typedoc --out docs --excludeInternal src/index.ts"
   },
-  "dependencies": {
-    "bip39": "^3.0.4"
-  },
   "devDependencies": {
     "@babel/core": "^7.18.10",
     "@babel/preset-env": "^7.18.10",

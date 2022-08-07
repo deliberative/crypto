@@ -11,6 +11,12 @@ export interface LibsodiumMethodsModule extends EmscriptenModule {
     SIZE: number,
     array: number, // Uint8Array
   ): number;
+  _argon2(
+    MNEMONIC_LEN: number,
+    seed: number, // Uint8Array
+    mnemonic: number, // Int8Array
+    salt: number, // Uint8Array
+  ): number;
   _new_keypair(
     public_key: number, // Uint8Array,
     secret_key: number, // Uint8Array

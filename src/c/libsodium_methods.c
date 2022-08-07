@@ -19,11 +19,20 @@
 #include <string.h>
 
 #include "../../libsodium/src/libsodium/randombytes/randombytes.c"
+#include "../../libsodium/src/libsodium/sodium/codecs.c"
 #include "../../libsodium/src/libsodium/sodium/core.c"
 #include "../../libsodium/src/libsodium/sodium/utils.c"
 
 // SHA512
 #include "../../libsodium/src/libsodium/crypto_hash/sha512/cp/hash_sha512_cp.c"
+
+// Argon2
+#include "../../libsodium/src/libsodium/crypto_pwhash/argon2/argon2-core.c"
+#include "../../libsodium/src/libsodium/crypto_pwhash/argon2/argon2-encoding.c"
+#include "../../libsodium/src/libsodium/crypto_pwhash/argon2/argon2-fill-block-ref.c"
+#include "../../libsodium/src/libsodium/crypto_pwhash/argon2/argon2.c"
+#include "../../libsodium/src/libsodium/crypto_pwhash/argon2/blake2b-long.c"
+#include "../../libsodium/src/libsodium/crypto_pwhash/argon2/pwhash_argon2id.c"
 
 // Ed25519
 #include "../../libsodium/src/libsodium/crypto_core/ed25519/ref10/ed25519_ref10.c"
@@ -63,6 +72,18 @@ random_bytes(const int SIZE, uint8_t array[SIZE])
   randombytes_buf(array, SIZE);
 
   return 0;
+}
+
+__attribute__((used)) int
+argon2(const int MNEMONIC_LEN, uint8_t seed[crypto_sign_ed25519_SEEDBYTES],
+       const char mnemonic[MNEMONIC_LEN],
+       const uint8_t salt[crypto_pwhash_argon2id_SALTBYTES])
+{
+  return crypto_pwhash_argon2id(seed, crypto_sign_ed25519_SEEDBYTES, mnemonic,
+                                MNEMONIC_LEN, salt,
+                                crypto_pwhash_argon2id_OPSLIMIT_INTERACTIVE,
+                                crypto_pwhash_argon2id_MEMLIMIT_INTERACTIVE,
+                                crypto_pwhash_argon2id_ALG_ARGON2ID13);
 }
 
 __attribute__((used)) int

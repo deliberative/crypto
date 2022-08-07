@@ -29,3 +29,4 @@ export const crypto_sign_ed25519_BYTES = 64;
 export const crypto_sign_ed25519_SEEDBYTES = 32;
 export const crypto_sign_ed25519_PUBLICKEYBYTES = 32;
 export const crypto_sign_ed25519_SECRETKEYBYTES = 64;
+export const crypto_pwhash_argon2id_SALTBYTES = 16;

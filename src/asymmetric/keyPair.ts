@@ -13,10 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import * as bip39 from "bip39";
-
-import randomBytes from "../utils/randomBytes";
-
 import libsodiumMemory from "./memory";
 
 import libsodiumMethodsModule from "../../build/libsodiumMethodsModule";
@@ -69,17 +65,6 @@ const newKeyPair = async (
   }
 };
 
-const generateMnemonic = async () => {
-  const seed = await randomBytes(crypto_sign_ed25519_SEEDBYTES);
-  const seedBuffer = Buffer.from(
-    seed,
-    seed.byteOffset,
-    crypto_sign_ed25519_SEEDBYTES,
-  );
-
-  return bip39.entropyToMnemonic(seedBuffer);
-};
-
 const keyPairFromSeed = async (
   seed: Uint8Array,
   module?: LibsodiumMethodsModule,
@@ -130,18 +115,6 @@ const keyPairFromSeed = async (
   }
 };
 
-const keyPairFromMnemonic = async (mnemonic: string) => {
-  const isValid = bip39.validateMnemonic(mnemonic);
-  if (!isValid) throw new Error("Invalid mnemonic.");
-
-  const seed = await bip39.mnemonicToSeed(mnemonic);
-  const privateKeySeed = new Uint8Array(seed.toJSON().data.slice(0, 32));
-  const keypair = await keyPairFromSeed(privateKeySeed);
-  if (!keypair) throw new Error("Invalid seed from mnemonic.");
-
-  return keypair;
-};
-
 const keyPairFromSecretKey = async (
   secretKey: Uint8Array,
   module?: LibsodiumMethodsModule,
@@ -185,8 +158,6 @@ const keyPairFromSecretKey = async (
 
 export default {
   newKeyPair,
-  generateMnemonic,
   keyPairFromSeed,
-  keyPairFromMnemonic,
   keyPairFromSecretKey,
 };
