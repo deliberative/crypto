@@ -51,11 +51,9 @@ const sha512 = async (
     hash.byteOffset,
   );
 
-  if (result === 0) {
-    return new Uint8Array([...hash]);
-  } else {
-    throw new Error("Could not hash the array.");
-  }
+  if (result === 0) return new Uint8Array([...hash]);
+
+  throw new Error("Could not hash the array.");
 };
 
 export default sha512;

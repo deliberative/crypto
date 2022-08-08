@@ -23,7 +23,7 @@ const splitSecretMemory = (
   threshold: number,
 ): WebAssembly.Memory => {
   const memoryLen =
-    (sharesLen * (secretLen + 1) + secretLen + threshold + LOG_AND_EXP) *
+    (sharesLen * (secretLen + 1) * (LOG_AND_EXP + 1) + secretLen + threshold) *
     Uint8Array.BYTES_PER_ELEMENT;
   const pages = memoryLenToPages(memoryLen);
 
@@ -35,7 +35,9 @@ const restoreSecretMemory = (
   sharesLen: number,
 ): WebAssembly.Memory => {
   const memoryLen =
-    (sharesLen * (secretLen + 1) + secretLen + 2 * sharesLen + LOG_AND_EXP) *
+    (sharesLen * (secretLen + 1) * (LOG_AND_EXP + 1) +
+      secretLen +
+      2 * sharesLen) *
     Uint8Array.BYTES_PER_ELEMENT;
   const pages = memoryLenToPages(memoryLen);
 

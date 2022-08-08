@@ -22,7 +22,8 @@ import {
 
 const argon2Memory = (mnemonicLen: number): WebAssembly.Memory => {
   const memoryLen =
-    (mnemonicLen +
+    (75 * 1024 * 1024 +
+      mnemonicLen +
       crypto_sign_ed25519_SEEDBYTES +
       crypto_pwhash_argon2id_SALTBYTES) *
     Uint8Array.BYTES_PER_ELEMENT;

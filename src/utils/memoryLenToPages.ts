@@ -13,23 +13,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/**
+ * Webassembly Memory is separated into 64kb contiguous memory "pages".
+ * This function takes memory length in bytes and converts it to pages.
+ */
 const memoryLenToPages = (
   memoryLen: number,
   minPages?: number,
   maxPages?: number,
 ): number => {
-  minPages = minPages || 256; // 16mb // 6; // 384kb
-  maxPages = maxPages || 256; // 16mb // 8; // 512kb
+  minPages = minPages || 32; // 2mb // 256; // 16mb // 6; // 384kb
+  maxPages = maxPages || 1600; // 100mb for argon2 // 256; // 16mb // 8; // 512kb
   const pageSize = 64 * 1024;
   const ceil = Math.ceil(memoryLen / pageSize);
   if (ceil > maxPages)
     throw new Error(
-      `Memory requirements larger than declared maximum ${
+      `Memory required is ${ceil * pageSize} bytes while declared maximum is ${
         maxPages * pageSize
       } bytes`,
     );
 
-  return minPages; // ceil <= minPages ? minPages : ceil;
+  return ceil < minPages ? minPages : ceil;
 };
 
 export default memoryLenToPages;

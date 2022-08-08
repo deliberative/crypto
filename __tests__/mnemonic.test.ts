@@ -15,6 +15,12 @@ describe("Signing and verifying with Ed25519 keys test suite.", () => {
   test("Generating a new keypair from mnemonic seed works.", async () => {
     const mnemonic = await dcrypto.generateMnemonic();
     const keypair = await dcrypto.keypairFromMnemonic(mnemonic);
+
+    const anotherKeypair = await dcrypto.keypairFromMnemonic(mnemonic);
+
+    console.log(keypair);
+    console.log(anotherKeypair);
+
     expect(typeof keypair === "object").toBe(true);
     expect(keypair.secretKey.length).toBe(crypto_sign_ed25519_SECRETKEYBYTES);
     expect(keypair.publicKey.length).toBe(crypto_sign_ed25519_PUBLICKEYBYTES);

@@ -24,8 +24,7 @@ const keyPairFromMnemonic = async (mnemonic: string) => {
 
   const seed = await argon2(mnemonic);
   // const privateKeySeed = new Uint8Array(seed.toJSON().data.slice(0, 32));
-  const privateKeySeed = seed.slice(0, 32);
-  const keypair = await keyPair.keyPairFromSeed(privateKeySeed);
+  const keypair = await keyPair.keyPairFromSeed(seed);
   if (!keypair) throw new Error("Invalid seed from mnemonic.");
 
   return keypair;

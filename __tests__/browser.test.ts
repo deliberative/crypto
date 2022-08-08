@@ -19,6 +19,7 @@ describe("Browser-based tests.", () => {
     const previousBlockHash = await dcrypto.randomBytes(
       crypto_hash_sha512_BYTES,
     );
+
     const encrypted = await dcrypto.encrypt(
       message,
       keypair.publicKey,

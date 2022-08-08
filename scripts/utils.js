@@ -49,6 +49,13 @@ export const licenseApache = `
 const testing = ``;
 // const testing = `\
 // -g3 \
+// -gsource-map \
+// -s ASSERTIONS=2 \
+// -s LOAD_SOURCE_MAP=1 \
+// -s ABORT_ON_WASM_EXCEPTIONS=1 \
+// `;
+// const testing = `\
+// -g3 \
 // --profiling \
 // --memoryprofiler \
 // -gsource-map \
@@ -87,8 +94,10 @@ const withJS = ` \
 
 const memory = `\
 -s IMPORTED_MEMORY=1 \
--s INITIAL_MEMORY=16mb \
--s TOTAL_STACK=10mb \
+-s ALLOW_MEMORY_GROWTH=1 \
+-s INITIAL_MEMORY=2mb \
+-s MAXIMUM_MEMORY=100mb \
+-s TOTAL_STACK=1mb \
 `;
 
 export const emcc = `\
