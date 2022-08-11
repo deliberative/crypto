@@ -40,7 +40,6 @@ exec(
 ${emcc} \
 -s EXPORTED_FUNCTIONS=_random_number_in_range \
 -s EXPORT_NAME=utilsMethodsModule \
---closure 1 \
 -I${libsodiumIncludePath} \
 -I${libsodiumIncludePrivatePath} \
 -o ${wasmPath} \

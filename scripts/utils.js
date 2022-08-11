@@ -95,6 +95,7 @@ const withJS = ` \
 const memory = `\
 -s IMPORTED_MEMORY=1 \
 -s ALLOW_MEMORY_GROWTH=1 \
+-s MEMORY_GROWTH_LINEAR_STEP=64kb \
 -s INITIAL_MEMORY=2mb \
 -s MAXIMUM_MEMORY=100mb \
 -s TOTAL_STACK=1mb \
@@ -103,6 +104,7 @@ const memory = `\
 export const emcc = `\
 emcc \
 -O3 \
+-flto \
 --no-entry \
 -s STRICT \
 ${testing} \

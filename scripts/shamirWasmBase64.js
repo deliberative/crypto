@@ -42,7 +42,6 @@ ${emcc} \
 _split_secret,\
 _restore_secret \
 -s EXPORT_NAME=shamirMethodsModule \
---closure 1 \
 -I${libsodiumIncludePath} \
 -I${libsodiumIncludePrivatePath} \
 -o ${wasmPath} \

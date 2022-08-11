@@ -52,7 +52,6 @@ _verify_data,\
 _encrypt_data,\
 _decrypt_data \
 -s EXPORT_NAME=libsodiumMethodsModule \
---closure 1 \
 -I${libsodiumIncludePath} \
 -I${libsodiumIncludePrivatePath} \
 -o ${wasmPath} \

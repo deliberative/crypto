@@ -57,13 +57,12 @@ export default [
         babelHelpers: "bundled",
       }),
 
-      production &&
-        terser({
-          compress: true,
-          mangle: true,
-        }),
+      terser({
+        compress: true,
+        mangle: true,
+      }),
 
-      production && gzipPlugin(),
+      gzipPlugin(),
     ],
     output: {
       name: "dcrypto",
