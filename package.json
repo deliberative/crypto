@@ -50,11 +50,9 @@
   ],
   "scripts": {
     "start": "cross-env NODE_ENV=development rollup -c -w",
-    "preclean": "rm -rf build",
-    "clean": "rm -rf dist",
+    "clean": "rm -rf build",
     "postclean": "rm -rf lib",
-    "predir": "mkdir build",
-    "dir": "mkdir dist",
+    "dir": "mkdir build",
     "wasm:libsodium": "node scripts/libsodiumWasmBase64.js",
     "wasm:shamir": "node scripts/shamirWasmBase64.js",
     "wasm:utils": "node scripts/utilsWasmBase64.js",
