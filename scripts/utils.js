@@ -84,6 +84,7 @@ const testing = ``;
 
 const withJS = ` \
 -s WASM=1 \
+-s WASM_BIGINT=1 \
 -s MODULARIZE=1 \
 -s MAIN_MODULE=2 \
 -s STRICT_JS=1 \
@@ -105,6 +106,7 @@ export const emcc = `\
 emcc \
 -O3 \
 -flto \
+--llvm-lto 1 \
 --no-entry \
 -s STRICT \
 ${testing} \

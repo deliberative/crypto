@@ -31,6 +31,13 @@ jobs:
           version: "13"
           cached: ${{ steps.cache-llvm.outputs.cache-hit }}
 
+      - name: Cache EMSDK
+        id: cache-emsdk
+        uses: actions/cache@v2
+        with:
+          path: 'emsdk-cache'
+          key: 3.1.9-${{ runner.os }}
+
       - name: Setup emsdk
         uses: mymindstorm/setup-emsdk@v11
         with:
@@ -40,6 +47,7 @@ jobs:
           # The cache folder will be placed in the build directory,
           #  so make sure it doesn't conflict with anything!
           actions-cache-folder: 'emsdk-cache'
+          update: true
 
       - name: Verify
         run: emcc -v
@@ -47,11 +55,11 @@ jobs:
       - name: Setup
         run: npm install
 
-      - name: Build
-        run: npm run build
-
       - name: Jest
         run: npm test
+
+      - name: Build
+        run: npm run build
 
       - name: get-npm-version
         id: package-version
@@ -60,7 +68,7 @@ jobs:
       # Setup .npmrc file to publish to npm
       - uses: actions/setup-node@v3
         with:
-          node-version: '16.x'
+          node-version: '18.x'
           registry-url: 'https://registry.npmjs.org'
           tag: '{{ steps.package-version.outputs.current-version}}-alpha'
 
@@ -71,22 +79,22 @@ jobs:
       # Setup .npmrc file to publish to GitHub Packages
       - uses: actions/setup-node@v3
         with:
-          node-version: '16.x'
+          node-version: '18.x'
           registry-url: 'https://npm.pkg.github.com'
           tag: '{{ steps.package-version.outputs.current-version}}-alpha'
 
-      - run: npm publish
+      - run: github publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
-      # - name: Codecov
-      #   uses: codecov/codecov-action@v2
-      #   with:
-      #     # token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
-      #     # files: ./coverage1.xml,./coverage2.xml # optional
-      #     directory: ./coverage
-      #     # flags: unittests # optional
-      #     # name: codecov-umbrella # optional
-      #     fail_ci_if_error: true
-      #     # verbose: true # optional (default = false)
+      - name: Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          # token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+          # files: ./coverage1.xml,./coverage2.xml # optional
+          directory: ./coverage
+          # flags: unittests # optional
+          # name: codecov-umbrella # optional
+          fail_ci_if_error: true
+          # verbose: true # optional (default = false)
