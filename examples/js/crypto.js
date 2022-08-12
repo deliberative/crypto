@@ -7,7 +7,7 @@ const main = async () => {
   console.log(mnemonic);
 
   // Keypair is an object representing an Ed25519 keypair with { publicKey: Uint8Array(32), secretKey: Uint8Array(64) }
-  const keypair = await dcrypto.keypairFromMnemonic(mnemonic);
+  const keypair = await dcrypto.keyPairFromMnemonic(mnemonic);
 
   console.log(keypair.secretKey);
 
