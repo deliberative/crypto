@@ -36,9 +36,6 @@
     "emscripten",
     "typescript"
   ],
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/@deliberative"
-  },
   "homepage": "https://github.com/deliberative/crypto#readme",
   "main": "lib/index.cjs.js",
   "module": "lib/index.esm.js",
@@ -63,7 +60,7 @@
     "format": "prettier --write src __tests__",
     "postformat": "clang-format-all examples/",
     "lint": "eslint --ext .js,.ts src __tests__",
-    "prepublishOnly": "npm-run-all -s test lint",
+    "prepublishOnly": "npm-run-all -s test lint build",
     "preversion": "npm-run-all -s lint format",
     "docs": "typedoc --out docs --excludeInternal src/index.ts"
   },
