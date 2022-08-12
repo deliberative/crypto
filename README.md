@@ -18,22 +18,24 @@
 [code-style-prettier-image]: https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square
 [code-style-prettier-url]: https://github.com/prettier/prettier
 
-This repository is part of the reference implementation of the Deliberative Ledger Protocol, which hopes to become the infrastructure for futuristic deliberative democracies.
+This repository is part of the reference implementation of the Deliberative Ledger Protocol, the infrastructure for futuristic deliberative democracies.
 
 It does not have any native dependencies and can be used in both Nodejs and the browser.
 
-This package is beta-stable but it has not undergone external security audits. Use at your own risk.
+This package is somewhat unstable and it has not undergone external security audits. Use at your own risk.
 
 ## Introduction
 
-This package relies heavily on the [libsodium](https://github.com/jedisct1/libsodium) library for the Curve25519 cryptographic operations.
-Instead of implementing our own crypto we decided to use a battle-tested implementation and compile it to WebAssembly for speed.
+We rely heavily on the [libsodium](https://github.com/jedisct1/libsodium) library for the Curve25519 cryptographic operations.
+Instead of implementing our own crypto we decided to use a battle-tested implementation and compile it to WebAssembly for speed. In comparison to [tweetnacl](https://github.com/dchest/tweetnacl-js) this library is much faster.We will post benchmarks when we have time.
 
 We have also introduced function that can split and restore a secret through the Shamir threshold sharing method because we could not find many well-tested open-source implementations of it and we use it heavily in the Deliberative Ledger protocol.
 
 Another feature of the library is a mnemonic generation, validation and Ed25519 key pair from mnemonic that was inspired by [bip39](https://github.com/bitcoinjs/bip39) but instead of Blake2b we use Argon2 and instead of SHA256 we use SHA512, both of which can be found in libsodium.
 
 Finally we introduced some utility functions that do random shuffles, pick random subsets of Uint8Arrays etc.
+
+## Files
 
 The [libsodium](https://github.com/deliberative/libsodium) directory contains a fork of libsodium whose only differences with the master branch of libsodium are name changes to the implementation structs.
 
@@ -45,8 +47,7 @@ The [hash](src/hash) directory contains a sha512 hashing function and a Merkle r
 
 The [shamir](src/shamir) directory contains a WASM implementation of a cryptographic technique called [Shamir's secret
 sharing](https://en.wikipedia.org/wiki/Shamir%27s_Secret_Sharing), which allows one to split a secret into random shares that can only recreate it if a threshold of them is combined.
-Under the hood it uses the libsodium randombytes js method to generate random coefficients for the
-polynomial.
+Under the hood it uses the libsodium randombytes js method to generate random coefficients for the polynomial.
 
 The [utils](src/utils) directory contains helper methods such as cryptographic random slicing of arrays etc.
 
@@ -111,14 +112,14 @@ console.log("sk1 and kaypair.secretKey are equal");
 const lessShares = shares.slice(0, shares.length - 40);
 
 // Should be equal to sk1 and keypair.secretKey
-const sk2 = dcrypto.restoreSecret(lessShares);
+const sk2 = await dcrypto.restoreSecret(lessShares);
 
 console.log("sk2 and kaypair.secretKey are equal");
 
 const evenLessShares = lessShares.slice(0, lessShares.length - 1);
 
 // Should not be equal to sk1 and sk2.
-const sk3 = dcrypto.restoreSecret(evenLessShares);
+const sk3 = await dcrypto.restoreSecret(evenLessShares);
 
 console.log("sk3 and kaypair.secretKey are NOT equal");
 ```
