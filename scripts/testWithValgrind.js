@@ -31,7 +31,7 @@ if (fs.existsSync(outputPath)) fs.rmSync(outputPath);
 if (fs.existsSync(valgrindReportPath)) fs.rmSync(valgrindReportPath);
 
 exec(
-  `gcc -Wall -std=c11 -g -ggdb3 -Og \
+  `clang -Werror -ggdb -g -fstandalone-debug -fsanitize=address -Og -lm \
 -I${libsodiumIncludePath} \
 -I${libsodiumIncludePrivatePath} \
 -o ${outputPath} \

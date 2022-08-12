@@ -1,19 +1,15 @@
 /// <reference types="emscripten" />
 import type { SignKeyPair } from "./utils/interfaces";
-import type { LibsodiumMethodsModule } from "../build/libsodiumMethodsModule";
-import type { SHA512Module } from "./hash/build/sha512Module";
-import type { SplitSecretModule } from "./shamir/build/splitSecretModule";
-import type { RestoreSecretModule } from "./shamir/build/restoreSecretModule";
-import type { RandomNumberInRangeModule } from "./utils/build/randomNumberInRangeModule";
+import type { DCryptoMethodsModule } from "./c/build/dcryptoMethodsModule";
 export interface DeliberativeCrypto {
     /**
      * Generates a Uint8Array of size n full with random bytes
      */
-    randomBytes: (n: number, module?: LibsodiumMethodsModule) => Promise<Uint8Array>;
+    randomBytes: (n: number, module?: DCryptoMethodsModule) => Promise<Uint8Array>;
     /**
      * Get an integer between min and max with uniform probability
      */
-    randomNumberInRange: (min: number, max: number, module?: RandomNumberInRangeModule) => Promise<number>;
+    randomNumberInRange: (min: number, max: number, module?: DCryptoMethodsModule) => Promise<number>;
     /**
      * Fisher-Yates random shuffle of elements of an array
      */
@@ -26,36 +22,35 @@ export interface DeliberativeCrypto {
         randomBytes: (bytes: number) => WebAssembly.Memory;
         randomNumberInRange: (min: number, max: number) => WebAssembly.Memory;
     };
-    loadRandomNumberInRangeModule: EmscriptenModuleFactory<RandomNumberInRangeModule>;
     /**
      * Generate a new Ed25519 keypair
      */
-    keyPair: (module?: LibsodiumMethodsModule) => Promise<SignKeyPair>;
+    keyPair: (module?: DCryptoMethodsModule) => Promise<SignKeyPair>;
     /**
      * Generate a new Ed25519 keypair from a given seed
      */
-    keyPairFromSeed: (seed: Uint8Array, module?: LibsodiumMethodsModule) => Promise<SignKeyPair>;
+    keyPairFromSeed: (seed: Uint8Array, module?: DCryptoMethodsModule) => Promise<SignKeyPair>;
     /**
      * Generate a new Ed25519 keypair from an Ed25519 secret key
      */
-    keyPairFromSecretKey: (secretKey: Uint8Array, module?: LibsodiumMethodsModule) => Promise<SignKeyPair>;
+    keyPairFromSecretKey: (secretKey: Uint8Array, module?: DCryptoMethodsModule) => Promise<SignKeyPair>;
     /**
      * Generates a digital signature for the message using the private key.
      */
-    sign: (message: Uint8Array, secretKey: Uint8Array, module?: LibsodiumMethodsModule) => Promise<Uint8Array>;
+    sign: (message: Uint8Array, secretKey: Uint8Array, module?: DCryptoMethodsModule) => Promise<Uint8Array>;
     /**
      * Verifies that the digital signature was indeed generated from private key
      * corresponding to the public key
      */
-    verify: (message: Uint8Array, signature: Uint8Array, publicKey: Uint8Array, module?: LibsodiumMethodsModule) => Promise<boolean>;
+    verify: (message: Uint8Array, signature: Uint8Array, publicKey: Uint8Array, module?: DCryptoMethodsModule) => Promise<boolean>;
     /**
      * Encrypts
      */
-    encrypt: (message: Uint8Array, publicKey: Uint8Array, additionalData: Uint8Array, module?: LibsodiumMethodsModule) => Promise<Uint8Array>;
+    encrypt: (message: Uint8Array, publicKey: Uint8Array, additionalData: Uint8Array, module?: DCryptoMethodsModule) => Promise<Uint8Array>;
     /**
      * Decrypts
      */
-    decrypt: (encrypted: Uint8Array, secretKey: Uint8Array, additionalData: Uint8Array, module?: LibsodiumMethodsModule) => Promise<Uint8Array>;
+    decrypt: (encrypted: Uint8Array, secretKey: Uint8Array, additionalData: Uint8Array, module?: DCryptoMethodsModule) => Promise<Uint8Array>;
     /**
      * Generates a 12-natural-language-word representation of an Ed25519 private key.
      */
@@ -67,7 +62,7 @@ export interface DeliberativeCrypto {
     /**
      * Generates an Ed25519 keypair from a 12-natural-language-word mnemonic.
      */
-    keypairFromMnemonic: (mnemonic: string) => Promise<SignKeyPair>;
+    keyPairFromMnemonic: (mnemonic: string, password?: string) => Promise<SignKeyPair>;
     loadAsymmetricMemory: {
         newKeyPair: () => WebAssembly.Memory;
         keyPairFromSeed: () => WebAssembly.Memory;
@@ -77,8 +72,7 @@ export interface DeliberativeCrypto {
         encrypt: (messageLen: number, additionalDataLen: number) => WebAssembly.Memory;
         decrypt: (encryptedLen: number, additionalDataLen: number) => WebAssembly.Memory;
     };
-    loadLibsodiumModule: EmscriptenModuleFactory<LibsodiumMethodsModule>;
-    sha512: (data: Uint8Array, module?: SHA512Module) => Promise<Uint8Array>;
+    sha512: (data: Uint8Array, module?: DCryptoMethodsModule) => Promise<Uint8Array>;
     getMerkleRoot: (tree: Uint8Array[]) => Promise<Uint8Array>;
     loadHashMemory: {
         sha512: (arrayLen: number) => WebAssembly.Memory;
@@ -87,15 +81,13 @@ export interface DeliberativeCrypto {
             subsequentMemory: WebAssembly.Memory;
         };
     };
-    loadSHA512Module: EmscriptenModuleFactory<SHA512Module>;
-    splitSecret: (secret: Uint8Array, numberOfShares: number, threshold: number, module?: SplitSecretModule) => Promise<Uint8Array[]>;
-    restoreSecret: (shares: Uint8Array[], module?: RestoreSecretModule) => Promise<Uint8Array>;
+    splitSecret: (secret: Uint8Array, numberOfShares: number, threshold: number, module?: DCryptoMethodsModule) => Promise<Uint8Array[]>;
+    restoreSecret: (shares: Uint8Array[], module?: DCryptoMethodsModule) => Promise<Uint8Array>;
     loadShamirMemory: {
         splitSecret: (secretLen: number, sharesLen: number, threshold: number) => WebAssembly.Memory;
         restoreSecret: (secretLen: number, sharesLen: number) => WebAssembly.Memory;
     };
-    loadSplitSecretModule: EmscriptenModuleFactory<SplitSecretModule>;
-    loadRestoreSecretModule: EmscriptenModuleFactory<RestoreSecretModule>;
+    loadModule: EmscriptenModuleFactory<DCryptoMethodsModule>;
 }
 declare const dcrypto: DeliberativeCrypto;
 export default dcrypto;

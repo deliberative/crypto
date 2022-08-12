@@ -1,5 +1,5 @@
 declare const _default: {
-    sha512: (data: Uint8Array, module?: import("./build/sha512Module").SHA512Module | undefined) => Promise<Uint8Array>;
+    sha512: (data: Uint8Array, module?: import("../c/build/dcryptoMethodsModule").DCryptoMethodsModule | undefined) => Promise<Uint8Array>;
     getMerkleRoot: (tree: Uint8Array[]) => Promise<Uint8Array>;
     memory: {
         sha512Memory: (arrayLen: number) => WebAssembly.Memory;

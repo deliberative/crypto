@@ -85,6 +85,7 @@ const testing = ``;
 const withJS = ` \
 -s WASM=1 \
 -s WASM_BIGINT=1 \
+-s BUILD_AS_WORKER=1 \
 -s MODULARIZE=1 \
 -s MAIN_MODULE=2 \
 -s SINGLE_FILE=1 \

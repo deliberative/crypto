@@ -24,13 +24,16 @@
   },
   "type": "module",
   "keywords": [
+    "deliberative",
+    "ledger",
+    "deliberative ledger",
     "libsodium",
     "curve25519",
     "public key cryptography",
     "shamir secret sharing",
+    "bip39",
     "cryptography",
     "emscripten",
-    "libsodium",
     "typescript"
   ],
   "publishConfig": {

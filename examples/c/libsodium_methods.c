@@ -1,3 +1,4 @@
+#include <math.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,9 +11,12 @@
 int
 main()
 {
-  int DATA_LEN = crypto_sign_ed25519_SEEDBYTES;
+  int res;
+
+  const int DATA_LEN = crypto_sign_ed25519_SEEDBYTES;
   uint8_t *random_array = malloc(DATA_LEN * sizeof(uint8_t));
-  int res = random_bytes(DATA_LEN, random_array);
+
+  res = random_bytes(DATA_LEN, random_array);
   if (res != 0)
   {
     free(random_array);
@@ -23,21 +27,79 @@ main()
   }
 
   uint8_t *hash = malloc(crypto_hash_sha512_BYTES * sizeof(uint8_t));
+  res = sha512(DATA_LEN, random_array, hash);
+  if (res != 0)
+  {
+    free(random_array);
+    free(hash);
 
-  sha512(DATA_LEN, random_array, hash);
+    printf("Could not calculate SHA512 hash of data\n");
+
+    return -1;
+  }
 
   uint8_t *ed25519_pk
       = malloc(crypto_sign_ed25519_PUBLICKEYBYTES * sizeof(uint8_t));
   uint8_t *ed25519_sk
       = sodium_malloc(crypto_sign_ed25519_SECRETKEYBYTES * sizeof(uint8_t));
-  new_keypair(ed25519_pk, ed25519_sk);
-  keypair_from_seed(ed25519_pk, ed25519_sk, random_array);
-  keypair_from_secret_key(ed25519_pk, ed25519_sk);
-  uint8_t *sig = malloc(crypto_sign_ed25519_BYTES * sizeof(uint8_t));
+  res = new_keypair(ed25519_pk, ed25519_sk);
+  if (res != 0)
+  {
+    free(random_array);
+    free(hash);
+    free(ed25519_pk);
+    sodium_free(ed25519_sk);
 
-  sign_data(DATA_LEN, random_array, sig, ed25519_sk);
-  bool verified = verify_data(DATA_LEN, random_array, sig, ed25519_pk);
-  if (!verified)
+    printf("Could not generate Ed25519 keypair from new_keypair function\n");
+
+    return -1;
+  }
+
+  res = keypair_from_seed(ed25519_pk, ed25519_sk, random_array);
+  if (res != 0)
+  {
+    free(random_array);
+    free(hash);
+    free(ed25519_pk);
+    sodium_free(ed25519_sk);
+
+    printf(
+        "Could not generate Ed25519 keypair from keypair_from_seed function\n");
+
+    return -1;
+  }
+
+  res = keypair_from_secret_key(ed25519_pk, ed25519_sk);
+  if (res != 0)
+  {
+    free(random_array);
+    free(hash);
+    free(ed25519_pk);
+    sodium_free(ed25519_sk);
+
+    printf("Could not generate Ed25519 keypair from keypair_from_secret_key "
+           "function\n");
+
+    return -1;
+  }
+
+  uint8_t *sig = malloc(crypto_sign_ed25519_BYTES * sizeof(uint8_t));
+  res = sign_data(DATA_LEN, random_array, sig, ed25519_sk);
+  if (res != 0)
+  {
+    free(random_array);
+    free(hash);
+    free(ed25519_pk);
+    sodium_free(ed25519_sk);
+    free(sig);
+
+    printf("Could not generate Ed25519 signature\n");
+
+    return -1;
+  }
+
+  int verified = verify_data(DATA_LEN, random_array, sig, ed25519_pk);
+  if (verified != 0)
   {
     free(random_array);
     free(hash);
@@ -85,7 +147,6 @@ main()
     return -1;
   }
 
-  free(random_array);
   free(hash);
   free(ed25519_pk);
   sodium_free(ed25519_sk);
@@ -95,6 +156,35 @@ main()
   sodium_free(another_ed25519_sk);
   free(encrypted);
   free(decrypted);
+
+  int SHARES_LEN = 200;
+  int THRESHOLD = 101;
+
+  uint8_t *shares = malloc(SHARES_LEN * (DATA_LEN + 1) * sizeof(uint8_t));
+
+  split_secret(SHARES_LEN, THRESHOLD, DATA_LEN, random_array, shares);
+
+  uint8_t *restored = malloc(DATA_LEN * sizeof(uint8_t));
+
+  restore_secret(SHARES_LEN, DATA_LEN, shares, restored);
+
+  for (size_t i = 0; i < DATA_LEN; i++)
+  {
+    if (restored[i] != random_array[i])
+    {
+      free(random_array);
+      free(restored);
+      free(shares);
+
+      printf("Could not restore secret \n");
+
+      return -1;
+    }
+  }
+
+  free(random_array);
+  free(restored);
+  free(shares);
 
   printf("SUCCESS\n");
 
