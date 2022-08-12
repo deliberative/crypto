@@ -1,9 +1,9 @@
 lib
 build
 dist
-coverage
 *.o
 *valgrind*.txt
+.npmrc
 
 # Logs
 logs

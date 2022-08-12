@@ -2,7 +2,7 @@ import dcrypto from "../../lib";
 
 const main = async () => {
   // Words from dictionary create random seed for Ed25519 private key.
-  const mnemonic = dcrypto.generateMnemonic();
+  const mnemonic = await dcrypto.generateMnemonic();
 
   console.log(mnemonic);
 
@@ -23,7 +23,7 @@ const main = async () => {
 
   console.log(verify); // true
 
-  const hash = dcrypto.sha512(message);
+  const hash = await dcrypto.sha512(message);
 
   const keypair2 = await dcrypto.keyPair();
 
