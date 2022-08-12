@@ -15,13 +15,13 @@
 
 import shamirMemory from "./memory";
 
-import shamirMethodsModule from "../../build/shamirMethodsModule";
+import dcryptoMethodsModule from "../c/build/dcryptoMethodsModule";
 
-import type { ShamirMethodsModule } from "../../build/shamirMethodsModule";
+import type { DCryptoMethodsModule } from "../c/build/dcryptoMethodsModule";
 
 const restoreSecret = async (
   shares: Uint8Array[],
-  module?: ShamirMethodsModule,
+  module?: DCryptoMethodsModule,
 ) => {
   const sharesLen = shares.length;
 
@@ -48,9 +48,9 @@ const restoreSecret = async (
   offset += sharesLen * (secretLen + 1);
   const secretArray = new Uint8Array(wasmMemory.buffer, offset, secretLen);
 
-  const shamirModule = await shamirMethodsModule({ wasmMemory });
+  const dcryptoModule = module || (await dcryptoMethodsModule({ wasmMemory })); // await shamirMethodsModule({ wasmMemory });
 
-  const result = shamirModule._restore_secret(
+  const result = dcryptoModule._restore_secret(
     sharesLen,
     secretLen,
     sharesArray.byteOffset,

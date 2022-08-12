@@ -13,7 +13,7 @@ describe("Signing and verifying with Ed25519 keys test suite.", () => {
     const keypair = await dcrypto.keyPair();
 
     const wasmMemory = dcrypto.loadAsymmetricMemory.newKeyPair();
-    const module = await dcrypto.loadLibsodiumModule({ wasmMemory });
+    const module = await dcrypto.loadModule({ wasmMemory });
     const someOtherKeypair = await dcrypto.keyPair(module);
 
     expect(typeof keypair === "object").toBe(true);
@@ -30,7 +30,7 @@ describe("Signing and verifying with Ed25519 keys test suite.", () => {
     const keypair = await dcrypto.keyPairFromSeed(seed);
 
     const wasmMemory = dcrypto.loadAsymmetricMemory.keyPairFromSeed();
-    const module = await dcrypto.loadLibsodiumModule({ wasmMemory });
+    const module = await dcrypto.loadModule({ wasmMemory });
     const sameKeypair = await dcrypto.keyPairFromSeed(seed, module);
 
     expect(typeof keypair === "object").toBe(true);
@@ -45,7 +45,7 @@ describe("Signing and verifying with Ed25519 keys test suite.", () => {
     const keypair = await dcrypto.keyPairFromSecretKey(original.secretKey);
 
     const wasmMemory = dcrypto.loadAsymmetricMemory.keyPairFromSecretKey();
-    const module = await dcrypto.loadLibsodiumModule({ wasmMemory });
+    const module = await dcrypto.loadModule({ wasmMemory });
     const sameKeypair = await dcrypto.keyPairFromSecretKey(
       original.secretKey,
       module,
@@ -67,7 +67,7 @@ describe("Signing and verifying with Ed25519 keys test suite.", () => {
     const signature = await dcrypto.sign(randomMessage, keyPair.secretKey);
 
     const wasmMemory = dcrypto.loadAsymmetricMemory.sign(randomMessage.length);
-    const module = await dcrypto.loadLibsodiumModule({ wasmMemory });
+    const module = await dcrypto.loadModule({ wasmMemory });
     const otherSignature = await dcrypto.sign(
       randomMessage,
       keyPair.secretKey,
@@ -82,7 +82,7 @@ describe("Signing and verifying with Ed25519 keys test suite.", () => {
 
   test("Verifying the signature of a Uint8Array message works.", async () => {
     const mnemonic = await dcrypto.generateMnemonic();
-    const keypair = await dcrypto.keypairFromMnemonic(mnemonic);
+    const keypair = await dcrypto.keyPairFromMnemonic(mnemonic);
     const randomMessage = await dcrypto.randomBytes(256);
     const signature = await dcrypto.sign(randomMessage, keypair.secretKey);
     const verification = await dcrypto.verify(
@@ -94,7 +94,7 @@ describe("Signing and verifying with Ed25519 keys test suite.", () => {
     const wasmMemory = dcrypto.loadAsymmetricMemory.verify(
       randomMessage.length,
     );
-    const module = await dcrypto.loadLibsodiumModule({ wasmMemory });
+    const module = await dcrypto.loadModule({ wasmMemory });
     const otherVerification = await dcrypto.verify(
       randomMessage,
       signature,

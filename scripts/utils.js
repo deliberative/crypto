@@ -87,6 +87,7 @@ const withJS = ` \
 -s WASM_BIGINT=1 \
 -s MODULARIZE=1 \
 -s MAIN_MODULE=2 \
+-s SINGLE_FILE=1 \
 -s STRICT_JS=1 \
 -s EXPORT_ES6=1 \
 -s USE_ES6_IMPORT_META=0 \
@@ -104,9 +105,8 @@ const memory = `\
 
 export const emcc = `\
 emcc \
--O3 \
 -flto \
---llvm-lto 1 \
+-O3 \
 --no-entry \
 -s STRICT \
 ${testing} \

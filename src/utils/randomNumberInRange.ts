@@ -17,23 +17,24 @@
 
 import utilsMemory from "./memory";
 
-import utilsMethodsModule from "../../build/utilsMethodsModule";
+import dcryptoMethodsModule from "../c/build/dcryptoMethodsModule";
 
-import type { UtilsMethodsModule } from "../../build/utilsMethodsModule";
+import type { DCryptoMethodsModule } from "../c/build/dcryptoMethodsModule";
 
 const randomNumberInRange = async (
   min: number,
   max: number,
   // wasm?: WebAssembly.Exports,
-  module?: UtilsMethodsModule,
+  // module?: UtilsMethodsModule,
+  module?: DCryptoMethodsModule,
 ): Promise<number> => {
   if (module) return module._random_number_in_range(min, max);
 
   const wasmMemory = utilsMemory.randomNumberInRangeMemory(min, max);
 
-  const utilsModule = await utilsMethodsModule({ wasmMemory });
+  const dcryptoModule = await dcryptoMethodsModule({ wasmMemory });
 
-  return utilsModule._random_number_in_range(min, max);
+  return dcryptoModule._random_number_in_range(min, max);
 };
 
 // import * as nacl from "tweetnacl";

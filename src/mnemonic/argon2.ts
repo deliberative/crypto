@@ -13,18 +13,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import randomBytes from "../utils/randomBytes";
-
 import mnemonicMemory from "./memory";
 
-import libsodiumMethodsModule from "../../build/libsodiumMethodsModule";
-
-import type { LibsodiumMethodsModule } from "../../build/libsodiumMethodsModule";
-
+import randomBytes from "../utils/randomBytes";
 import {
   crypto_sign_ed25519_SEEDBYTES,
   crypto_pwhash_argon2id_SALTBYTES,
 } from "../utils/interfaces";
+
+import dcryptoMethodsModule from "../c/build/dcryptoMethodsModule";
+
+import type { DCryptoMethodsModule } from "../c/build/dcryptoMethodsModule";
 
 const normalize = (str: string) => {
   return (str || "").normalize("NFKD");
@@ -32,14 +31,15 @@ const normalize = (str: string) => {
 
 const argon2 = async (
   mnemonic: string,
-  module?: LibsodiumMethodsModule,
+  salt?: Uint8Array,
+  module?: DCryptoMethodsModule,
 ): Promise<Uint8Array> => {
   const mnemonicNormalized = normalize(mnemonic);
   const mnemonicBuffer = Buffer.from(mnemonicNormalized, "utf8");
   const mnemonicInt8Array = Int8Array.from(mnemonicBuffer);
   const mnemonicArrayLen = mnemonicInt8Array.length;
 
-  const saltUint8Array = await randomBytes(crypto_pwhash_argon2id_SALTBYTES);
+  salt = salt || (await randomBytes(crypto_pwhash_argon2id_SALTBYTES));
 
   const wasmMemory = module
     ? module.wasmMemory
@@ -57,21 +57,20 @@ const argon2 = async (
   mnmnc.set([...mnemonicInt8Array]);
 
   offset += mnemonicArrayLen;
-  const salt = new Uint8Array(
+  const saltArray = new Uint8Array(
     wasmMemory.buffer,
     offset,
     crypto_pwhash_argon2id_SALTBYTES,
   );
-  salt.set([...saltUint8Array]);
+  saltArray.set([...salt]);
 
-  const libsodiumModule =
-    module || (await libsodiumMethodsModule({ wasmMemory }));
+  const dcryptoModule = module || (await dcryptoMethodsModule({ wasmMemory }));
 
-  const result = libsodiumModule._argon2(
+  const result = dcryptoModule._argon2(
     mnemonicArrayLen,
     seed.byteOffset,
     mnmnc.byteOffset,
-    salt.byteOffset,
+    saltArray.byteOffset,
   );
 
   if (result === 0) {

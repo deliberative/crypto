@@ -1,6 +1,6 @@
 /// <reference types="emscripten" />
 
-export interface LibsodiumMethodsModule extends EmscriptenModule {
+export interface DCryptoMethodsModule extends EmscriptenModule {
   wasmMemory: WebAssembly.Memory;
   _sha512(
     DATA_LEN: number,
@@ -58,7 +58,21 @@ export interface LibsodiumMethodsModule extends EmscriptenModule {
     additional_data: number, // Uint8Array,
     data: number, // Uint8Array,
   ): number;
+  _random_number_in_range(MIN: number, MAX: number): number;
+  _split_secret(
+    SHARES_LEN: number,
+    THRESHOLD: number,
+    SECRET_LEN: number,
+    secret: number, // Uint8Array, // byteOffset
+    shares: number, // Uint8Array, // byteOffset
+  ): number;
+  _restore_secret(
+    SHARES_LEN: number,
+    SECRET_LEN: number,
+    shares: number, // Uint8Array,
+    secret: number, // Uint8Array,
+  ): number;
 }
 
-declare const libsodiumMethodsModule: EmscriptenModuleFactory<LibsodiumMethodsModule>;
-export default libsodiumMethodsModule;
+declare const dcryptoMethodsModule: EmscriptenModuleFactory<DCryptoMethodsModule>;
+export default dcryptoMethodsModule;

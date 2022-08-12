@@ -15,13 +15,13 @@
 
 import utilsMemory from "./memory";
 
-import libsodiumMethodsModule from "../../build/libsodiumMethodsModule";
+import dcryptoMethodsModule from "../c/build/dcryptoMethodsModule";
 
-import type { LibsodiumMethodsModule } from "../../build/libsodiumMethodsModule";
+import type { DCryptoMethodsModule } from "../c/build/dcryptoMethodsModule";
 
 const randomBytes = async (
   n: number,
-  module?: LibsodiumMethodsModule,
+  module?: DCryptoMethodsModule,
 ): Promise<Uint8Array> => {
   const wasmMemory = module
     ? module.wasmMemory
@@ -29,13 +29,13 @@ const randomBytes = async (
 
   const bytes = new Uint8Array(wasmMemory.buffer, 0, n);
 
-  const libsodiumModule =
+  const dcryptoModule =
     module ||
-    (await libsodiumMethodsModule({
+    (await dcryptoMethodsModule({
       wasmMemory,
     }));
 
-  const result = libsodiumModule._random_bytes(n, bytes.byteOffset);
+  const result = dcryptoModule._random_bytes(n, bytes.byteOffset);
 
   if (result === 0) return new Uint8Array([...bytes]);
 

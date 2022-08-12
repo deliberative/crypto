@@ -14,15 +14,14 @@
 // limitations under the License.
 
 import libsodiumMemory from "./memory";
-
-import libsodiumMethodsModule from "../../build/libsodiumMethodsModule";
-
-import type { LibsodiumMethodsModule } from "../../build/libsodiumMethodsModule";
-
 import {
   crypto_sign_ed25519_BYTES,
   crypto_sign_ed25519_SECRETKEYBYTES,
 } from "../utils/interfaces";
+
+import dcryptoMethodsModule from "../c/build/dcryptoMethodsModule";
+
+import type { DCryptoMethodsModule } from "../c/build/dcryptoMethodsModule";
 
 /**
  * @function
@@ -31,7 +30,7 @@ import {
 const sign = async (
   message: Uint8Array,
   secretKey: Uint8Array,
-  module?: LibsodiumMethodsModule,
+  module?: DCryptoMethodsModule,
 ): Promise<Uint8Array> => {
   const messageLen = message.length;
 
@@ -59,7 +58,7 @@ const sign = async (
   sk.set([...secretKey]);
 
   const libsodiumModule =
-    module || (await libsodiumMethodsModule({ wasmMemory }));
+    module || (await dcryptoMethodsModule({ wasmMemory }));
 
   libsodiumModule._sign_data(
     messageLen,

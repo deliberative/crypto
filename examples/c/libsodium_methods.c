@@ -5,7 +5,7 @@
 #include "../../libsodium/src/libsodium/randombytes/sysrandom/randombytes_sysrandom.c"
 #include "../../libsodium/src/libsodium/sodium/runtime.c"
 
-#include "../../src/c/libsodium_methods.c"
+#include "../../src/c/dcrypto.c"
 
 int
 main()

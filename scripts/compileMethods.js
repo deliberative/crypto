@@ -15,49 +15,55 @@
 
 import fs from "fs";
 import path from "path";
-import { exec } from "child_process";
+import { execSync } from "child_process";
 
 import {
   srcPath,
-  buildPath,
   libsodiumIncludePath,
   libsodiumIncludePrivatePath,
   emcc,
 } from "./utils.js";
 
-const methodsPath = path.join(srcPath, "c", "shamir_methods.c");
-const wasmPath = path.join(buildPath, "shamirMethodsModule.js");
+const basePath = path.join(srcPath, "c");
+const buildPath = path.join(basePath, "build");
+if (fs.existsSync(buildPath))
+  fs.rmSync(buildPath, { recursive: true, force: true });
+fs.mkdirSync(buildPath);
+
+const methodsPath = path.join(basePath, "dcrypto.c");
+const wasmPath = path.join(buildPath, "dcryptoMethodsModule.js");
+
 const typesPath = path.join(
   process.cwd(),
   "scripts",
-  "shamirMethodsModule.d.ts",
+  "dcryptoMethodsModule.d.ts",
 );
 const types = fs.readFileSync(typesPath);
 fs.writeFileSync(wasmPath.replace("le.js", "le.d.ts"), types);
 
-exec(
+execSync(
   `\
 ${emcc} \
 -s EXPORTED_FUNCTIONS=\
+_sha512,\
+_random_bytes,\
+_argon2,\
+_new_keypair,\
+_keypair_from_seed,\
+_keypair_from_secret_key,\
+_sign_data,\
+_verify_data,\
+_encrypt_data,\
+_decrypt_data,\
+_random_number_in_range,\
 _split_secret,\
 _restore_secret \
--s EXPORT_NAME=shamirMethodsModule \
+-s EXPORT_NAME=dcryptoMethodsModule \
 -I${libsodiumIncludePath} \
 -I${libsodiumIncludePrivatePath} \
 -o ${wasmPath} \
 ${methodsPath}`,
-  (error, stdout, stderr) => {
-    if (error) {
-      console.error(error.message);
-      return;
-    }
-
-    if (stderr) {
-      console.error(`stderr: ${stderr}`);
-    }
-
-    console.log(
-      `stdout: Successfully compiled shamir methods wasm module! ${stdout}`,
-    );
-  },
+  { stdio: "inherit" },
 );
+
+console.log("Successfully compiled dcrypto c methods to Wasm.");

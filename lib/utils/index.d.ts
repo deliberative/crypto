@@ -1,6 +1,6 @@
 declare const _default: {
     randomBytes: (n: number, module?: import("../../build/libsodiumMethodsModule").LibsodiumMethodsModule | undefined) => Promise<Uint8Array>;
-    randomNumberInRange: (min: number, max: number, module?: import("../../build/utilsMethodsModule").UtilsMethodsModule | undefined) => Promise<number>;
+    randomNumberInRange: (min: number, max: number, module?: import("./build/randomNumberInRangeModule").RandomNumberInRangeModule | undefined) => Promise<number>;
     arrayRandomShuffle: <T>(array: T[]) => Promise<T[]>;
     arrayRandomSubset: <T_1>(array: T_1[], elements: number) => Promise<T_1[]>;
     memory: {

@@ -14,41 +14,43 @@
 // limitations under the License.
 
 import fs from "fs";
+import path from "path";
 import { exec } from "child_process";
 
 import { libsodiumIncludePath, libsodiumIncludePrivatePath } from "./utils.js";
 
-const testWithValgrind = (testPath, testFilename) => {
-  const outputPath = testPath.replace(`${testFilename}.c`, `${testFilename}.o`);
-  const valgrindReportPath = outputPath.replace(
-    `${testFilename}.o`,
-    `${testFilename}-valgrind-report.txt`,
-  );
+const testFilename = "libsodium_methods";
+const testPath = path.join(process.cwd(), "examples", "c", `${testFilename}.c`);
+const outputPath = testPath.replace(`${testFilename}.c`, `${testFilename}.o`);
+const valgrindReportPath = outputPath.replace(
+  `${testFilename}.o`,
+  `${testFilename}-valgrind-report.txt`,
+);
 
-  if (fs.existsSync(outputPath)) fs.rmSync(outputPath);
-  if (fs.existsSync(valgrindReportPath)) fs.rmSync(valgrindReportPath);
+if (fs.existsSync(outputPath)) fs.rmSync(outputPath);
+if (fs.existsSync(valgrindReportPath)) fs.rmSync(valgrindReportPath);
 
-  exec(
-    `gcc -Wall -std=c11 -g -ggdb3 -Og \
+exec(
+  `gcc -Wall -std=c11 -g -ggdb3 -Og \
 -I${libsodiumIncludePath} \
 -I${libsodiumIncludePrivatePath} \
 -o ${outputPath} \
 ${testPath}`,
-    (error, stdout, stderr) => {
-      if (error) {
-        console.error(error.message);
-        return;
-      } else if (stderr) {
-        console.error(`stderr: ${stderr}`);
-        return;
-      }
+  (error, stdout, stderr) => {
+    if (error) {
+      console.error(error.message);
+      return;
+    } else if (stderr) {
+      console.error(`stderr: ${stderr}`);
+      return;
+    }
 
-      console.log(
-        `stdout: Successfully compiled ${testFilename} c test! ${stdout}`,
-      );
+    console.log(
+      `stdout: Successfully compiled ${testFilename} c test! ${stdout}`,
+    );
 
-      exec(
-        `valgrind \
+    exec(
+      `valgrind \
 --log-file=\"${valgrindReportPath}\" \
 --leak-check=full \
 --show-leak-kinds=all \
@@ -58,22 +60,19 @@ ${testPath}`,
 --trace-children=yes \
 -v \
 ${outputPath}`,
-        (err, out, derr) => {
-          if (err) {
-            console.error(err.message);
-            return;
-          } else if (derr) {
-            console.error(`stderr: ${err}`);
-            return;
-          }
+      (err, out, derr) => {
+        if (err) {
+          console.error(err.message);
+          return;
+        } else if (derr) {
+          console.error(`stderr: ${err}`);
+          return;
+        }
 
-          console.log(
-            `stdout: Successfully run Valgrind on ${outputPath} ${out}`,
-          );
-        },
-      );
-    },
-  );
-};
-
-export default testWithValgrind;
+        console.log(
+          `stdout: Successfully run Valgrind on ${outputPath} ${out}`,
+        );
+      },
+    );
+  },
+);

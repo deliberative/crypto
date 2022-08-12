@@ -19,15 +19,11 @@ import hash from "./hash";
 import shamir from "./shamir";
 import utils from "./utils";
 
-import libsodiumMethodsModule from "../build/libsodiumMethodsModule";
-import shamirMethodsModule from "../build/shamirMethodsModule";
-import utilsMethodsModule from "../build/utilsMethodsModule";
+import dcryptoMethodsModule from "./c/build/dcryptoMethodsModule";
 
 import type { SignKeyPair } from "./utils/interfaces";
 
-import type { LibsodiumMethodsModule } from "../build/libsodiumMethodsModule";
-import type { ShamirMethodsModule } from "../build/shamirMethodsModule";
-import type { UtilsMethodsModule } from "../build/utilsMethodsModule";
+import type { DCryptoMethodsModule } from "./c/build/dcryptoMethodsModule";
 
 export interface DeliberativeCrypto {
   /**
@@ -35,7 +31,7 @@ export interface DeliberativeCrypto {
    */
   randomBytes: (
     n: number,
-    module?: LibsodiumMethodsModule,
+    module?: DCryptoMethodsModule,
   ) => Promise<Uint8Array>;
 
   /**
@@ -44,7 +40,7 @@ export interface DeliberativeCrypto {
   randomNumberInRange: (
     min: number,
     max: number,
-    module?: UtilsMethodsModule,
+    module?: DCryptoMethodsModule,
   ) => Promise<number>;
 
   /**
@@ -62,19 +58,17 @@ export interface DeliberativeCrypto {
     randomNumberInRange: (min: number, max: number) => WebAssembly.Memory;
   };
 
-  loadUtilsModule: EmscriptenModuleFactory<UtilsMethodsModule>;
-
   /**
    * Generate a new Ed25519 keypair
    */
-  keyPair: (module?: LibsodiumMethodsModule) => Promise<SignKeyPair>;
+  keyPair: (module?: DCryptoMethodsModule) => Promise<SignKeyPair>;
 
   /**
    * Generate a new Ed25519 keypair from a given seed
    */
   keyPairFromSeed: (
     seed: Uint8Array,
-    module?: LibsodiumMethodsModule,
+    module?: DCryptoMethodsModule,
   ) => Promise<SignKeyPair>;
 
   /**
@@ -82,7 +76,7 @@ export interface DeliberativeCrypto {
    */
   keyPairFromSecretKey: (
     secretKey: Uint8Array,
-    module?: LibsodiumMethodsModule,
+    module?: DCryptoMethodsModule,
   ) => Promise<SignKeyPair>;
 
   /**
@@ -91,7 +85,7 @@ export interface DeliberativeCrypto {
   sign: (
     message: Uint8Array,
     secretKey: Uint8Array,
-    module?: LibsodiumMethodsModule,
+    module?: DCryptoMethodsModule,
   ) => Promise<Uint8Array>;
 
   /**
@@ -102,7 +96,7 @@ export interface DeliberativeCrypto {
     message: Uint8Array,
     signature: Uint8Array,
     publicKey: Uint8Array,
-    module?: LibsodiumMethodsModule,
+    module?: DCryptoMethodsModule,
   ) => Promise<boolean>;
 
   /**
@@ -112,7 +106,7 @@ export interface DeliberativeCrypto {
     message: Uint8Array,
     publicKey: Uint8Array,
     additionalData: Uint8Array,
-    module?: LibsodiumMethodsModule,
+    module?: DCryptoMethodsModule,
   ) => Promise<Uint8Array>;
 
   /**
@@ -122,7 +116,7 @@ export interface DeliberativeCrypto {
     encrypted: Uint8Array,
     secretKey: Uint8Array,
     additionalData: Uint8Array,
-    module?: LibsodiumMethodsModule,
+    module?: DCryptoMethodsModule,
   ) => Promise<Uint8Array>;
 
   /**
@@ -138,7 +132,10 @@ export interface DeliberativeCrypto {
   /**
    * Generates an Ed25519 keypair from a 12-natural-language-word mnemonic.
    */
-  keypairFromMnemonic: (mnemonic: string) => Promise<SignKeyPair>;
+  keyPairFromMnemonic: (
+    mnemonic: string,
+    password?: string,
+  ) => Promise<SignKeyPair>;
 
   loadAsymmetricMemory: {
     newKeyPair: () => WebAssembly.Memory;
@@ -156,11 +153,9 @@ export interface DeliberativeCrypto {
     ) => WebAssembly.Memory;
   };
 
-  loadLibsodiumModule: EmscriptenModuleFactory<LibsodiumMethodsModule>;
-
   sha512: (
     data: Uint8Array,
-    module?: LibsodiumMethodsModule,
+    module?: DCryptoMethodsModule,
   ) => Promise<Uint8Array>;
 
   getMerkleRoot: (tree: Uint8Array[]) => Promise<Uint8Array>;
@@ -173,8 +168,6 @@ export interface DeliberativeCrypto {
     };
   };
 
-  loadHashModule: EmscriptenModuleFactory<LibsodiumMethodsModule>;
-
   /*
    * Shamir secret sharing related
    */
@@ -182,12 +175,12 @@ export interface DeliberativeCrypto {
     secret: Uint8Array,
     numberOfShares: number,
     threshold: number,
-    module?: ShamirMethodsModule,
+    module?: DCryptoMethodsModule,
   ) => Promise<Uint8Array[]>;
 
   restoreSecret: (
     shares: Uint8Array[],
-    module?: ShamirMethodsModule,
+    module?: DCryptoMethodsModule,
   ) => Promise<Uint8Array>;
 
   loadShamirMemory: {
@@ -199,7 +192,7 @@ export interface DeliberativeCrypto {
     restoreSecret: (secretLen: number, sharesLen: number) => WebAssembly.Memory;
   };
 
-  loadShamirModule: EmscriptenModuleFactory<ShamirMethodsModule>;
+  loadModule: EmscriptenModuleFactory<DCryptoMethodsModule>;
 }
 
 const dcrypto: DeliberativeCrypto = {
@@ -211,7 +204,6 @@ const dcrypto: DeliberativeCrypto = {
     randomBytes: utils.memory.randomBytesMemory,
     randomNumberInRange: utils.memory.randomNumberInRangeMemory,
   },
-  loadUtilsModule: utilsMethodsModule,
 
   keyPair: asymmetric.keyPair.newKeyPair,
   keyPairFromSeed: asymmetric.keyPair.keyPairFromSeed,
@@ -223,7 +215,7 @@ const dcrypto: DeliberativeCrypto = {
 
   generateMnemonic: mnemonic.generateMnemonic,
   validateMnemonic: mnemonic.validateMnemonic,
-  keypairFromMnemonic: mnemonic.keyPairFromMnemonic,
+  keyPairFromMnemonic: mnemonic.keyPairFromMnemonic,
 
   loadAsymmetricMemory: {
     newKeyPair: asymmetric.memory.newKeyPairMemory,
@@ -234,7 +226,6 @@ const dcrypto: DeliberativeCrypto = {
     encrypt: asymmetric.memory.encryptMemory,
     decrypt: asymmetric.memory.decryptMemory,
   },
-  loadLibsodiumModule: libsodiumMethodsModule,
 
   sha512: hash.sha512,
   getMerkleRoot: hash.getMerkleRoot,
@@ -242,7 +233,6 @@ const dcrypto: DeliberativeCrypto = {
     sha512: hash.memory.sha512Memory,
     merkleRoot: hash.memory.merkleRootMemory,
   },
-  loadHashModule: libsodiumMethodsModule,
 
   splitSecret: shamir.splitSecret,
   restoreSecret: shamir.restoreSecret,
@@ -250,7 +240,8 @@ const dcrypto: DeliberativeCrypto = {
     splitSecret: shamir.memory.splitSecretMemory,
     restoreSecret: shamir.memory.restoreSecretMemory,
   },
-  loadShamirModule: shamirMethodsModule,
+
+  loadModule: dcryptoMethodsModule,
 };
 
 export default dcrypto;

@@ -16,7 +16,7 @@
 import utilsMemory from "./memory";
 import randomNumberInRange from "./randomNumberInRange";
 
-import utilsMethodsModule from "../../build/utilsMethodsModule";
+import dcryptoMethodsModule from "../c/build/dcryptoMethodsModule";
 
 /** Fisher-Yates Shuffle */
 const arrayRandomShuffle = async <T>(array: T[]): Promise<T[]> => {
@@ -28,10 +28,10 @@ const arrayRandomShuffle = async <T>(array: T[]): Promise<T[]> => {
   const shuffled = [...array];
 
   const wasmMemory = utilsMemory.randomNumberInRangeMemory(0, n);
-  const utilsModule = await utilsMethodsModule({ wasmMemory });
+  const module = await dcryptoMethodsModule({ wasmMemory });
 
   for (let i = n - 1; i > 0; i--) {
-    const j = await randomNumberInRange(0, i + 1, utilsModule);
+    const j = await randomNumberInRange(0, i + 1, module);
     const temp = shuffled[i];
     shuffled[i] = shuffled[j];
     shuffled[j] = temp;

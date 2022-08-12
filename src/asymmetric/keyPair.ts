@@ -15,9 +15,9 @@
 
 import libsodiumMemory from "./memory";
 
-import libsodiumMethodsModule from "../../build/libsodiumMethodsModule";
+import dcryptoMethodsModule from "../c/build/dcryptoMethodsModule";
 
-import type { LibsodiumMethodsModule } from "../../build/libsodiumMethodsModule";
+import type { DCryptoMethodsModule } from "../c/build/dcryptoMethodsModule";
 
 import {
   SignKeyPair,
@@ -27,7 +27,7 @@ import {
 } from "../utils/interfaces";
 
 const newKeyPair = async (
-  module?: LibsodiumMethodsModule,
+  module?: DCryptoMethodsModule,
 ): Promise<SignKeyPair> => {
   const wasmMemory = module
     ? module.wasmMemory
@@ -47,7 +47,7 @@ const newKeyPair = async (
     crypto_sign_ed25519_SECRETKEYBYTES,
   );
 
-  const libsodiumModule = await libsodiumMethodsModule({ wasmMemory });
+  const libsodiumModule = await dcryptoMethodsModule({ wasmMemory });
 
   const result = libsodiumModule._new_keypair(
     publicKey.byteOffset,
@@ -67,7 +67,7 @@ const newKeyPair = async (
 
 const keyPairFromSeed = async (
   seed: Uint8Array,
-  module?: LibsodiumMethodsModule,
+  module?: DCryptoMethodsModule,
 ): Promise<SignKeyPair> => {
   const wasmMemory = module
     ? module.wasmMemory
@@ -96,7 +96,7 @@ const keyPairFromSeed = async (
   seedBytes.set([...seed]);
 
   const libsodiumModule =
-    module || (await libsodiumMethodsModule({ wasmMemory }));
+    module || (await dcryptoMethodsModule({ wasmMemory }));
 
   const result = libsodiumModule._keypair_from_seed(
     publicKey.byteOffset,
@@ -117,7 +117,7 @@ const keyPairFromSeed = async (
 
 const keyPairFromSecretKey = async (
   secretKey: Uint8Array,
-  module?: LibsodiumMethodsModule,
+  module?: DCryptoMethodsModule,
 ): Promise<SignKeyPair> => {
   const wasmMemory = module
     ? module.wasmMemory
@@ -138,7 +138,7 @@ const keyPairFromSecretKey = async (
   );
   sk.set([...secretKey]);
 
-  const libsodiumModule = await libsodiumMethodsModule({ wasmMemory });
+  const libsodiumModule = await dcryptoMethodsModule({ wasmMemory });
 
   const result = libsodiumModule._keypair_from_secret_key(
     publicKey.byteOffset,

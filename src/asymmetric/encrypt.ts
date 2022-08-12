@@ -15,9 +15,9 @@
 
 import libsodiumMemory from "./memory";
 
-import libsodiumMethodsModule from "../../build/libsodiumMethodsModule";
+import dcryptoMethodsModule from "../c/build/dcryptoMethodsModule";
 
-import type { LibsodiumMethodsModule } from "../../build/libsodiumMethodsModule";
+import type { DCryptoMethodsModule } from "../c/build/dcryptoMethodsModule";
 
 import {
   crypto_box_x25519_NONCEBYTES,
@@ -30,7 +30,7 @@ const encrypt = async (
   message: Uint8Array,
   publicKey: Uint8Array,
   additionalData: Uint8Array,
-  module?: LibsodiumMethodsModule,
+  module?: DCryptoMethodsModule,
 ): Promise<Uint8Array> => {
   const len = message.length;
   const additionalLen = additionalData.length;
@@ -69,7 +69,7 @@ const encrypt = async (
   );
 
   const libsodiumModule =
-    module || (await libsodiumMethodsModule({ wasmMemory }));
+    module || (await dcryptoMethodsModule({ wasmMemory }));
 
   const result = libsodiumModule._encrypt_data(
     len,

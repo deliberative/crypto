@@ -16,14 +16,39 @@
 import validateMnemonic from "./validateMnemonic";
 import argon2 from "./argon2";
 
+import sha512 from "../hash/sha512";
+
 import keyPair from "../asymmetric/keyPair";
 
-const keyPairFromMnemonic = async (mnemonic: string) => {
+import {
+  crypto_pwhash_argon2id_SALTBYTES,
+  crypto_hash_sha512_BYTES,
+} from "../utils/interfaces";
+
+const keyPairFromMnemonic = async (mnemonic: string, password?: string) => {
   const isValid = await validateMnemonic(mnemonic);
   if (!isValid) throw new Error("Invalid mnemonic.");
 
-  const seed = await argon2(mnemonic);
-  // const privateKeySeed = new Uint8Array(seed.toJSON().data.slice(0, 32));
+  const defaultSalt = Uint8Array.from(Buffer.from("password12345678", "utf8"));
+  const salt = new Uint8Array(crypto_pwhash_argon2id_SALTBYTES);
+
+  if (password) {
+    const pwdHash = await sha512(
+      Uint8Array.from(Buffer.from(password, "utf8")),
+    );
+
+    salt.set(
+      pwdHash.slice(
+        crypto_hash_sha512_BYTES - crypto_pwhash_argon2id_SALTBYTES,
+        crypto_hash_sha512_BYTES,
+      ),
+    );
+  } else {
+    salt.set(defaultSalt);
+  }
+
+  const seed = await argon2(mnemonic, salt);
+
   const keypair = await keyPair.keyPairFromSeed(seed);
   if (!keypair) throw new Error("Invalid seed from mnemonic.");
 

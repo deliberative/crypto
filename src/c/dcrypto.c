@@ -17,6 +17,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #include "../../libsodium/src/libsodium/randombytes/randombytes.c"
 #include "../../libsodium/src/libsodium/sodium/codecs.c"
@@ -58,6 +59,8 @@
 #include "../../libsodium/src/libsodium/crypto_scalarmult/curve25519/ref10/x25519_ref10.c"
 #include "../../libsodium/src/libsodium/crypto_scalarmult/curve25519/scalarmult_curve25519.c"
 #include "../../libsodium/src/libsodium/crypto_scalarmult/ed25519/ref10/scalarmult_ed25519_ref10.c"
+
+#include "./shamir/polynomial.c"
 
 __attribute__((used)) int
 sha512(const int DATA_LEN, const uint8_t data[DATA_LEN],
@@ -303,4 +306,113 @@ decrypt_data(
   if (decrypted == 0) return 0;
 
   return -4;
+}
+
+__attribute__((used)) int
+random_number_in_range(const int MIN, const int MAX)
+{
+  size_t i;
+
+  const int RANGE = MAX - MIN;
+  const int BYTES_NEEDED = ceil(log2(RANGE) / 8);
+  const int MAX_RANGE = pow(pow(2, 8), BYTES_NEEDED);
+  const int EXTENDED_RANGE = floor(MAX_RANGE / RANGE) * RANGE;
+
+  uint8_t *randomBytes = malloc(BYTES_NEEDED * sizeof(uint8_t));
+
+  int randomInteger = EXTENDED_RANGE;
+  while (randomInteger >= EXTENDED_RANGE)
+  {
+    randombytes_buf(randomBytes, BYTES_NEEDED);
+
+    randomInteger = 0;
+    for (i = 0; i < BYTES_NEEDED; i++)
+    {
+      randomInteger <<= 8;
+      randomInteger += randomBytes[i];
+    }
+
+    if (randomInteger < EXTENDED_RANGE)
+    {
+      free(randomBytes);
+      randomInteger %= RANGE;
+
+      return MIN + randomInteger;
+    }
+  }
+
+  free(randomBytes);
+
+  return randomInteger;
+}
+
+__attribute__((used)) int
+split_secret(const int SHARES_LEN, const int THRESHOLD, const int SECRET_LEN,
+             const uint8_t secret[SECRET_LEN],
+             uint8_t shares[SHARES_LEN * (SECRET_LEN + 1)])
+{
+  size_t i, j;
+
+  if (SHARES_LEN > FIELD - 1) return -3;
+  if (SHARES_LEN < THRESHOLD) return -2;
+  if (THRESHOLD < 2) return -1;
+
+  uint8_t *coefficients = malloc(THRESHOLD * sizeof(uint8_t));
+
+  for (i = 0; i < SECRET_LEN; i++)
+  {
+    randombytes_buf(coefficients, THRESHOLD);
+    coefficients[0] = secret[i];
+
+    for (j = 0; j < SHARES_LEN; j++)
+    {
+      shares[j * (SECRET_LEN + 1) + i]
+          = evaluate(THRESHOLD, coefficients, j + 1);
+      /* shares[j][i] = evaluate(THRESHOLD, coefficients, j + 1); */
+
+      if (i == SECRET_LEN - 1)
+      {
+        shares[j * (SECRET_LEN + 1) + SECRET_LEN] = j + 1;
+        /* shares[j][SECRET_LEN] = j + 1; */
+      }
+    }
+  }
+
+  free(coefficients);
+
+  return 0;
+}
+
+__attribute__((used)) int
+restore_secret(const int SHARES_LEN, const int SECRET_LEN,
+               const uint8_t shares[SHARES_LEN * (SECRET_LEN + 1)],
+               uint8_t secret[SECRET_LEN])
+{
+  size_t i, j;
+
+  if (SHARES_LEN < 2)
+    return -2; // throw new Error('Not enough shares provided');
+  if (SHARES_LEN > FIELD - 1)
+    return -1; // throw new Error(`Need at most ${utils.FIELD - 1}
+               // shares`);
+
+  /* uint8_t(*points)[2] = malloc(SHARES_LEN * sizeof(*points)); */
+  uint8_t *points = malloc(SHARES_LEN * 2 * sizeof(uint8_t));
+
+  for (i = 0; i < SECRET_LEN; i++)
+  {
+    for (j = 0; j < SHARES_LEN; j++)
+    {
+      points[j * 2] = shares[j * (SECRET_LEN + 1) + SECRET_LEN];
+      /* points[j][0] = shares[j][SECRET_LEN]; */
+      points[j * 2 + 1] = shares[j * (SECRET_LEN + 1) + i];
+      /* points[j][1] = shares[j][i]; */
+    }
+
+    secret[i] = interpolate(SHARES_LEN, points);
+  }
+
+  free(points);
+
+  return 0;
 }

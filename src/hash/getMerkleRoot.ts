@@ -17,7 +17,7 @@ import sha512 from "./sha512";
 
 import libsodiumMemory from "./memory";
 
-import libsodiumMethodsModule from "../../build/libsodiumMethodsModule";
+import dcryptoMethodsModule from "../c/build/dcryptoMethodsModule";
 
 import { crypto_hash_sha512_BYTES } from "../utils/interfaces";
 
@@ -29,10 +29,12 @@ const getMerkleRoot = async (tree: Uint8Array[]): Promise<Uint8Array> => {
 
   const { initialMemory, subsequentMemory } =
     libsodiumMemory.merkleRootMemory(maxDataLen);
-  const libsodiumInitialModule = await libsodiumMethodsModule({
+
+  const initialModule = await dcryptoMethodsModule({
     wasmMemory: initialMemory,
   });
-  const libsodiumSubsequentModule = await libsodiumMethodsModule({
+
+  const subsequentModule = await dcryptoMethodsModule({
     wasmMemory: subsequentMemory,
   });
 
@@ -48,7 +50,7 @@ const getMerkleRoot = async (tree: Uint8Array[]): Promise<Uint8Array> => {
     let i = 0;
     if (leaves === treeLength) {
       do {
-        const hash = await sha512(tree[i++], libsodiumInitialModule);
+        const hash = await sha512(tree[i++], initialModule);
         hashes.push(hash);
       } while (i < leaves);
     }
@@ -61,7 +63,7 @@ const getMerkleRoot = async (tree: Uint8Array[]): Promise<Uint8Array> => {
         concatHashes.set([...hashes[i * 2], ...hashes[i * 2 + 1]]);
       }
 
-      const hash = await sha512(concatHashes, libsodiumSubsequentModule);
+      const hash = await sha512(concatHashes, subsequentModule);
 
       hashes[i++].set([...hash]);
     } while (i * 2 + 1 < leaves);

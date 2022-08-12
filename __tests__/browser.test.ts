@@ -58,23 +58,33 @@ describe("Browser-based tests.", () => {
   });
 
   test("Loading shamir wasm module in the browser and splitting/restoring works.", async () => {
-    const shamirMemory = dcrypto.loadShamirMemory.splitSecret(
+    const shamirSplitMemory = dcrypto.loadShamirMemory.splitSecret(
       crypto_sign_ed25519_SECRETKEYBYTES,
       20,
       11,
     );
-    const shamirModule = await dcrypto.loadShamirModule({
-      wasmMemory: shamirMemory,
+    const splitModule = await dcrypto.loadModule({
+      wasmMemory: shamirSplitMemory,
     });
     const keypair = await dcrypto.keyPair();
     const shares = await dcrypto.splitSecret(
       keypair.secretKey,
       10,
       6,
-      shamirModule,
+      splitModule,
     );
+
     const shuffled = await dcrypto.arrayRandomShuffle(shares);
-    const reconstructed = await dcrypto.restoreSecret(shuffled, shamirModule);
+
+    const shamirRestoreMemory = dcrypto.loadShamirMemory.restoreSecret(
+      crypto_sign_ed25519_SECRETKEYBYTES,
+      20,
+    );
+    const restoreModule = await dcrypto.loadModule({
+      wasmMemory: shamirRestoreMemory,
+    });
+    const reconstructed = await dcrypto.restoreSecret(shuffled, restoreModule);
+
     expect(arraysAreEqual(keypair.secretKey, reconstructed)).toBe(true);
   });
 

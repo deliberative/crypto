@@ -29,7 +29,7 @@ describe("Encryption and decryption with Ed25519 derived keys test suite.", () =
       message.length,
       crypto_hash_sha512_BYTES,
     );
-    const encryptionModule = await dcrypto.loadLibsodiumModule({
+    const encryptionModule = await dcrypto.loadModule({
       wasmMemory: encryptionMemory,
     });
     const encryptedWithModule = await dcrypto.encrypt(
@@ -43,7 +43,7 @@ describe("Encryption and decryption with Ed25519 derived keys test suite.", () =
       encrypted.length,
       crypto_hash_sha512_BYTES,
     );
-    const decryptionModule = await dcrypto.loadLibsodiumModule({
+    const decryptionModule = await dcrypto.loadModule({
       wasmMemory: decryptionMemory,
     });
     const decryptedWithModule = await dcrypto.decrypt(

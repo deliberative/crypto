@@ -11,7 +11,7 @@ describe("Utils test suite.", () => {
   test("Generation with module works.", async () => {
     const len = 34 * 1024;
     const randomBytesMemory = dcrypto.loadUtilsMemory.randomBytes(len);
-    const randomBytesModule = await dcrypto.loadLibsodiumModule({
+    const randomBytesModule = await dcrypto.loadModule({
       wasmMemory: randomBytesMemory,
     });
 

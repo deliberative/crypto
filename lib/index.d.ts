@@ -1,8 +1,10 @@
 /// <reference types="emscripten" />
 import type { SignKeyPair } from "./utils/interfaces";
 import type { LibsodiumMethodsModule } from "../build/libsodiumMethodsModule";
-import type { ShamirMethodsModule } from "../build/shamirMethodsModule";
-import type { UtilsMethodsModule } from "../build/utilsMethodsModule";
+import type { SHA512Module } from "./hash/build/sha512Module";
+import type { SplitSecretModule } from "./shamir/build/splitSecretModule";
+import type { RestoreSecretModule } from "./shamir/build/restoreSecretModule";
+import type { RandomNumberInRangeModule } from "./utils/build/randomNumberInRangeModule";
 export interface DeliberativeCrypto {
     /**
      * Generates a Uint8Array of size n full with random bytes
@@ -11,7 +13,7 @@ export interface DeliberativeCrypto {
     /**
      * Get an integer between min and max with uniform probability
      */
-    randomNumberInRange: (min: number, max: number, module?: UtilsMethodsModule) => Promise<number>;
+    randomNumberInRange: (min: number, max: number, module?: RandomNumberInRangeModule) => Promise<number>;
     /**
      * Fisher-Yates random shuffle of elements of an array
      */
@@ -24,7 +26,7 @@ export interface DeliberativeCrypto {
         randomBytes: (bytes: number) => WebAssembly.Memory;
         randomNumberInRange: (min: number, max: number) => WebAssembly.Memory;
     };
-    loadUtilsModule: EmscriptenModuleFactory<UtilsMethodsModule>;
+    loadRandomNumberInRangeModule: EmscriptenModuleFactory<RandomNumberInRangeModule>;
     /**
      * Generate a new Ed25519 keypair
      */
@@ -76,7 +78,7 @@ export interface DeliberativeCrypto {
         decrypt: (encryptedLen: number, additionalDataLen: number) => WebAssembly.Memory;
     };
     loadLibsodiumModule: EmscriptenModuleFactory<LibsodiumMethodsModule>;
-    sha512: (data: Uint8Array, module?: LibsodiumMethodsModule) => Promise<Uint8Array>;
+    sha512: (data: Uint8Array, module?: SHA512Module) => Promise<Uint8Array>;
     getMerkleRoot: (tree: Uint8Array[]) => Promise<Uint8Array>;
     loadHashMemory: {
         sha512: (arrayLen: number) => WebAssembly.Memory;
@@ -85,14 +87,15 @@ export interface DeliberativeCrypto {
             subsequentMemory: WebAssembly.Memory;
         };
     };
-    loadHashModule: EmscriptenModuleFactory<LibsodiumMethodsModule>;
-    splitSecret: (secret: Uint8Array, numberOfShares: number, threshold: number, module?: ShamirMethodsModule) => Promise<Uint8Array[]>;
-    restoreSecret: (shares: Uint8Array[], module?: ShamirMethodsModule) => Promise<Uint8Array>;
+    loadSHA512Module: EmscriptenModuleFactory<SHA512Module>;
+    splitSecret: (secret: Uint8Array, numberOfShares: number, threshold: number, module?: SplitSecretModule) => Promise<Uint8Array[]>;
+    restoreSecret: (shares: Uint8Array[], module?: RestoreSecretModule) => Promise<Uint8Array>;
     loadShamirMemory: {
         splitSecret: (secretLen: number, sharesLen: number, threshold: number) => WebAssembly.Memory;
         restoreSecret: (secretLen: number, sharesLen: number) => WebAssembly.Memory;
     };
-    loadShamirModule: EmscriptenModuleFactory<ShamirMethodsModule>;
+    loadSplitSecretModule: EmscriptenModuleFactory<SplitSecretModule>;
+    loadRestoreSecretModule: EmscriptenModuleFactory<RestoreSecretModule>;
 }
 declare const dcrypto: DeliberativeCrypto;
 export default dcrypto;

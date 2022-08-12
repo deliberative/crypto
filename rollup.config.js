@@ -5,6 +5,7 @@ import resolve from "@rollup/plugin-node-resolve";
 import replace from "@rollup/plugin-replace";
 import typescript from "@rollup/plugin-typescript";
 import { wasm } from "@rollup/plugin-wasm";
+import url from "@rollup/plugin-url";
 import { terser } from "rollup-plugin-terser";
 import gzipPlugin from "rollup-plugin-gzip";
 import analyzer from "rollup-plugin-analyzer";
@@ -28,7 +29,9 @@ const plugins = [
 
   commonjs(),
 
-  wasm(),
+  url(),
+
+  wasm({ publicPath: "wasm" }),
 
   json({
     compact: true,

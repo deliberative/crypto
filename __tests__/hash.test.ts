@@ -3,7 +3,7 @@ import dcrypto from "../src";
 describe("Sha512 and Merkle root test suite.", () => {
   test("Public key SHA512 hash works.", async () => {
     const mnemonic = await dcrypto.generateMnemonic();
-    const keypair = await dcrypto.keypairFromMnemonic(mnemonic);
+    const keypair = await dcrypto.keyPairFromMnemonic(mnemonic);
     const hash = await dcrypto.sha512(keypair.publicKey);
     expect(hash.length).toBe(64);
   });

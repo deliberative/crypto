@@ -7,7 +7,7 @@ import arraysAreEqual from "../src/utils/arraysAreEqual";
 describe("Starting the Shamir test suite.", () => {
   test("Splitting a secret key to Shamir shares works.", async () => {
     const mnemonic = await dcrypto.generateMnemonic();
-    const keypair = await dcrypto.keypairFromMnemonic(mnemonic);
+    const keypair = await dcrypto.keyPairFromMnemonic(mnemonic);
     const shares = await dcrypto.splitSecret(keypair.secretKey, 10, 6);
     expect(shares.length).toBe(10);
     expect(shares[9].length).toBe(crypto_sign_ed25519_SECRETKEYBYTES + 1);
@@ -43,7 +43,7 @@ describe("Starting the Shamir test suite.", () => {
 
   test("Combining Shamir shares to recreate a secret key works.", async () => {
     const mnemonic = await dcrypto.generateMnemonic();
-    const keypair = await dcrypto.keypairFromMnemonic(mnemonic);
+    const keypair = await dcrypto.keyPairFromMnemonic(mnemonic);
     const sharesLen = 9;
     const threshold = 5;
     const shares = await dcrypto.splitSecret(

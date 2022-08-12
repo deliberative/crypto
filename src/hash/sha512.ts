@@ -14,16 +14,15 @@
 // limitations under the License.
 
 import libsodiumMemory from "./memory";
-
-import libsodiumMethodsModule from "../../build/libsodiumMethodsModule";
-
-import type { LibsodiumMethodsModule } from "../../build/libsodiumMethodsModule";
-
 import { crypto_hash_sha512_BYTES } from "../utils/interfaces";
+
+import dcryptoMethodsModule from "../c/build/dcryptoMethodsModule";
+
+import type { DCryptoMethodsModule } from "../c/build/dcryptoMethodsModule";
 
 const sha512 = async (
   data: Uint8Array,
-  module?: LibsodiumMethodsModule,
+  module?: DCryptoMethodsModule,
 ): Promise<Uint8Array> => {
   const dataLen = data.length;
 
@@ -42,10 +41,9 @@ const sha512 = async (
     crypto_hash_sha512_BYTES,
   );
 
-  const libsodiumModule =
-    module || (await libsodiumMethodsModule({ wasmMemory }));
+  const dcryptoModule = module || (await dcryptoMethodsModule({ wasmMemory }));
 
-  const result = libsodiumModule._sha512(
+  const result = dcryptoModule._sha512(
     dataLen,
     arr.byteOffset,
     hash.byteOffset,

@@ -15,15 +15,15 @@
 
 import shamirMemory from "./memory";
 
-import shamirMethodsModule from "../../build/shamirMethodsModule";
+import dcryptoMethodsModule from "../c/build/dcryptoMethodsModule";
 
-import type { ShamirMethodsModule } from "../../build/shamirMethodsModule";
+import type { DCryptoMethodsModule } from "../c/build/dcryptoMethodsModule";
 
 const splitSecret = async (
   secret: Uint8Array,
   sharesLen: number,
   threshold: number,
-  module?: ShamirMethodsModule,
+  module?: DCryptoMethodsModule,
 ) => {
   const secretLen = secret.length;
   if (secretLen < 2) throw new Error("Need more data.");
@@ -43,9 +43,9 @@ const splitSecret = async (
     sharesLen * (secretLen + 1),
   );
 
-  const shamirModule = module || (await shamirMethodsModule({ wasmMemory }));
+  const dcryptoModule = module || (await dcryptoMethodsModule({ wasmMemory })); // await shamirMethodsModule({ wasmMemory });
 
-  const result = shamirModule._split_secret(
+  const result = dcryptoModule._split_secret(
     sharesLen,
     threshold,
     secretLen,
