@@ -91,7 +91,7 @@ const withJS = ` \
 -s STRICT_JS=1 \
 -s EXPORT_ES6=1 \
 -s USE_ES6_IMPORT_META=0 \
--s POLYFILL=1 \
+-s POLYFILL=0 \
 `;
 
 const memory = `\

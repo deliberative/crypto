@@ -12,7 +12,7 @@ import analyzer from "rollup-plugin-analyzer";
 
 import pkg from "./package.json";
 
-const production = !process.env.ROLLUP_WATCH;
+const production = process.env.NODE_ENV === "production";
 const dir = "lib";
 const input = "src/index.ts";
 
@@ -20,15 +20,14 @@ const plugins = [
   replace({
     preventAssignment: true,
     "process.env.NODE_ENV": JSON.stringify(production),
-    __dirname: "",
   }),
+
+  commonjs(),
 
   resolve({
     browser: true,
     preferBuiltins: false,
   }),
-
-  commonjs(),
 
   url(),
 
@@ -86,12 +85,14 @@ export default [
       {
         file: pkg.module,
         format: "es",
+        esModule: true,
         exports: "named",
         sourcemap: true,
       },
       {
         file: pkg.main,
         format: "cjs",
+        esModule: false,
         exports: "named",
         sourcemap: true,
       },
