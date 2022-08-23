@@ -7,7 +7,7 @@
   "fakeTimers": {
     "enableGlobally": true 
   },
-  "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?|js?|ts?)$",
+  "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.ts$",
   "testPathIgnorePatterns": ["<rootDir>/lib"],
   "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json", "node"],
   "collectCoverage": true,
