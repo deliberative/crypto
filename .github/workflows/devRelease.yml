@@ -77,9 +77,12 @@ jobs:
         with:
           node-version: '18.x'
           registry-url: 'https://registry.npmjs.org'
+          scope: '@deliberative'
+          cache: 'npm'
+          cache-dependency-path: subdir/package-lock.json
 
-      - name: Publish on npm
-        run: npm publish --access public --tag dev
+      - run: npm ci
+      - run: npm publish --access public --tag dev
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTOMATION_TOKEN }}
       
@@ -88,6 +91,9 @@ jobs:
         with:
           node-version: '18.x'
           registry-url: 'https://npm.pkg.github.com'
+          scope: '@deliberative'
+          cache: 'npm'
+          cache-dependency-path: subdir/package-lock.json
 
       - name: Publish on github
         run: github publish --tag dev
