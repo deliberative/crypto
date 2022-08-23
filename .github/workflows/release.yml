@@ -53,7 +53,7 @@ jobs:
         with:
           node-version: '16.x'
 
-      - run: npm publish
+      - run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTOMATION_TOKEN }}
 
@@ -63,6 +63,6 @@ jobs:
           node-version: '16.x'
           registry-url: 'https://npm.pkg.github.com'
 
-      - run: npm publish
+      - run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
