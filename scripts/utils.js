@@ -1,10 +1,10 @@
-import path from "path";
+const path = require("path");
 
-export const srcPath = path.join(process.cwd(), "src");
-export const buildPath = path.join(process.cwd(), "build");
-export const distPath = path.join(process.cwd(), "dist");
+const srcPath = path.join(process.cwd(), "src");
+const buildPath = path.join(process.cwd(), "build");
+const distPath = path.join(process.cwd(), "dist");
 
-export const libsodiumIncludePath = path.join(
+const libsodiumIncludePath = path.join(
   process.cwd(),
   "libsodium",
   "src",
@@ -13,7 +13,7 @@ export const libsodiumIncludePath = path.join(
   "sodium",
 );
 
-export const libsodiumIncludePrivatePath = path.join(
+const libsodiumIncludePrivatePath = path.join(
   process.cwd(),
   "libsodium",
   "src",
@@ -23,13 +23,9 @@ export const libsodiumIncludePrivatePath = path.join(
   "private",
 );
 
-export const libraryPath = path.join(
-  process.cwd(),
-  "src",
-  "emscriptenLibrary.js",
-);
+const libraryPath = path.join(process.cwd(), "src", "emscriptenLibrary.js");
 
-export const licenseApache = `
+const licenseApache = `
 // Copyright (C) 2022 Deliberative Technologies P.C.
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -46,7 +42,7 @@ export const licenseApache = `
 // limitations under the License.
 `;
 
-const testing = `--closure 1`;
+const testing = ``;
 // const testing = `\
 // -g3 \
 // -gsource-map \
@@ -103,7 +99,7 @@ const memory = `\
 -s TOTAL_STACK=1mb \
 `;
 
-export const emcc = `\
+const emcc = `\
 emcc \
 -flto \
 -O3 \
@@ -117,7 +113,7 @@ ${memory} \
 ${withJS} \
 `;
 
-export const clangOpts = `\
+const clangOpts = `\
 --target=wasm32-unknown-unknown-wasm \
 -std=c11 \
 -flto \
@@ -129,3 +125,15 @@ export const clangOpts = `\
 -Wl,--export-all \
 -Wl,--allow-undefined \
 `;
+
+module.exports = {
+  emcc,
+  srcPath,
+  buildPath,
+  distPath,
+  libsodiumIncludePath,
+  libsodiumIncludePrivatePath,
+  libraryPath,
+  licenseApache,
+  clangOpts,
+};

@@ -1,7 +1,7 @@
 {
   "name": "@deliberative/crypto",
   "description": "Libsodium and Shamir secret sharing wasm module for nodejs and the browser.",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "repository": {
     "type": "git",
     "url": "https://github.com/deliberative/crypto.git"
@@ -22,7 +22,6 @@
   "bugs": {
     "url": "https://github.com/deliberative/crypto/issues"
   },
-  "type": "module",
   "keywords": [
     "deliberative",
     "ledger",
@@ -37,13 +36,13 @@
     "typescript"
   ],
   "homepage": "https://github.com/deliberative/crypto#readme",
-  "main": "lib/index.cjs.js",
-  "module": "lib/index.esm.js",
-  "browser": "lib/index.umd.js",
+  "main": "lib/index.cjs",
+  "module": "lib/index.mjs",
+  "browser": "lib/index.min.js",
   "types": "lib/index.d.ts",
   "exports": {
-    "require": "./lib/index.cjs.js",
-    "import": "./lib/index.esm.js"
+    "require": "./lib/index.cjs",
+    "import": "./lib/index.mjs"
   },
   "files": [
     "lib/**/*"
@@ -57,9 +56,8 @@
     "postbuild": "node scripts/post.js",
     "jest": "jest --config jest.config.json",
     "test": "npm-run-all -s valgrind wasm jest",
-    "browser": "http-server examples/js/index.html",
     "preformat": "clang-format-all src/",
-    "format": "prettier --write src __tests__",
+    "format": "prettier --write src examples/js __tests__",
     "postformat": "clang-format-all examples/",
     "lint": "eslint --ext .js,.ts src __tests__",
     "prepublishOnly": "npm-run-all -s test lint build",

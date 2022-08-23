@@ -13,11 +13,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import fs from "fs";
-import path from "path";
-import { exec } from "child_process";
+const fs = require("fs");
+const path = require("path");
+const { exec } = require("child_process");
 
-import { libsodiumIncludePath, libsodiumIncludePrivatePath } from "./utils.js";
+const {
+  libsodiumIncludePath,
+  libsodiumIncludePrivatePath,
+} = require("./utils.js");
 
 const testFilename = "libsodium_methods";
 const testPath = path.join(process.cwd(), "examples", "c", `${testFilename}.c`);

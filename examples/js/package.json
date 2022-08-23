@@ -1,0 +1,49 @@
+{
+  "name": "example",
+  "description": "Examples of @deliberative/crypto.",
+  "version": "0.3.5",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/deliberative/crypto.git"
+  },
+  "author": {
+    "name": "Deliberative Technologies P.C.",
+    "email": "security@deliberative.io",
+    "url": "https://github.com/deliberative"
+  },
+  "contributors": [
+    {
+      "name": "Dimitris Karoukis",
+      "email": "dim@deliberative.io",
+      "url": "https://www.dkaroukis.com"
+    }
+  ],
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/deliberative/crypto/issues"
+  },
+  "keywords": [
+    "deliberative",
+    "ledger",
+    "deliberative ledger",
+    "libsodium",
+    "curve25519",
+    "public key cryptography",
+    "shamir secret sharing",
+    "bip39",
+    "cryptography",
+    "emscripten",
+    "typescript"
+  ],
+  "homepage": "https://github.com/deliberative/crypto#readme",
+  "scripts": {
+    "test": "node test.mjs && node test.cjs"
+  },
+  "dependencies": {
+    "@deliberative/crypto": "file:deliberative-crypto-0.3.5.tgz"
+  },
+  "engines": {
+    "node": ">=16",
+    "npm": ">=8"
+  }
+}

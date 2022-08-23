@@ -13,16 +13,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import fs from "fs";
-import path from "path";
-import { execSync } from "child_process";
+const fs = require("fs");
+const path = require("path");
+const { execSync } = require("child_process");
 
-import {
+const {
   srcPath,
   libsodiumIncludePath,
   libsodiumIncludePrivatePath,
   emcc,
-} from "./utils.js";
+} = require("./utils.js");
 
 const basePath = path.join(srcPath, "c");
 const buildPath = path.join(basePath, "build");
