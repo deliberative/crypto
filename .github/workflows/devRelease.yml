@@ -36,13 +36,13 @@ jobs:
         uses: actions/cache@v2
         with:
           path: 'emsdk-cache'
-          key: 3.1.9-${{ runner.os }}
+          key: 3.1.19-${{ runner.os }}
 
       - name: Setup emsdk
         uses: mymindstorm/setup-emsdk@v11
         with:
           # Make sure to set a version number!
-          version: 3.1.9
+          version: 3.1.19
           # This is the name of the cache folder.
           # The cache folder will be placed in the build directory,
           #  so make sure it doesn't conflict with anything!
