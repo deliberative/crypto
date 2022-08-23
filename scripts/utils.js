@@ -88,6 +88,7 @@ const withJS = ` \
 -s EXPORT_ES6=1 \
 -s USE_ES6_IMPORT_META=0 \
 -s POLYFILL=0 \
+-s FILESYSTEM=0 \
 `;
 
 const memory = `\
