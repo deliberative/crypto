@@ -60,7 +60,7 @@
     "format": "prettier --write src examples/js __tests__",
     "postformat": "clang-format-all examples/",
     "lint": "eslint --ext .js,.ts src __tests__",
-    "prepublishOnly": "npm-run-all -s test lint build",
+    "prepublishOnly": "npm-run-all -s format lint test build",
     "preversion": "npm-run-all -s lint format",
     "docs": "typedoc --out docs --excludeInternal src/index.ts"
   },

@@ -31,13 +31,6 @@ jobs:
           version: "13"
           cached: ${{ steps.cache-llvm.outputs.cache-hit }}
 
-      - name: Cache EMSDK
-        id: cache-emsdk
-        uses: actions/cache@v2
-        with:
-          path: 'emsdk-cache'
-          key: 3.1.19-${{ runner.os }}
-
       - name: Setup emsdk
         uses: mymindstorm/setup-emsdk@v11
         with:
@@ -69,18 +62,13 @@ jobs:
           fail_ci_if_error: true
           # verbose: true # optional (default = false)
 
-      - name: Build
-        run: npm run build
-
       # Setup .npmrc file to publish to npm
       - uses: actions/setup-node@v3
         with:
           node-version: '18.x'
           registry-url: 'https://registry.npmjs.org'
-          scope: '@deliberative'
 
-      - run: npm ci
-      - run: npm publish --access public --tag dev
+      - run: npm publish --access public --tag next
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTOMATION_TOKEN }}
       
@@ -92,7 +80,7 @@ jobs:
           scope: '@deliberative'
 
       - name: Publish on github
-        run: github publish --tag dev
+        run: github publish --tag next
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
