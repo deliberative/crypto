@@ -71,17 +71,3 @@ jobs:
       - run: npm publish --access public --tag next
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTOMATION_TOKEN }}
-      
-      # Setup .npmrc file to publish to GitHub Packages
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '18.x'
-          registry-url: 'https://npm.pkg.github.com'
-          scope: '@deliberative'
-
-      - name: Publish on github
-        run: npm publish --tag next
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-

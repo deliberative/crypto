@@ -2,10 +2,21 @@ const dcrypto = require("@deliberative/crypto");
 
 const main = async () => {
   try {
-    // Words from dictionary create random seed for Ed25519 private key.
+    // 12 Words from dictionary create random seed for Ed25519 private key.
     const mnemonic = await dcrypto.generateMnemonic();
-
-    console.log(`Mnemonic: ${mnemonic}\n`);
+    console.log(`Mnemonic with 128bit entropy => 12 words: ${mnemonic}`);
+    // 15 Words from dictionary create random seed for Ed25519 private key.
+    const mnemonic1 = await dcrypto.generateMnemonic(160);
+    console.log(`Mnemonic with 160bit entropy => 15 words: ${mnemonic1}`);
+    // 20 Words from dictionary create random seed for Ed25519 private key.
+    const mnemonic2 = await dcrypto.generateMnemonic(192);
+    console.log(`Mnemonic with 192bit entropy => 18 words: ${mnemonic2}`);
+    // 24 Words from dictionary create random seed for Ed25519 private key.
+    const mnemonic3 = await dcrypto.generateMnemonic(224);
+    console.log(`Mnemonic with 224bit entropy => 21 words: ${mnemonic3}`);
+    // 28 Words from dictionary create random seed for Ed25519 private key.
+    const mnemonic4 = await dcrypto.generateMnemonic(256);
+    console.log(`Mnemonic with 256bit entropy => 24 words: ${mnemonic4}`);
 
     // Keypair is an object representing an Ed25519 keypair with { publicKey: Uint8Array(32), secretKey: Uint8Array(64) }
     const keypair = await dcrypto.keyPairFromMnemonic(mnemonic);
@@ -63,9 +74,9 @@ const main = async () => {
     );
 
     console.log(
-      `Decrypted AEAD box should be equal to random message: ${Buffer.from(
-        decrypted,
-      ).toString("hex")}`,
+      `Decrypted AEAD box should be equal to random message: \n\
+  Decrypted: ${Buffer.from(decrypted).toString("hex")} \n\
+  Original : ${Buffer.from(message).toString("hex")}\n`,
     );
   } catch (err) {
     console.error(err);

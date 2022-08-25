@@ -13,6 +13,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@master
+        with:
+          submodules: 'true'
 
       - name: Cache LLVM and Clang
         id: cache-llvm
@@ -29,6 +31,20 @@ jobs:
           version: "13"
           cached: ${{ steps.cache-llvm.outputs.cache-hit }}
 
+      - name: Setup emsdk
+        uses: mymindstorm/setup-emsdk@v11
+        with:
+          # Make sure to set a version number!
+          version: 3.1.19
+          # This is the name of the cache folder.
+          # The cache folder will be placed in the build directory,
+          #  so make sure it doesn't conflict with anything!
+          actions-cache-folder: 'emsdk-cache'
+          update: true
+
+      - name: Verify
+        run: emcc -v
+
       - name: Setup
         run: npm install
 
@@ -44,28 +60,26 @@ jobs:
           # flags: unittests # optional
           # name: codecov-umbrella # optional
           fail_ci_if_error: true
-          verbose: true # optional (default = false)
+          # verbose: true # optional (default = false)
 
-      - name: Build
-        run: npm run build
-
+      # Setup .npmrc file to publish to npm
       - uses: actions/setup-node@v3
         with:
-          node-version: '16.x'
+          node-version: '18.x'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Publish to npmjs
-        run: npm publish --access public
+      - run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTOMATION_TOKEN }}
-
+      
       # Setup .npmrc file to publish to GitHub Packages
       - uses: actions/setup-node@v3
         with:
-          node-version: '16.x'
+          node-version: '18.x'
           registry-url: 'https://npm.pkg.github.com'
+          scope: '@deliberative'
 
-      - name: Publish to github
-        run: npm publish --access public
+      - name: Publish on github
+        run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
