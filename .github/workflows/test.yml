@@ -1,4 +1,4 @@
-name: "pre-release"
+name: "test"
 
 on:
   push:
@@ -6,8 +6,8 @@ on:
       - "master"
 
 jobs:
-  pre-release:
-    name: "Pre Release"
+  test:
+    name: "Tests"
     runs-on: "ubuntu-latest"
 
     steps:
@@ -61,13 +61,3 @@ jobs:
           # name: codecov-umbrella # optional
           fail_ci_if_error: true
           # verbose: true # optional (default = false)
-
-      # Setup .npmrc file to publish to npm
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '18.x'
-          registry-url: 'https://registry.npmjs.org'
-
-      - run: npm publish --access public --tag next
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTOMATION_TOKEN }}
