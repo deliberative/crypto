@@ -48,6 +48,20 @@ jobs:
       - name: Setup
         run: npm install
 
+      - name: Jest
+        run: npm test
+
+      - name: Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          # token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+          # files: ./coverage1.xml,./coverage2.xml # optional
+          directory: ./coverage
+          # flags: unittests # optional
+          # name: codecov-umbrella # optional
+          fail_ci_if_error: true
+          # verbose: true # optional (default = false)
+
       # Setup .npmrc file to publish to npm
       - uses: actions/setup-node@v3
         with:
