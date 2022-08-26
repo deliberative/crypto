@@ -7,7 +7,6 @@ import typescript from "@rollup/plugin-typescript";
 import { wasm } from "@rollup/plugin-wasm";
 import url from "@rollup/plugin-url";
 import { terser } from "rollup-plugin-terser";
-import gzipPlugin from "rollup-plugin-gzip";
 import analyzer from "rollup-plugin-analyzer";
 
 import pkg from "./package.json";
@@ -64,15 +63,14 @@ export default [
         compress: true,
         mangle: true,
       }),
-
-      gzipPlugin(),
     ],
     output: {
       name: "dcrypto",
       file: pkg.browser,
-      format: "umd",
+      format: "iife",
       esModule: false,
       exports: "named",
+      extend: true,
       sourcemap: true,
     },
   },

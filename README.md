@@ -1,18 +1,20 @@
 # @deliberative/crypto
 
 [![codecov][codecov-image]][codecov-url]
+[![Known Vulnerabilities](https://snyk.io/test/github/deliberative/crypto/badge.svg?targetFile=package.json)](https://snyk.io/test/github/deliberative/crypto?targetFile=package.json)
+[![Code Climate](https://codeclimate.com/github/deliberative/crypto/badges/gpa.svg)](https://codeclimate.com/github/deliberative/crypto)
 <br>
-[![npm][npm-image]][npm-url]
-[![npm-downloads][npm-downloads-image]][npm-url]
-<br>
+[![NPM Version](https://badge.fury.io/js/@deliberative/crypto.svg?style=flat)](https://npmjs.org/package/@deliberative/crypto)
 [![semantic-release][semantic-release-image]][semantic-release-url]
 [![code-style-prettier][code-style-prettier-image]][code-style-prettier-url]
+![NPM License](https://img.shields.io/npm/l/@deliberative/crypto)
+<br>
+![NPM Downloads](https://img.shields.io/npm/dw/@deliberative/crypto)
+[![](https://data.jsdelivr.com/v1/package/npm/@deliberative/crypto/badge)](https://www.jsdelivr.com/package/npm/@deliberative/crypto)
+[![Twitter](https://img.shields.io/twitter/follow/:twitterHandle.svg?style=social&label=@deliberativetec)](https://twitter.com/deliberativetec)
 
 [codecov-image]: https://codecov.io/gh/deliberative/crypto/branch/master/graph/badge.svg
 [codecov-url]: https://codecov.io/gh/deliberative/crypto
-[npm-image]: https://img.shields.io/npm/v/deliberative.svg?style=flat
-[npm-downloads-image]: https://img.shields.io/npm/dm/deliberative.svg?style=flat
-[npm-url]: https://www.npmjs.com/package/@deliberative/crypto
 [semantic-release-image]: https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg
 [semantic-release-url]: https://github.com/semantic-release/semantic-release
 [code-style-prettier-image]: https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square
@@ -26,10 +28,9 @@ This package is somewhat unstable and it has not undergone external security aud
 
 ## Introduction
 
-We rely heavily on the [libsodium](https://github.com/jedisct1/libsodium) library for the Curve25519 cryptographic operations.
-Instead of implementing our own crypto we decided to use a battle-tested implementation and compile it to WebAssembly for speed. In comparison to [tweetnacl](https://github.com/dchest/tweetnacl-js) this library is much faster.We will post benchmarks when we have time.
+This library relies heavily on the [libsodium](https://github.com/jedisct1/libsodium) library for the Curve25519 cryptographic operations, which is a battle-tested project, compiled to WebAssembly for speed. In comparison to [tweetnacl](https://github.com/dchest/tweetnacl-js) this library is much faster. Benchmarks will be posted when there is time.
 
-We have also introduced function that can split and restore a secret through the Shamir threshold sharing method because we could not find many well-tested open-source implementations of it and we use it heavily in the Deliberative Ledger protocol.
+We have also introduced function that can split and restore a secret through the Shamir threshold sharing scheme because we could not find many well-tested open-source implementations of it and we use it heavily in the Deliberative Ledger protocol.
 
 Another feature of the library is a mnemonic generation, validation and Ed25519 key pair from mnemonic that was inspired by [bip39](https://github.com/bitcoinjs/bip39) but instead of Blake2b we use Argon2 and instead of SHA256 we use SHA512, both of which can be found in libsodium.
 
@@ -57,6 +58,8 @@ To get started you have to install the package with
 `npm install @deliberative/crypto`
 
 ## Examples
+
+For comprehensive CommonJS, Es module and html examples, you can visit the [examples](examples/js) folder.
 
 For public key cryptography we have the following methods
 
