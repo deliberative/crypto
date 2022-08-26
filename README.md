@@ -2,16 +2,15 @@
 
 [![codecov][codecov-image]][codecov-url]
 [![Known Vulnerabilities](https://snyk.io/test/github/deliberative/crypto/badge.svg?targetFile=package.json)](https://snyk.io/test/github/deliberative/crypto?targetFile=package.json)
-[![Code Climate](https://codeclimate.com/github/deliberative/crypto/badges/gpa.svg)](https://codeclimate.com/github/deliberative/crypto)
 <br>
-[![NPM Version](https://badge.fury.io/js/@deliberative/crypto.svg?style=flat)](https://npmjs.org/package/@deliberative/crypto)
+![NPM Version](https://img.shields.io/npm/v/@deliberative/crypto)
 [![semantic-release][semantic-release-image]][semantic-release-url]
 [![code-style-prettier][code-style-prettier-image]][code-style-prettier-url]
 ![NPM License](https://img.shields.io/npm/l/@deliberative/crypto)
 <br>
 ![NPM Downloads](https://img.shields.io/npm/dw/@deliberative/crypto)
 [![](https://data.jsdelivr.com/v1/package/npm/@deliberative/crypto/badge)](https://www.jsdelivr.com/package/npm/@deliberative/crypto)
-[![Twitter](https://img.shields.io/twitter/follow/:twitterHandle.svg?style=social&label=@deliberativetec)](https://twitter.com/deliberativetec)
+[![Twitter](https://img.shields.io/twitter/follow/deliberativetec.svg?style=social&label=@deliberativetec)](https://twitter.com/deliberativetec)
 
 [codecov-image]: https://codecov.io/gh/deliberative/crypto/branch/master/graph/badge.svg
 [codecov-url]: https://codecov.io/gh/deliberative/crypto

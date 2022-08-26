@@ -1,4 +1,3 @@
-import babel from "@rollup/plugin-babel";
 import commonjs from "@rollup/plugin-commonjs";
 import json from "@rollup/plugin-json";
 import resolve from "@rollup/plugin-node-resolve";
@@ -55,10 +54,6 @@ export default [
     plugins: [
       ...plugins,
 
-      babel({
-        babelHelpers: "bundled",
-      }),
-
       terser({
         compress: true,
         mangle: true,
@@ -67,7 +62,7 @@ export default [
     output: {
       name: "dcrypto",
       file: pkg.browser,
-      format: "iife",
+      format: "umd",
       esModule: false,
       exports: "named",
       extend: true,
