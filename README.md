@@ -10,7 +10,6 @@
 <br>
 ![NPM Downloads](https://img.shields.io/npm/dw/@deliberative/crypto)
 [![](https://data.jsdelivr.com/v1/package/npm/@deliberative/crypto/badge)](https://www.jsdelivr.com/package/npm/@deliberative/crypto)
-[![Twitter](https://img.shields.io/twitter/follow/deliberativetec.svg?style=social&label=@deliberativetec)](https://twitter.com/deliberativetec)
 
 [codecov-image]: https://codecov.io/gh/deliberative/crypto/branch/master/graph/badge.svg
 [codecov-url]: https://codecov.io/gh/deliberative/crypto
@@ -55,6 +54,15 @@ The [utils](src/utils) directory contains helper methods such as cryptographic r
 
 To get started you have to install the package with
 `npm install @deliberative/crypto`
+
+You can include as ES module
+`import dcrypto from '@deliberative/crypto'`
+
+as CommonJS module
+`const dcrypto = require('@deliberative/crypto')`
+
+or as UMD in the browser with
+`<script src="https://cdn.jsdelivr.net/npm/@deliberative/crypto@0.3.8/lib/index.min.js"></script>`
 
 ## Examples
 

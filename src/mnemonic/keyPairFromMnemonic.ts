@@ -29,7 +29,10 @@ const keyPairFromMnemonic = async (mnemonic: string, password?: string) => {
   const isValid = await validateMnemonic(mnemonic);
   if (!isValid) throw new Error("Invalid mnemonic.");
 
-  const defaultSalt = Uint8Array.from(Buffer.from("password12345678", "utf8"));
+  // const defaultSalt = Uint8Array.from(Buffer.from("password12345678", "utf8"));
+  const defaultSalt = new Uint8Array(crypto_pwhash_argon2id_SALTBYTES);
+  const encoder = new TextEncoder();
+  encoder.encodeInto("password12345678", defaultSalt);
   const salt = new Uint8Array(crypto_pwhash_argon2id_SALTBYTES);
 
   if (password) {

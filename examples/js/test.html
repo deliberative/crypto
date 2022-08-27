@@ -1,10 +1,15 @@
 <!DOCTYPE html>
 <html>
   <body>
-    <script 
-      src="./node_modules/@deliberative/crypto/lib/index.min.js"
-    ></script>
+    <script src="./node_modules/@deliberative/crypto/lib/index.min.js"></script>
     <script type="text/javascript">
+      const uint8ToHex = (array) => {
+        return array.reduce(
+          (str, byte) => str + byte.toString(16).padStart(2, "0"),
+          "",
+        );
+      };
+
       const onClick = async () => {
         try {
           // 12 Words from dictionary create random seed for Ed25519 private key.
@@ -28,22 +33,20 @@
 
           console.log(
             `Keypair from mnemonic: {\n\
-  secretKey: ${Buffer.from(keypair.secretKey).toString("hex")}\n\
-  publicKey: ${Buffer.from(keypair.publicKey).toString("hex")}\n}\
+  secretKey: ${uint8ToHex(keypair.secretKey)}\n\
+  publicKey: ${uint8ToHex(keypair.publicKey)}\n}\
 `,
           );
 
           // Random Uint8Array array of 32 elements
           const message = await dcrypto.randomBytes(32);
 
-          console.log(
-            `Random message to sign: ${Buffer.from(message).toString("hex")}`,
-          );
+          console.log(`Random message to sign: ${uint8ToHex(message)}`);
 
           // Can also provide mnemonic instead of private key
           const signature = await dcrypto.sign(message, keypair.secretKey);
 
-          console.log(`Signature: ${Buffer.from(signature).toString("hex")}`);
+          console.log(`Signature: ${uint8ToHex(signature)}`);
 
           const verify = await dcrypto.verify(
             message,
@@ -55,18 +58,14 @@
 
           const hash = await dcrypto.sha512(message);
 
-          console.log(
-            `SHA512 of the random message: ${Buffer.from(hash).toString(
-              "hex",
-            )}`,
-          );
+          console.log(`SHA512 of the random message: ${uint8ToHex(hash)}`);
 
           const keypair2 = await dcrypto.keyPair();
 
           console.log(
             `New random keypair: {\n\
-  secretKey: ${Buffer.from(keypair2.secretKey).toString("hex")}\n\
-  publicKey: ${Buffer.from(keypair2.publicKey).toString("hex")}\n}\
+  secretKey: ${uint8ToHex(keypair2.secretKey)}\n\
+  publicKey: ${uint8ToHex(keypair2.publicKey)}\n}\
 `,
           );
 
@@ -77,9 +76,9 @@
           );
 
           console.log(
-            `AEAD encrypted box for random message and keypair2: ${Buffer.from(
+            `AEAD encrypted box for random message and keypair2: ${uint8ToHex(
               encrypted,
-            ).toString("hex")}`,
+            )}`,
           );
 
           const decrypted = await dcrypto.decrypt(
@@ -90,8 +89,8 @@
 
           console.log(
             `Decrypted AEAD box should be equal to random message: \n\
-  Decrypted: ${Buffer.from(decrypted).toString("hex")} \n\
-  Original : ${Buffer.from(message).toString("hex")}\n`,
+  Decrypted: ${uint8ToHex(decrypted)} \n\
+  Original : ${uint8ToHex(message)}\n`,
           );
         } catch (err) {
           console.error(err);

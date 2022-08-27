@@ -35,8 +35,10 @@ const argon2 = async (
   module?: DCryptoMethodsModule,
 ): Promise<Uint8Array> => {
   const mnemonicNormalized = normalize(mnemonic);
-  const mnemonicBuffer = Buffer.from(mnemonicNormalized, "utf8");
-  const mnemonicInt8Array = Int8Array.from(mnemonicBuffer);
+  // const mnemonicBuffer = Buffer.from(mnemonicNormalized, "utf8");
+  const encoder = new TextEncoder();
+  const mnemonicBuffer = encoder.encode(mnemonicNormalized).buffer;
+  const mnemonicInt8Array = new Int8Array(mnemonicBuffer);
   const mnemonicArrayLen = mnemonicInt8Array.length;
 
   salt = salt || (await randomBytes(crypto_pwhash_argon2id_SALTBYTES));

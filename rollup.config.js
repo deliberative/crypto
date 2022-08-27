@@ -23,13 +23,15 @@ const plugins = [
   commonjs(),
 
   resolve({
+    jsnext: true,
+    main: true,
     browser: true,
     preferBuiltins: false,
   }),
 
   url(),
 
-  wasm({ publicPath: "wasm" }),
+  wasm(),
 
   json({
     compact: true,
@@ -55,8 +57,15 @@ export default [
       ...plugins,
 
       terser({
-        compress: true,
-        mangle: true,
+        ecma: 2020,
+        mangle: { toplevel: true },
+        compress: {
+          module: true,
+          toplevel: true,
+          unsafe_arrows: true,
+          drop_console: true,
+          drop_debugger: true,
+        },
       }),
     ],
     output: {
@@ -64,7 +73,7 @@ export default [
       file: pkg.browser,
       format: "umd",
       esModule: false,
-      exports: "named",
+      interop: "default",
       extend: true,
       sourcemap: true,
     },
@@ -79,6 +88,7 @@ export default [
         file: pkg.module,
         format: "es",
         esModule: true,
+        interop: "esModule",
         exports: "named",
         sourcemap: true,
       },
@@ -86,6 +96,7 @@ export default [
         file: pkg.main,
         format: "cjs",
         esModule: false,
+        interop: "defaultOnly",
         exports: "named",
         sourcemap: true,
       },

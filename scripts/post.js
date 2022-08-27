@@ -9,20 +9,20 @@ const esmBundle = fs.readFileSync(esmPath);
 fs.writeFileSync(
   esmPath,
   `\
-import \{ dirname \} from \"path\"; \
-import \{ createRequire \} from \"module\"; \
-globalThis.__dirname = dirname(import.meta.url).substring(7); \
-globalThis.require = createRequire(import.meta.url); \
+import \{ dirname \} from \"path\";\n\
+import \{ createRequire \} from \"module\";\n\
+globalThis.__dirname = dirname(import.meta.url).substring(7);\n\
+globalThis.require = createRequire(import.meta.url);\n\
 ${esmBundle}`,
 );
 
-const cjsBundle = fs.readFileSync(cjsPath);
+let cjsBundle = fs.readFileSync(cjsPath, "utf8");
 fs.writeFileSync(
   cjsPath,
-  `\
-${cjsBundle}\
-module.exports = dcrypto;
-`,
+  cjsBundle.replace(
+    "//# sourceMappingURL=index.cjs.map",
+    "module.exports = dcrypto;\n//# sourceMappingURL=index.cjs.map",
+  ),
 );
 
 // const umdBundle = fs.readFileSync(umdPath);
