@@ -19,7 +19,7 @@ This repository is part of the reference implementation of the Deliberative Ledg
 
 It does not have any native dependencies and can be used in both Nodejs and the browser.
 
-This package is somewhat unstable and it has not undergone external security audits. Use at your own risk.
+The API is not completely stable and the code has not undergone external security audits. Use at your own risk.
 
 ## Introduction
 
