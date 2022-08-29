@@ -4,17 +4,14 @@
 [![Known Vulnerabilities](https://snyk.io/test/github/deliberative/crypto/badge.svg?targetFile=package.json)](https://snyk.io/test/github/deliberative/crypto?targetFile=package.json)
 <br>
 ![NPM Version](https://img.shields.io/npm/v/@deliberative/crypto)
-[![semantic-release][semantic-release-image]][semantic-release-url]
-[![code-style-prettier][code-style-prettier-image]][code-style-prettier-url]
 ![NPM License](https://img.shields.io/npm/l/@deliberative/crypto)
+[![code-style-prettier][code-style-prettier-image]][code-style-prettier-url]
 <br>
 ![NPM Downloads](https://img.shields.io/npm/dw/@deliberative/crypto)
 [![](https://data.jsdelivr.com/v1/package/npm/@deliberative/crypto/badge)](https://www.jsdelivr.com/package/npm/@deliberative/crypto)
 
 [codecov-image]: https://codecov.io/gh/deliberative/crypto/branch/master/graph/badge.svg
 [codecov-url]: https://codecov.io/gh/deliberative/crypto
-[semantic-release-image]: https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg
-[semantic-release-url]: https://github.com/semantic-release/semantic-release
 [code-style-prettier-image]: https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square
 [code-style-prettier-url]: https://github.com/prettier/prettier
 
@@ -53,20 +50,34 @@ The [utils](src/utils) directory contains helper methods such as cryptographic r
 ## Getting Started
 
 To get started you have to install the package with
-`npm install @deliberative/crypto`
+
+```
+npm install @deliberative/crypto
+```
 
 You can include as ES module
-`import dcrypto from '@deliberative/crypto'`
+
+```
+import dcrypto from '@deliberative/crypto'
+```
 
 as CommonJS module
-`const dcrypto = require('@deliberative/crypto')`
+
+```
+const dcrypto = require('@deliberative/crypto')
+```
 
 or as UMD in the browser with
-`<script src="https://cdn.jsdelivr.net/npm/@deliberative/crypto@0.3.8/lib/index.min.js"></script>`
+
+```
+<script src="https://cdn.jsdelivr.net/npm/@deliberative/crypto@0.3.8/lib/index.min.js"></script>
+```
 
 ## Examples
 
-For comprehensive CommonJS, Es module and html examples, you can visit the [examples](examples/js) folder.
+You can visit the [examples](examples/js) folder, where you will find examples in
+[CommonJS](examples/js/test.cjs), [ES module](examples/js/test.mjs) and
+[html in the browser](examples/js/test.html).
 
 For public key cryptography we have the following methods
 
@@ -74,15 +85,24 @@ For public key cryptography we have the following methods
 import dcrypto from "@deliberative/crypto";
 
 // Words from dictionary create random seed for Ed25519 private key.
+// Default entropy is 128bits, which results in 12 words.
 const mnemonic = await dcrypto.generateMnemonic();
+console.log(`Mnemonic with 128 bits of entropy => 12 words: ${mnemonic}`);
+// Max entropy is 256bit, where generateMnemonic(256) results in 28 words.
 
 // Keypair is an object representing an Ed25519 keypair with { publicKey: Uint8Array(32), secretKey: Uint8Array(64) }
 const keypair = await dcrypto.keyPairFromMnemonic(mnemonic);
+console.log(
+  `Keypair from mnemonic: {\n\
+  secretKey: ${Buffer.from(keypair.secretKey).toString("hex")}\n\
+  publicKey: ${Buffer.from(keypair.publicKey).toString("hex")}\n}\
+`,
+);
 
 // Generates a Uint8Array(128) full of random bytes
 const message = await dcrypto.randomBytes(128);
 
-// Can also provide mnemonic instead of private key
+// EdDSA
 const signature = await dcrypto.sign(message, keypair.secretKey);
 
 const verify = await dcrypto.verify(message, signature, keypair.publicKey);
@@ -92,6 +112,10 @@ const hash = await dcrypto.sha512(message);
 
 const keypair2 = await dcrypto.keyPair();
 
+// Forward secrecy box.
+// Encryptor generates a random keypair. The public key is contained in the
+// "encrypted" box and the secret key is used for the key exchange with
+// "keypair2.publicKey" and then it is removed from memory.
 const encrypted = await dcrypto.encrypt(message, keypair2.publicKey, hash);
 
 const decrypted = await dcrypto.decrypt(encrypted, keypair2.secretKey, hash);
@@ -175,10 +199,6 @@ For more examples you can see the [tests](__tests__) directory.
 
 Releases are available on [Github](https://github.com/deliberative/crypto/releases)
 and [npmjs.com](https://www.npmjs.com/package/@deliberative/crypto)
-
-Each Github release features a tarball containing API documentation and a
-minified version of the module suitable for direct use in a browser environment
-(`<script>` tag)
 
 ## License
 
