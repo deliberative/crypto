@@ -57,19 +57,19 @@ npm install @deliberative/crypto
 
 You can include as ES module
 
-```
-import dcrypto from '@deliberative/crypto'
+```typescript
+import dcrypto from "@deliberative/crypto";
 ```
 
 as CommonJS module
 
-```
-const dcrypto = require('@deliberative/crypto')
+```javascript
+const dcrypto = require("@deliberative/crypto");
 ```
 
 or as UMD in the browser with
 
-```
+```html
 <script src="https://cdn.jsdelivr.net/npm/@deliberative/crypto@0.3.8/lib/index.min.js"></script>
 ```
 
@@ -79,7 +79,7 @@ You can visit the [examples](examples/js) folder, where you will find examples i
 [CommonJS](examples/js/test.cjs), [ES module](examples/js/test.mjs) and
 [html in the browser](examples/js/test.html).
 
-For public key cryptography we have the following methods
+For Curve25519 public key cryptography we have the following methods
 
 ```typescript
 import dcrypto from "@deliberative/crypto";
@@ -88,7 +88,7 @@ import dcrypto from "@deliberative/crypto";
 // Default entropy is 128bits, which results in 12 words.
 const mnemonic = await dcrypto.generateMnemonic();
 console.log(`Mnemonic with 128 bits of entropy => 12 words: ${mnemonic}`);
-// Max entropy is 256bit, where generateMnemonic(256) results in 28 words.
+// Max entropy is 256bit, where generateMnemonic(256) results in 24 words.
 
 // Keypair is an object representing an Ed25519 keypair with { publicKey: Uint8Array(32), secretKey: Uint8Array(64) }
 const keypair = await dcrypto.keyPairFromMnemonic(mnemonic);
@@ -127,7 +127,7 @@ for (let i = 0; i < message.length; i++) {
 }
 ```
 
-For Shamir's secret sharing you can test the following
+For Shamir secret sharing you can test the following
 
 ```typescript
 import dcrypto from "@deliberative/crypto";
@@ -135,6 +135,7 @@ import dcrypto from "@deliberative/crypto";
 const keypair = await dcrypto.keyPair();
 
 // 100 splitted shares, you need 60 to recreate keypair.secretKey
+// Note that you can have max 255 shares and threshold <= shares
 const shares = await dcrypto.splitSecret(keypair.secretKey, 100, 60);
 
 // Should be equal to keypair.secretKey
@@ -167,7 +168,9 @@ const someRandomArray = await dcrypto.randomBytes(12); // 12 byte array
 console.log(someRandomArray);
 
 // Cryptographic shuffling
-const someRandomArrayShuffled = await dcrypto.arrayShuffle(someRandomArray);
+const someRandomArrayShuffled = await dcrypto.arrayRandomShuffle(
+  someRandomArray,
+);
 console.log(someRandomArrayShuffled);
 
 // Choose 5 elements from someRandomArray uniformly.
@@ -194,6 +197,22 @@ console.log(someOtherRandomNumberBetween0and100);
 ```
 
 For more examples you can see the [tests](__tests__) directory.
+
+## Development
+
+If you want to bundle the library yourselves, you need to have [Emscripten](https://github.com/emscripten-core/emscripten)
+installed on your machine in order to compile the C code into WebAssembly.
+We have the `-s SINGLE_FILE=1` option for the `emcc` compiler, which converts the `wasm` file to a `base64` string
+that will be compiled by the glue js code into a WebAssembly module. This was done for the purpose of interoperability
+and modularity.
+
+Once you have all the dependencies installed, you can run
+
+```
+npm run build
+```
+
+and [Rollup](https://github.com/rollup/rollup) will generate the UMD, ESM and CJS bundles.
 
 ## Releases
 

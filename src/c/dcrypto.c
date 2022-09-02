@@ -385,8 +385,8 @@ split_secret(const int SHARES_LEN, const int THRESHOLD, const int SECRET_LEN,
 
 __attribute__((used)) int
 restore_secret(const int SHARES_LEN, const int SECRET_LEN,
-               const uint8_t shares[SHARES_LEN * (SECRET_LEN + 1)],
-               uint8_t secret[SECRET_LEN])
+               const uint8_t *shares, // [SHARES_LEN * (SECRET_LEN + 1)]
+               uint8_t *secret)       // [SECRET_LEN])
 {
   size_t i, j;
 
@@ -403,9 +403,13 @@ restore_secret(const int SHARES_LEN, const int SECRET_LEN,
   {
     for (j = 0; j < SHARES_LEN; j++)
     {
-      points[j * 2] = shares[j * (SECRET_LEN + 1) + SECRET_LEN];
+      /* points[j * 2] = shares[j * (SECRET_LEN + 1) + SECRET_LEN]; */
+      memcpy(&points[j * 2], &shares[j * (SECRET_LEN + 1) + SECRET_LEN],
+             sizeof(uint8_t));
       /* points[j][0] = shares[j][SECRET_LEN]; */
-      points[j * 2 + 1] = shares[j * (SECRET_LEN + 1) + i];
+      /* points[j * 2 + 1] = shares[j * (SECRET_LEN + 1) + i]; */
+      memcpy(&points[j * 2 + 1], &shares[j * (SECRET_LEN + 1) + i],
+             sizeof(uint8_t));
       /* points[j][1] = shares[j][i]; */
     }
 

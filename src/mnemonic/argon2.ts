@@ -47,26 +47,32 @@ const argon2 = async (
     ? module.wasmMemory
     : mnemonicMemory.argon2Memory(mnemonicArrayLen);
 
-  let offset = 0;
+  const dcryptoModule = module || (await dcryptoMethodsModule({ wasmMemory }));
+
+  const ptr1 = dcryptoModule._malloc(crypto_sign_ed25519_SEEDBYTES);
   const seed = new Uint8Array(
-    wasmMemory.buffer,
-    offset,
+    dcryptoModule.HEAP8.buffer,
+    ptr1,
     crypto_sign_ed25519_SEEDBYTES,
   );
 
-  offset += crypto_sign_ed25519_SEEDBYTES;
-  const mnmnc = new Int8Array(wasmMemory.buffer, offset, mnemonicArrayLen);
+  const ptr2 = dcryptoModule._malloc(
+    mnemonicArrayLen * Uint8Array.BYTES_PER_ELEMENT,
+  );
+  const mnmnc = new Int8Array(
+    dcryptoModule.HEAP8.buffer,
+    ptr2,
+    mnemonicArrayLen * Uint8Array.BYTES_PER_ELEMENT,
+  );
   mnmnc.set([...mnemonicInt8Array]);
 
-  offset += mnemonicArrayLen;
+  const ptr3 = dcryptoModule._malloc(crypto_pwhash_argon2id_SALTBYTES);
   const saltArray = new Uint8Array(
-    wasmMemory.buffer,
-    offset,
+    dcryptoModule.HEAP8.buffer,
+    ptr3,
     crypto_pwhash_argon2id_SALTBYTES,
   );
   saltArray.set([...salt]);
-
-  const dcryptoModule = module || (await dcryptoMethodsModule({ wasmMemory }));
 
   const result = dcryptoModule._argon2(
     mnemonicArrayLen,
@@ -75,8 +81,14 @@ const argon2 = async (
     saltArray.byteOffset,
   );
 
+  const s = new Uint8Array([...seed]);
+
+  dcryptoModule._free(ptr1);
+  dcryptoModule._free(ptr2);
+  dcryptoModule._free(ptr3);
+
   if (result === 0) {
-    return new Uint8Array([...seed]);
+    return s;
   } else {
     throw new Error("Could not generate argon2id for mnemonic.");
   }

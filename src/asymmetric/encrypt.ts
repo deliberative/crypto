@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import libsodiumMemory from "./memory";
+import dcryptoMemory from "./memory";
 
 import dcryptoMethodsModule from "../c/build/dcryptoMethodsModule";
 
@@ -37,7 +37,35 @@ const encrypt = async (
 
   const wasmMemory = module
     ? module.wasmMemory
-    : libsodiumMemory.encryptMemory(len, additionalLen);
+    : dcryptoMemory.encryptMemory(len, additionalLen);
+
+  const dcryptoModule = module || (await dcryptoMethodsModule({ wasmMemory }));
+
+  const ptr1 = dcryptoModule._malloc(len * Uint8Array.BYTES_PER_ELEMENT);
+  const dataArray = new Uint8Array(
+    dcryptoModule.HEAP8.buffer,
+    ptr1,
+    len * Uint8Array.BYTES_PER_ELEMENT,
+  );
+  dataArray.set([...message]);
+
+  const ptr2 = dcryptoModule._malloc(crypto_sign_ed25519_PUBLICKEYBYTES);
+  const pub = new Uint8Array(
+    dcryptoModule.HEAP8.buffer,
+    ptr2,
+    crypto_sign_ed25519_PUBLICKEYBYTES,
+  );
+  pub.set([...publicKey]);
+
+  const ptr3 = dcryptoModule._malloc(
+    additionalLen * Uint8Array.BYTES_PER_ELEMENT,
+  );
+  const additional = new Uint8Array(
+    dcryptoModule.HEAP8.buffer,
+    ptr3,
+    additionalLen * Uint8Array.BYTES_PER_ELEMENT,
+  );
+  additional.set([...additionalData]);
 
   const sealedBoxLen =
     crypto_box_x25519_PUBLICKEYBYTES + // ephemeral x25519 public key
@@ -45,33 +73,16 @@ const encrypt = async (
     len +
     crypto_box_poly1305_AUTHTAGBYTES; // 16 bytes poly1305 auth tag
 
-  let offset = 0;
-  const dataArray = new Uint8Array(wasmMemory.buffer, offset, len);
-  dataArray.set([...message]);
-
-  offset += len;
-  const pub = new Uint8Array(
-    wasmMemory.buffer,
-    offset,
-    crypto_sign_ed25519_PUBLICKEYBYTES,
+  const ptr4 = dcryptoModule._malloc(
+    sealedBoxLen * Uint8Array.BYTES_PER_ELEMENT,
   );
-  pub.set([...publicKey]);
-
-  offset += crypto_sign_ed25519_PUBLICKEYBYTES;
-  const additional = new Uint8Array(wasmMemory.buffer, offset, additionalLen);
-  additional.set([...additionalData]);
-
-  offset += additionalLen;
   const encrypted = new Uint8Array(
-    wasmMemory.buffer,
-    offset,
+    dcryptoModule.HEAP8.buffer,
+    ptr4,
     sealedBoxLen * Uint8Array.BYTES_PER_ELEMENT,
   );
 
-  const libsodiumModule =
-    module || (await dcryptoMethodsModule({ wasmMemory }));
-
-  const result = libsodiumModule._encrypt_data(
+  const result = dcryptoModule._encrypt_data(
     len,
     dataArray.byteOffset,
     pub.byteOffset,
@@ -80,9 +91,16 @@ const encrypt = async (
     encrypted.byteOffset,
   );
 
+  const enc = new Uint8Array([...encrypted]);
+
+  dcryptoModule._free(ptr1);
+  dcryptoModule._free(ptr2);
+  dcryptoModule._free(ptr3);
+  dcryptoModule._free(ptr4);
+
   switch (result) {
     case 0: {
-      return new Uint8Array([...encrypted]);
+      return enc;
     }
 
     case -1: {

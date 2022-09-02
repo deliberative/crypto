@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import libsodiumMemory from "./memory";
+import dcryptoMemory from "./memory";
 import {
   crypto_sign_ed25519_BYTES,
   crypto_sign_ed25519_PUBLICKEYBYTES,
@@ -33,36 +33,44 @@ const verify = async (
 
   const wasmMemory = module
     ? module.wasmMemory
-    : libsodiumMemory.verifyMemory(len);
+    : dcryptoMemory.verifyMemory(len);
 
-  let offset = 0;
-  const dataArray = new Uint8Array(wasmMemory.buffer, offset, len);
+  const dcryptoModule = await dcryptoMethodsModule({ wasmMemory });
+
+  const ptr1 = dcryptoModule._malloc(len * Uint8Array.BYTES_PER_ELEMENT);
+  const dataArray = new Uint8Array(
+    dcryptoModule.HEAP8.buffer,
+    ptr1,
+    len * Uint8Array.BYTES_PER_ELEMENT,
+  );
   dataArray.set([...message]);
 
-  offset += len;
+  const ptr2 = dcryptoModule._malloc(crypto_sign_ed25519_BYTES);
   const sig = new Uint8Array(
-    wasmMemory.buffer,
-    offset,
+    dcryptoModule.HEAP8.buffer,
+    ptr2,
     crypto_sign_ed25519_BYTES,
   );
   sig.set([...signature]);
 
-  offset += crypto_sign_ed25519_BYTES;
+  const ptr3 = dcryptoModule._malloc(crypto_sign_ed25519_PUBLICKEYBYTES);
   const key = new Uint8Array(
-    wasmMemory.buffer,
-    offset,
+    dcryptoModule.HEAP8.buffer,
+    ptr3,
     crypto_sign_ed25519_PUBLICKEYBYTES,
   );
   key.set([...publicKey]);
 
-  const libsodiumModule = await dcryptoMethodsModule({ wasmMemory });
-
-  const result = libsodiumModule._verify_data(
+  const result = dcryptoModule._verify_data(
     len,
     dataArray.byteOffset,
     sig.byteOffset,
     key.byteOffset,
   );
+
+  dcryptoModule._free(ptr1);
+  dcryptoModule._free(ptr2);
+  dcryptoModule._free(ptr3);
 
   return result === 0;
 };

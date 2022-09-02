@@ -23,7 +23,7 @@ const memoryLenToPages = (
   maxPages?: number,
 ): number => {
   minPages = minPages || 32; // 2mb // 256; // 16mb // 6; // 384kb
-  maxPages = maxPages || 1600; // 100mb for argon2 // 256; // 16mb // 8; // 512kb
+  maxPages = maxPages || 1600; // 100mb for argon2
   const pageSize = 64 * 1024;
   const ceil = Math.ceil(memoryLen / pageSize);
   if (ceil > maxPages)

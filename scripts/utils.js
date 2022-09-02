@@ -42,42 +42,6 @@ const licenseApache = `
 // limitations under the License.
 `;
 
-const testing = ``;
-// const testing = `\
-// -g3 \
-// -gsource-map \
-// -s ASSERTIONS=2 \
-// -s LOAD_SOURCE_MAP=1 \
-// -s ABORT_ON_WASM_EXCEPTIONS=1 \
-// `;
-// const testing = `\
-// -g3 \
-// --profiling \
-// --memoryprofiler \
-// -gsource-map \
-// -s ASSERTIONS=2 \
-// -fsanitize=address \
-// -s RUNTIME_LOGGING=1 \
-// -s RUNTIME_DEBUG=1 \
-// -s STACK_OVERFLOW_CHECK=2 \
-// -s LOAD_SOURCE_MAP=1 \
-// -s ABORT_ON_WASM_EXCEPTIONS=1 \
-// `;
-// const testing = `\
-// -g3 \
-// --profiling \
-// --memoryprofiler \
-// -gsource-map \
-// -fsanitize=undefined \
-// -s ASSERTIONS=2 \
-// -s RUNTIME_LOGGING=1 \
-// -s RUNTIME_DEBUG=1 \
-// -s STACK_OVERFLOW_CHECK=2 \
-// -s SAFE_HEAP=2 \
-// -s LOAD_SOURCE_MAP=1 \
-// -s ABORT_ON_WASM_EXCEPTIONS=1 \
-// `;
-
 const withJS = ` \
 -s WASM=1 \
 -s WASM_BIGINT=1 \
@@ -88,7 +52,6 @@ const withJS = ` \
 -s EXPORT_ES6=1 \
 -s USE_ES6_IMPORT_META=0 \
 -s POLYFILL=0 \
--s FILESYSTEM=0 \
 `;
 
 const memory = `\
@@ -98,20 +61,17 @@ const memory = `\
 -s INITIAL_MEMORY=2mb \
 -s MAXIMUM_MEMORY=100mb \
 -s TOTAL_STACK=1mb \
+-s SUPPORT_BIG_ENDIAN=1 \
 `;
 
 const emcc = `\
 emcc \
--flto \
--O3 \
 --no-entry \
 -s STRICT \
-${testing} \
 ${memory} \
--s LLD_REPORT_UNDEFINED \
+${withJS} \
 -s NODEJS_CATCH_EXIT=0 \
 -s NODEJS_CATCH_REJECTION=0 \
-${withJS} \
 `;
 
 const clangOpts = `\

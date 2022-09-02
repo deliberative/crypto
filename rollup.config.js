@@ -97,7 +97,7 @@ export default [
         format: "cjs",
         esModule: false,
         interop: "defaultOnly",
-        exports: "named",
+        exports: "default",
         sourcemap: true,
       },
     ],

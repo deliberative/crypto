@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import libsodiumMemory from "./memory";
+import dcryptoMemory from "./memory";
 
 import dcryptoMethodsModule from "../c/build/dcryptoMethodsModule";
 
@@ -31,32 +31,40 @@ const newKeyPair = async (
 ): Promise<SignKeyPair> => {
   const wasmMemory = module
     ? module.wasmMemory
-    : libsodiumMemory.newKeyPairMemory();
+    : dcryptoMemory.newKeyPairMemory();
 
-  let offset = 0;
+  const dcryptoModule = await dcryptoMethodsModule({ wasmMemory });
+
+  const ptr1 = dcryptoModule._malloc(crypto_sign_ed25519_PUBLICKEYBYTES);
   const publicKey = new Uint8Array(
-    wasmMemory.buffer,
-    offset,
+    dcryptoModule.HEAP8.buffer,
+    ptr1,
     crypto_sign_ed25519_PUBLICKEYBYTES,
   );
 
-  offset += crypto_sign_ed25519_PUBLICKEYBYTES;
+  const ptr2 = dcryptoModule._malloc(crypto_sign_ed25519_SECRETKEYBYTES);
   const secretKey = new Uint8Array(
-    wasmMemory.buffer,
-    offset,
+    dcryptoModule.HEAP8.buffer,
+    ptr2,
     crypto_sign_ed25519_SECRETKEYBYTES,
   );
 
-  const libsodiumModule = await dcryptoMethodsModule({ wasmMemory });
-
-  const result = libsodiumModule._new_keypair(
+  const result = dcryptoModule._new_keypair(
     publicKey.byteOffset,
     secretKey.byteOffset,
   );
 
+  const keyPair = {
+    publicKey: new Uint8Array([...publicKey]),
+    secretKey: new Uint8Array([...secretKey]),
+  };
+
+  dcryptoModule._free(ptr1);
+  dcryptoModule._free(ptr2);
+
   switch (result) {
     case 0: {
-      return { publicKey, secretKey };
+      return keyPair;
     }
 
     default: {
@@ -71,42 +79,50 @@ const keyPairFromSeed = async (
 ): Promise<SignKeyPair> => {
   const wasmMemory = module
     ? module.wasmMemory
-    : libsodiumMemory.keyPairFromSeedMemory();
+    : dcryptoMemory.keyPairFromSeedMemory();
 
-  let offset = 0;
+  const dcryptoModule = module || (await dcryptoMethodsModule({ wasmMemory }));
+
+  const ptr1 = dcryptoModule._malloc(crypto_sign_ed25519_PUBLICKEYBYTES);
   const publicKey = new Uint8Array(
-    wasmMemory.buffer,
-    offset,
+    dcryptoModule.HEAP8.buffer,
+    ptr1,
     crypto_sign_ed25519_PUBLICKEYBYTES,
   );
 
-  offset += crypto_sign_ed25519_PUBLICKEYBYTES;
+  const ptr2 = dcryptoModule._malloc(crypto_sign_ed25519_SECRETKEYBYTES);
   const secretKey = new Uint8Array(
-    wasmMemory.buffer,
-    offset,
+    dcryptoModule.HEAP8.buffer,
+    ptr2,
     crypto_sign_ed25519_SECRETKEYBYTES,
   );
 
-  offset += crypto_sign_ed25519_SECRETKEYBYTES;
+  const ptr3 = dcryptoModule._malloc(crypto_sign_ed25519_SEEDBYTES);
   const seedBytes = new Uint8Array(
-    wasmMemory.buffer,
-    offset,
+    dcryptoModule.HEAP8.buffer,
+    ptr3,
     crypto_sign_ed25519_SEEDBYTES,
   );
   seedBytes.set([...seed]);
 
-  const libsodiumModule =
-    module || (await dcryptoMethodsModule({ wasmMemory }));
-
-  const result = libsodiumModule._keypair_from_seed(
+  const result = dcryptoModule._keypair_from_seed(
     publicKey.byteOffset,
     secretKey.byteOffset,
     seedBytes.byteOffset,
   );
 
+  const keyPair = {
+    publicKey: new Uint8Array([...publicKey]),
+    secretKey: new Uint8Array([...secretKey]),
+  };
+
+  dcryptoModule._free(ptr1);
+  dcryptoModule._free(ptr2);
+  dcryptoModule._free(ptr3);
+
   switch (result) {
     case 0: {
-      return { publicKey, secretKey };
+      return keyPair;
     }
 
     default: {
@@ -121,33 +137,41 @@ const keyPairFromSecretKey = async (
 ): Promise<SignKeyPair> => {
   const wasmMemory = module
     ? module.wasmMemory
-    : libsodiumMemory.keyPairFromSecretKeyMemory();
+    : dcryptoMemory.keyPairFromSecretKeyMemory();
 
-  let offset = 0;
+  const dcryptoModule = await dcryptoMethodsModule({ wasmMemory });
+
+  const ptr1 = dcryptoModule._malloc(crypto_sign_ed25519_PUBLICKEYBYTES);
   const publicKey = new Uint8Array(
-    wasmMemory.buffer,
-    offset,
+    dcryptoModule.HEAP8.buffer,
+    ptr1,
     crypto_sign_ed25519_PUBLICKEYBYTES,
   );
 
-  offset += crypto_sign_ed25519_PUBLICKEYBYTES;
+  const ptr2 = dcryptoModule._malloc(crypto_sign_ed25519_SECRETKEYBYTES);
   const sk = new Uint8Array(
-    wasmMemory.buffer,
-    offset,
+    dcryptoModule.HEAP8.buffer,
+    ptr2,
     crypto_sign_ed25519_SECRETKEYBYTES,
   );
   sk.set([...secretKey]);
 
-  const libsodiumModule = await dcryptoMethodsModule({ wasmMemory });
-
-  const result = libsodiumModule._keypair_from_secret_key(
+  const result = dcryptoModule._keypair_from_secret_key(
     publicKey.byteOffset,
-    secretKey.byteOffset,
+    sk.byteOffset,
   );
+
+  const keyPair = {
+    publicKey: new Uint8Array([...publicKey]),
+    secretKey,
+  };
+
+  dcryptoModule._free(ptr1);
+  dcryptoModule._free(ptr2);
 
   switch (result) {
     case 0: {
-      return { publicKey, secretKey };
+      return keyPair;
     }
 
     default: {

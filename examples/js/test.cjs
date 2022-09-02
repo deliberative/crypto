@@ -23,9 +23,9 @@ const main = async () => {
 
     console.log(
       `Keypair from mnemonic: {\n\
-  secretKey: ${Buffer.from(keypair.secretKey).toString("hex")}\n\
-  publicKey: ${Buffer.from(keypair.publicKey).toString("hex")}\n}\
-`,
+      secretKey: ${Buffer.from(keypair.secretKey).toString("hex")}\n\
+      publicKey: ${Buffer.from(keypair.publicKey).toString("hex")}\n}\
+    `,
     );
 
     // Random Uint8Array array of 32 elements
@@ -54,9 +54,9 @@ const main = async () => {
 
     console.log(
       `New random keypair: {\n\
-  secretKey: ${Buffer.from(keypair2.secretKey).toString("hex")}\n\
-  publicKey: ${Buffer.from(keypair2.publicKey).toString("hex")}\n}\
-`,
+      secretKey: ${Buffer.from(keypair2.secretKey).toString("hex")}\n\
+      publicKey: ${Buffer.from(keypair2.publicKey).toString("hex")}\n}\
+    `,
     );
 
     const encrypted = await dcrypto.encrypt(message, keypair2.publicKey, hash);
@@ -75,8 +75,108 @@ const main = async () => {
 
     console.log(
       `Decrypted AEAD box should be equal to random message: \n\
-  Decrypted: ${Buffer.from(decrypted).toString("hex")} \n\
-  Original : ${Buffer.from(message).toString("hex")}\n`,
+      Decrypted: ${Buffer.from(decrypted).toString("hex")} \n\
+      Original : ${Buffer.from(message).toString("hex")}\n`,
+    );
+
+    const sharesLen = 255;
+    const threshold = 165;
+    const shares = await dcrypto.splitSecret(
+      keypair.secretKey,
+      sharesLen,
+      threshold,
+    );
+    console.log(
+      `We split secret key ${Buffer.from(keypair.secretKey).toString(
+        "hex",
+      )} into ${sharesLen} shares and we need at least ${threshold} shares to recreate it`,
+    );
+    for (let i = 0; i < sharesLen; i++) {
+      console.log(
+        `Share #${i + 1} is ${Buffer.from(shares[i]).toString("hex")}`,
+      );
+    }
+
+    // Should be equal to keypair.secretKey
+    const sk1 = await dcrypto.restoreSecret(shares);
+    console.log(
+      `If we combine all shares then the result ${Buffer.from(sk1).toString(
+        "hex",
+      )} should be equal to secret key ${Buffer.from(
+        keypair.secretKey,
+      ).toString("hex")}`,
+    );
+
+    // Remove 80 shares to see if it will still work
+    const lessShares = shares.slice(0, shares.length - 80);
+    const lessSharesRandom = await dcrypto.arrayRandomShuffle(lessShares);
+
+    // Should be equal to sk1 and keypair.secretKey
+    const sk2 = await dcrypto.restoreSecret(lessSharesRandom);
+    console.log(
+      `If we combine 60 shares then the result ${Buffer.from(sk2).toString(
+        "hex",
+      )} should be equal to secret key ${Buffer.from(
+        keypair.secretKey,
+      ).toString("hex")}`,
+    );
+
+    // Remove 11 more and now we are bellow the threshold
+    const evenLessShares = lessShares.slice(0, lessShares.length - 11);
+
+    // Should not be equal to sk1 and sk2.
+    const sk3 = await dcrypto.restoreSecret(evenLessShares);
+    console.log(
+      `If we combine 59 shares then the result ${Buffer.from(sk3).toString(
+        "hex",
+      )} will be differet from the secret key ${Buffer.from(
+        keypair.secretKey,
+      ).toString("hex")}`,
+    );
+
+    const someRandomArray = await dcrypto.randomBytes(12); // 12 byte array
+    console.log("Some random array");
+    console.log(someRandomArray);
+
+    // Cryptographic shuffling
+    const someRandomArrayShuffled = await dcrypto.arrayRandomShuffle(
+      someRandomArray,
+    );
+    console.log("The same array shuffled");
+    console.log(someRandomArrayShuffled);
+
+    // Choose 5 elements from someRandomArray uniformly.
+    const someRandomSubArray = await dcrypto.arrayRandomSubset(
+      someRandomArray,
+      5,
+    ); // 5 elements
+    console.log("5 random elements of the array");
+    console.log(someRandomSubArray);
+
+    // Choose 5 other elements and chances are that the arrays are different
+    const someOtherRandomSubArray = await dcrypto.arrayRandomSubset(
+      someRandomArray,
+      5,
+    );
+    console.log(
+      "Another 5 random elements from the array. They should be different from the previous ones",
+    );
+    console.log(someOtherRandomSubArray);
+
+    const min = 0;
+    const max = 100;
+    const someRandomNumberBetween0and100 = await dcrypto.randomNumberInRange(
+      min,
+      max,
+    );
+    console.log(
+      `A random number from ${min} to ${max} is ${someRandomNumberBetween0and100}`,
+    );
+
+    const someOtherRandomNumberBetween0and100 =
+      await dcrypto.randomNumberInRange(min, max);
+    console.log(
+      `Another random number from ${min} to ${max} is ${someOtherRandomNumberBetween0and100}`,
     );
   } catch (err) {
     console.error(err);

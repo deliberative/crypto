@@ -35,20 +35,26 @@ const restoreSecret = async (
     ? module.wasmMemory
     : shamirMemory.restoreSecretMemory(secretLen, sharesLen);
 
-  let offset = 0;
+  const dcryptoModule = module || (await dcryptoMethodsModule({ wasmMemory })); // await shamirMethodsModule({ wasmMemory });
+
+  const ptr1 = dcryptoModule._malloc(
+    sharesLen * (secretLen + 1) * Uint8Array.BYTES_PER_ELEMENT,
+  );
   const sharesArray = new Uint8Array(
-    wasmMemory.buffer,
-    offset,
-    sharesLen * (secretLen + 1),
+    dcryptoModule.HEAP8.buffer,
+    ptr1,
+    sharesLen * (secretLen + 1) * Uint8Array.BYTES_PER_ELEMENT,
   );
   for (let i = 0; i < sharesLen; i++) {
     sharesArray.set(shares[i], i * (secretLen + 1));
   }
 
-  offset += sharesLen * (secretLen + 1);
-  const secretArray = new Uint8Array(wasmMemory.buffer, offset, secretLen);
-
-  const dcryptoModule = module || (await dcryptoMethodsModule({ wasmMemory })); // await shamirMethodsModule({ wasmMemory });
+  const ptr2 = dcryptoModule._malloc(secretLen * Uint8Array.BYTES_PER_ELEMENT);
+  const secretArray = new Uint8Array(
+    dcryptoModule.HEAP8.buffer,
+    ptr2,
+    secretLen * Uint8Array.BYTES_PER_ELEMENT,
+  );
 
   const result = dcryptoModule._restore_secret(
     sharesLen,
@@ -56,6 +62,9 @@ const restoreSecret = async (
     sharesArray.byteOffset,
     secretArray.byteOffset,
   );
+
+  dcryptoModule._free(ptr1);
+  dcryptoModule._free(ptr2);
 
   switch (result) {
     case 0: {

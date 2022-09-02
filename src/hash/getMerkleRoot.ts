@@ -15,7 +15,7 @@
 
 import sha512 from "./sha512";
 
-import libsodiumMemory from "./memory";
+import dcryptoMemory from "./memory";
 
 import dcryptoMethodsModule from "../c/build/dcryptoMethodsModule";
 
@@ -28,7 +28,7 @@ const getMerkleRoot = async (tree: Uint8Array[]): Promise<Uint8Array> => {
   const maxDataLen = lengths.indexOf(Math.max(...lengths));
 
   const { initialMemory, subsequentMemory } =
-    libsodiumMemory.merkleRootMemory(maxDataLen);
+    dcryptoMemory.merkleRootMemory(maxDataLen);
 
   const initialModule = await dcryptoMethodsModule({
     wasmMemory: initialMemory,

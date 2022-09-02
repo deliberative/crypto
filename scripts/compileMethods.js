@@ -41,10 +41,34 @@ const typesPath = path.join(
 const types = fs.readFileSync(typesPath);
 fs.writeFileSync(wasmPath.replace("le.js", "le.d.ts"), types);
 
+const testing =
+  process.env.NODE_ENV === "production"
+    ? `\
+-flto \
+-O3 \
+-s FILESYSTEM=0 \
+`
+    : `\
+-O1 \
+-g3 \
+--profiling \
+-gsource-map \
+-fsanitize=undefined \
+-s ASSERTIONS=2 \
+-s RUNTIME_LOGGING=1 \
+-s RUNTIME_DEBUG=1 \
+-s SAFE_HEAP=2 \
+-s STACK_OVERFLOW_CHECK=2 \
+-s EXIT_RUNTIME=1 \
+`;
+
 execSync(
   `\
 ${emcc} \
+${testing} \
 -s EXPORTED_FUNCTIONS=\
+_malloc,\
+_free,\
 _sha512,\
 _random_bytes,\
 _argon2,\

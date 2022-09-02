@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import libsodiumMemory from "./memory";
+import dcryptoMemory from "./memory";
 import { crypto_hash_sha512_BYTES } from "../utils/interfaces";
 
 import dcryptoMethodsModule from "../c/build/dcryptoMethodsModule";
@@ -28,20 +28,24 @@ const sha512 = async (
 
   const wasmMemory = module
     ? module.wasmMemory
-    : libsodiumMemory.sha512Memory(dataLen);
-
-  let offset = 0;
-  const arr = new Uint8Array(wasmMemory.buffer, offset, dataLen);
-  arr.set([...data]);
-
-  offset += dataLen;
-  const hash = new Uint8Array(
-    wasmMemory.buffer,
-    offset,
-    crypto_hash_sha512_BYTES,
-  );
+    : dcryptoMemory.sha512Memory(dataLen);
 
   const dcryptoModule = module || (await dcryptoMethodsModule({ wasmMemory }));
+
+  const ptr1 = dcryptoModule._malloc(dataLen * Uint8Array.BYTES_PER_ELEMENT);
+  const arr = new Uint8Array(
+    dcryptoModule.HEAP8.buffer,
+    ptr1,
+    dataLen * Uint8Array.BYTES_PER_ELEMENT,
+  );
+  arr.set([...data]);
+
+  const ptr2 = dcryptoModule._malloc(crypto_hash_sha512_BYTES);
+  const hash = new Uint8Array(
+    dcryptoModule.HEAP8.buffer,
+    ptr2,
+    crypto_hash_sha512_BYTES,
+  );
 
   const result = dcryptoModule._sha512(
     dataLen,
@@ -49,7 +53,12 @@ const sha512 = async (
     hash.byteOffset,
   );
 
-  if (result === 0) return new Uint8Array([...hash]);
+  const h = new Uint8Array([...hash]);
+
+  dcryptoModule._free(ptr1);
+  dcryptoModule._free(ptr2);
+
+  if (result === 0) return h;
 
   throw new Error("Could not hash the array.");
 };

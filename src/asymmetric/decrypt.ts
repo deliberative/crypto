@@ -39,36 +39,48 @@ const decrypt = async (
     ? module.wasmMemory
     : libsodiumMemory.decryptMemory(len, additionalLen);
 
+  const dcryptoModule = module || (await dcryptoMethodsModule({ wasmMemory }));
+
   const decryptedLen =
     len -
     crypto_box_x25519_PUBLICKEYBYTES - // x25519 ephemeral
     crypto_box_x25519_NONCEBYTES - // nonce
     crypto_box_poly1305_AUTHTAGBYTES; // authTag
 
-  let offset = 0;
-  const encryptedArray = new Uint8Array(wasmMemory.buffer, offset, len);
+  const ptr1 = dcryptoModule._malloc(len * Uint8Array.BYTES_PER_ELEMENT);
+  const encryptedArray = new Uint8Array(
+    dcryptoModule.HEAP8.buffer,
+    ptr1,
+    len * Uint8Array.BYTES_PER_ELEMENT,
+  );
   encryptedArray.set([...encrypted]);
 
-  offset += len;
+  const ptr2 = dcryptoModule._malloc(crypto_sign_ed25519_SECRETKEYBYTES);
   const sec = new Uint8Array(
-    wasmMemory.buffer,
-    offset,
+    dcryptoModule.HEAP8.buffer,
+    ptr2,
     crypto_sign_ed25519_SECRETKEYBYTES,
   );
   sec.set([...secretKey]);
 
-  offset += crypto_sign_ed25519_SECRETKEYBYTES;
-  const additional = new Uint8Array(wasmMemory.buffer, offset, additionalLen);
+  const ptr3 = dcryptoModule._malloc(
+    additionalLen * Uint8Array.BYTES_PER_ELEMENT,
+  );
+  const additional = new Uint8Array(
+    dcryptoModule.HEAP8.buffer,
+    ptr3,
+    additionalLen * Uint8Array.BYTES_PER_ELEMENT,
+  );
   additional.set([...additionalData]);
 
-  offset += additionalLen;
-  const decrypted = new Uint8Array(
-    wasmMemory.buffer,
-    offset,
+  const ptr4 = dcryptoModule._malloc(
     decryptedLen * Uint8Array.BYTES_PER_ELEMENT,
   );
-
-  const dcryptoModule = module || (await dcryptoMethodsModule({ wasmMemory }));
+  const decrypted = new Uint8Array(
+    dcryptoModule.HEAP8.buffer,
+    ptr4,
+    decryptedLen * Uint8Array.BYTES_PER_ELEMENT,
+  );
 
   const result = dcryptoModule._decrypt_data(
     len,
@@ -79,9 +91,16 @@ const decrypt = async (
     decrypted.byteOffset,
   );
 
+  const decr = new Uint8Array([...decrypted]);
+
+  dcryptoModule._free(ptr1);
+  dcryptoModule._free(ptr2);
+  dcryptoModule._free(ptr3);
+  dcryptoModule._free(ptr4);
+
   switch (result) {
     case 0:
-      return decrypted;
+      return decr;
     case -1:
       throw new Error("Decrypted data len will be <= 0.");
     case -2:

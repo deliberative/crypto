@@ -27,15 +27,23 @@ const randomBytes = async (
     ? module.wasmMemory
     : utilsMemory.randomBytesMemory(n);
 
-  const bytes = new Uint8Array(wasmMemory.buffer, 0, n);
-
   const dcryptoModule =
     module ||
     (await dcryptoMethodsModule({
       wasmMemory,
     }));
 
+  const ptr = dcryptoModule._malloc(n * Uint8Array.BYTES_PER_ELEMENT);
+  const bytes = new Uint8Array(
+    dcryptoModule.HEAP8.buffer,
+    ptr,
+    n * Uint8Array.BYTES_PER_ELEMENT,
+  );
+  // const bytes = new Uint8Array(wasmMemory.buffer, 0, n);
+
   const result = dcryptoModule._random_bytes(n, bytes.byteOffset);
+
+  dcryptoModule._free(ptr);
 
   if (result === 0) return new Uint8Array([...bytes]);
 

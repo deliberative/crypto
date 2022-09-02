@@ -28,22 +28,31 @@ const splitSecret = async (
   const secretLen = secret.length;
   if (secretLen < 2) throw new Error("Need more data.");
 
+  if (threshold < 2) throw new Error("Threshold is less than 2");
+  if (sharesLen < threshold) throw new Error("Shares are less than threshold");
+  if (sharesLen > 255) throw new Error("Shares exceed 255");
+
   const wasmMemory = module
     ? module.wasmMemory
     : shamirMemory.splitSecretMemory(secretLen, sharesLen, threshold);
+  const dcryptoModule = module || (await dcryptoMethodsModule({ wasmMemory })); // await shamirMethodsModule({ wasmMemory });
 
-  let offset = 0;
-  const secretArray = new Uint8Array(wasmMemory.buffer, offset, secretLen);
+  const ptr1 = dcryptoModule._malloc(secretLen * Uint8Array.BYTES_PER_ELEMENT);
+  const secretArray = new Uint8Array(
+    dcryptoModule.HEAP8.buffer,
+    ptr1,
+    secretLen * Uint8Array.BYTES_PER_ELEMENT,
+  );
   secretArray.set([...secret]);
 
-  offset += secretLen;
-  const sharesArray = new Uint8Array(
-    wasmMemory.buffer,
-    offset,
-    sharesLen * (secretLen + 1),
+  const ptr2 = dcryptoModule._malloc(
+    sharesLen * (secretLen + 1) * Uint8Array.BYTES_PER_ELEMENT,
   );
-
-  const dcryptoModule = module || (await dcryptoMethodsModule({ wasmMemory })); // await shamirMethodsModule({ wasmMemory });
+  const sharesArray = new Uint8Array(
+    dcryptoModule.HEAP8.buffer,
+    ptr2,
+    sharesLen * (secretLen + 1) * Uint8Array.BYTES_PER_ELEMENT,
+  );
 
   const result = dcryptoModule._split_secret(
     sharesLen,
@@ -52,6 +61,9 @@ const splitSecret = async (
     secretArray.byteOffset,
     sharesArray.byteOffset,
   );
+
+  dcryptoModule._free(ptr1);
+  dcryptoModule._free(ptr2);
 
   const values: Uint8Array[] = [];
 
