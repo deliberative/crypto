@@ -159,6 +159,15 @@ export interface DeliberativeCrypto {
   ) => Promise<Uint8Array>;
 
   getMerkleRoot: (tree: Uint8Array[]) => Promise<Uint8Array>;
+  getMerkleProofArtifacts: (
+    tree: Uint8Array[],
+    elementIndex: number,
+  ) => Promise<Uint8Array>;
+  verifyMerkleProof: (
+    hash: Uint8Array,
+    root: Uint8Array,
+    leaves: Uint8Array,
+  ) => Promise<boolean>;
 
   loadHashMemory: {
     sha512: (arrayLen: number) => WebAssembly.Memory;
@@ -229,6 +238,8 @@ const dcrypto: DeliberativeCrypto = {
 
   sha512: hash.sha512,
   getMerkleRoot: hash.getMerkleRoot,
+  getMerkleProofArtifacts: hash.getMerkleProofArtifacts,
+  verifyMerkleProof: hash.verifyMerkleProof,
   loadHashMemory: {
     sha512: hash.memory.sha512Memory,
     merkleRoot: hash.memory.merkleRootMemory,

@@ -39,7 +39,8 @@ The [asymmetric](src/asymmetric) directory contains asymmetric key cryptography 
 
 The [mnemonic](src/mnemonic) directory contains all the relevant to mnemonic generation functions.
 
-The [hash](src/hash) directory contains a sha512 hashing function and a Merkle root getter function.
+The [hash](src/hash) directory contains a sha512 hashing function, a Merkle root getter function, a Merkle
+proof artifacts getter and a verification function.
 
 The [shamir](src/shamir) directory contains a WASM implementation of a cryptographic technique called [Shamir's secret
 sharing](https://en.wikipedia.org/wiki/Shamir%27s_Secret_Sharing), which allows one to split a secret into random shares that can only recreate it if a threshold of them is combined.
@@ -213,6 +214,14 @@ npm run build
 ```
 
 and [Rollup](https://github.com/rollup/rollup) will generate the UMD, ESM and CJS bundles.
+
+For development compilation you can run
+
+```
+npm run build:debug
+```
+
+and everything will work in debug mode.
 
 ## Releases
 

@@ -21,7 +21,10 @@ import dcryptoMethodsModule from "../c/build/dcryptoMethodsModule";
 
 import { crypto_hash_sha512_BYTES } from "../utils/interfaces";
 
-const getMerkleRoot = async (tree: Uint8Array[]): Promise<Uint8Array> => {
+const getMerkleProofArtifacts = async (
+  tree: Uint8Array[],
+  elementIndex: number,
+): Promise<Uint8Array> => {
   const treeLength = tree.length;
 
   const lengths = tree.map((a) => a.length);
@@ -41,11 +44,15 @@ const getMerkleRoot = async (tree: Uint8Array[]): Promise<Uint8Array> => {
   const hashes: Uint8Array[] = [];
   const concatHashes = new Uint8Array(2 * crypto_hash_sha512_BYTES);
 
+  const proofLeaves: Uint8Array[] = [];
+  let indexOfInterest = elementIndex;
+
   let leaves = treeLength;
   let oddLeaves;
 
+  let i;
   while (leaves > 1) {
-    let i = 0;
+    i = 0;
     if (leaves === treeLength) {
       do {
         const hash = await sha512(tree[i++], initialModule);
@@ -58,8 +65,21 @@ const getMerkleRoot = async (tree: Uint8Array[]): Promise<Uint8Array> => {
     do {
       if (oddLeaves && i * 2 === leaves - 1) {
         concatHashes.set([...hashes[i * 2], ...hashes[i * 2]]);
+
+        if (i === indexOfInterest) {
+          proofLeaves.push(Uint8Array.from([...hashes[i], 0]));
+          indexOfInterest = i;
+        }
       } else {
         concatHashes.set([...hashes[i * 2], ...hashes[i * 2 + 1]]);
+
+        if (indexOfInterest === i * 2) {
+          proofLeaves.push(Uint8Array.from([...hashes[i * 2 + 1], 1]));
+          indexOfInterest = i;
+        } else if (indexOfInterest === i * 2 + 1) {
+          proofLeaves.push(Uint8Array.from([...hashes[i * 2], 0]));
+          indexOfInterest = i;
+        }
       }
 
       const hash = await sha512(concatHashes, subsequentModule);
@@ -73,10 +93,19 @@ const getMerkleRoot = async (tree: Uint8Array[]): Promise<Uint8Array> => {
   }
 
   if (hashes.length === 1) {
-    return hashes[0];
+    const proofLeavesLen = proofLeaves.length;
+    const proofArtifacts = new Uint8Array(
+      proofLeavesLen * (crypto_hash_sha512_BYTES + 1),
+    );
+
+    for (i = 0; i < proofLeavesLen; i++) {
+      proofArtifacts.set(proofLeaves[i], i * (crypto_hash_sha512_BYTES + 1));
+    }
+
+    return proofArtifacts;
   } else {
     throw new Error("Something went wrong");
   }
 };
 
-export default getMerkleRoot;
+export default getMerkleProofArtifacts;
