@@ -201,6 +201,18 @@ export interface DeliberativeCrypto {
     restoreSecret: (secretLen: number, sharesLen: number) => WebAssembly.Memory;
   };
 
+  interfaces: {
+    crypto_hash_sha512_BYTES: number;
+    crypto_box_poly1305_AUTHTAGBYTES: number;
+    crypto_box_x25519_PUBLICKEYBYTES: number;
+    crypto_box_x25519_SECRETKEYBYTES: number;
+    crypto_box_x25519_NONCEBYTES: number;
+    crypto_sign_ed25519_BYTES: number;
+    crypto_sign_ed25519_SEEDBYTES: number;
+    crypto_sign_ed25519_PUBLICKEYBYTES: number;
+    crypto_sign_ed25519_SECRETKEYBYTES: number;
+  };
+
   loadModule: EmscriptenModuleFactory<DCryptoMethodsModule>;
 }
 
@@ -250,6 +262,24 @@ const dcrypto: DeliberativeCrypto = {
   loadShamirMemory: {
     splitSecret: shamir.memory.splitSecretMemory,
     restoreSecret: shamir.memory.restoreSecretMemory,
+  },
+
+  interfaces: {
+    crypto_hash_sha512_BYTES: utils.interfaces.crypto_hash_sha512_BYTES,
+    crypto_box_poly1305_AUTHTAGBYTES:
+      utils.interfaces.crypto_box_poly1305_AUTHTAGBYTES,
+    crypto_box_x25519_PUBLICKEYBYTES:
+      utils.interfaces.crypto_box_x25519_PUBLICKEYBYTES,
+    crypto_box_x25519_SECRETKEYBYTES:
+      utils.interfaces.crypto_box_x25519_SECRETKEYBYTES,
+    crypto_box_x25519_NONCEBYTES: utils.interfaces.crypto_box_x25519_NONCEBYTES,
+    crypto_sign_ed25519_BYTES: utils.interfaces.crypto_sign_ed25519_BYTES,
+    crypto_sign_ed25519_SEEDBYTES:
+      utils.interfaces.crypto_sign_ed25519_SEEDBYTES,
+    crypto_sign_ed25519_PUBLICKEYBYTES:
+      utils.interfaces.crypto_sign_ed25519_PUBLICKEYBYTES,
+    crypto_sign_ed25519_SECRETKEYBYTES:
+      utils.interfaces.crypto_sign_ed25519_SECRETKEYBYTES,
   },
 
   loadModule: dcryptoMethodsModule,

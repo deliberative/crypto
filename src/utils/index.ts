@@ -17,6 +17,7 @@ import randomBytes from "./randomBytes";
 import randomNumberInRange from "./randomNumberInRange";
 import arrayRandomShuffle from "./arrayRandomShuffle";
 import arrayRandomSubset from "./arrayRandomSubset";
+import interfaces from "./interfaces";
 import memory from "./memory";
 
 export default {
@@ -24,5 +25,6 @@ export default {
   randomNumberInRange,
   arrayRandomShuffle,
   arrayRandomSubset,
+  interfaces,
   memory,
 };

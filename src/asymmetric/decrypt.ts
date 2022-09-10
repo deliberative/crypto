@@ -20,10 +20,8 @@ import dcryptoMethodsModule from "../c/build/dcryptoMethodsModule";
 import type { DCryptoMethodsModule } from "../c/build/dcryptoMethodsModule";
 
 import {
-  crypto_box_x25519_NONCEBYTES,
-  crypto_box_x25519_PUBLICKEYBYTES,
-  crypto_box_poly1305_AUTHTAGBYTES,
   crypto_sign_ed25519_SECRETKEYBYTES,
+  getBoxDataLen,
 } from "../utils/interfaces";
 
 const decrypt = async (
@@ -41,11 +39,7 @@ const decrypt = async (
 
   const dcryptoModule = module || (await dcryptoMethodsModule({ wasmMemory }));
 
-  const decryptedLen =
-    len -
-    crypto_box_x25519_PUBLICKEYBYTES - // x25519 ephemeral
-    crypto_box_x25519_NONCEBYTES - // nonce
-    crypto_box_poly1305_AUTHTAGBYTES; // authTag
+  const decryptedLen = getBoxDataLen(len);
 
   const ptr1 = dcryptoModule._malloc(len * Uint8Array.BYTES_PER_ELEMENT);
   const encryptedArray = new Uint8Array(

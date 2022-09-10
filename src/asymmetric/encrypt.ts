@@ -20,10 +20,8 @@ import dcryptoMethodsModule from "../c/build/dcryptoMethodsModule";
 import type { DCryptoMethodsModule } from "../c/build/dcryptoMethodsModule";
 
 import {
-  crypto_box_x25519_NONCEBYTES,
-  crypto_box_x25519_PUBLICKEYBYTES,
-  crypto_box_poly1305_AUTHTAGBYTES,
   crypto_sign_ed25519_PUBLICKEYBYTES,
+  getBoxLen,
 } from "../utils/interfaces";
 
 const encrypt = async (
@@ -67,11 +65,7 @@ const encrypt = async (
   );
   additional.set([...additionalData]);
 
-  const sealedBoxLen =
-    crypto_box_x25519_PUBLICKEYBYTES + // ephemeral x25519 public key
-    crypto_box_x25519_NONCEBYTES + // xchacha uses 24 byte nonce while ietf 12
-    len +
-    crypto_box_poly1305_AUTHTAGBYTES; // 16 bytes poly1305 auth tag
+  const sealedBoxLen = getBoxLen(len);
 
   const ptr4 = dcryptoModule._malloc(
     sealedBoxLen * Uint8Array.BYTES_PER_ELEMENT,
