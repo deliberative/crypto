@@ -18,18 +18,24 @@ export interface SignKeyPair {
   secretKey: Uint8Array;
 }
 
-export const crypto_hash_sha512_BYTES = 64;
-export const crypto_secretbox_KEYBYTES = 32;
-export const crypto_secretbox_NONCEBYTES = 24;
-export const crypto_box_poly1305_AUTHTAGBYTES = 16;
-export const crypto_box_x25519_PUBLICKEYBYTES = 32;
-export const crypto_box_x25519_SECRETKEYBYTES = 32;
-export const crypto_box_x25519_NONCEBYTES = 12;
-export const crypto_sign_ed25519_BYTES = 64;
-export const crypto_sign_ed25519_SEEDBYTES = 32;
-export const crypto_sign_ed25519_PUBLICKEYBYTES = 32;
-export const crypto_sign_ed25519_SECRETKEYBYTES = 64;
-export const crypto_pwhash_argon2id_SALTBYTES = 16;
+export const crypto_hash_sha512_BYTES = 64 * Uint8Array.BYTES_PER_ELEMENT;
+export const crypto_secretbox_KEYBYTES = 32 * Uint8Array.BYTES_PER_ELEMENT;
+export const crypto_secretbox_NONCEBYTES = 24 * Uint8Array.BYTES_PER_ELEMENT;
+export const crypto_box_poly1305_AUTHTAGBYTES =
+  16 * Uint8Array.BYTES_PER_ELEMENT;
+export const crypto_box_x25519_PUBLICKEYBYTES =
+  32 * Uint8Array.BYTES_PER_ELEMENT;
+export const crypto_box_x25519_SECRETKEYBYTES =
+  32 * Uint8Array.BYTES_PER_ELEMENT;
+export const crypto_box_x25519_NONCEBYTES = 12 * Uint8Array.BYTES_PER_ELEMENT;
+export const crypto_sign_ed25519_BYTES = 64 * Uint8Array.BYTES_PER_ELEMENT;
+export const crypto_sign_ed25519_SEEDBYTES = 32 * Uint8Array.BYTES_PER_ELEMENT;
+export const crypto_sign_ed25519_PUBLICKEYBYTES =
+  32 * Uint8Array.BYTES_PER_ELEMENT;
+export const crypto_sign_ed25519_SECRETKEYBYTES =
+  64 * Uint8Array.BYTES_PER_ELEMENT;
+export const crypto_pwhash_argon2id_SALTBYTES =
+  16 * Uint8Array.BYTES_PER_ELEMENT;
 
 export const getBoxLen = (dataLen: number) => {
   return (
