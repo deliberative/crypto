@@ -69,7 +69,7 @@
 `,
           );
 
-          const encrypted = await dcrypto.encrypt(
+          const encrypted = await dcrypto.encryptForwardSecrecy(
             message,
             keypair2.publicKey,
             hash,
@@ -81,7 +81,7 @@
             )}`,
           );
 
-          const decrypted = await dcrypto.decrypt(
+          const decrypted = await dcrypto.decryptForwardSecrecy(
             encrypted,
             keypair2.secretKey,
             hash,

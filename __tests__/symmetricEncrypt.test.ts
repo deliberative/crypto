@@ -1,29 +1,23 @@
 import dcrypto from "../src";
 
-import { crypto_hash_sha512_BYTES } from "../src/utils/interfaces";
+import {
+  crypto_hash_sha512_BYTES,
+  crypto_kx_SESSIONKEYBYTES,
+} from "../src/utils/interfaces";
 
 import arraysAreEqual from "../src/utils/arraysAreEqual";
 
-describe("Encryption and decryption with Ed25519 derived keys test suite.", () => {
+describe("Encryption and decryption with symmetric key test suite.", () => {
   test("Encryption and decryption work.", async () => {
     const message = await dcrypto.randomBytes(32);
-    const keypair = await dcrypto.keyPair();
+    const key = await dcrypto.randomBytes(crypto_kx_SESSIONKEYBYTES);
 
     const previousBlockHash = await dcrypto.randomBytes(
       crypto_hash_sha512_BYTES,
     );
 
-    const encrypted = await dcrypto.encrypt(
-      message,
-      keypair.publicKey,
-      previousBlockHash,
-    );
-
-    const decrypted = await dcrypto.decrypt(
-      encrypted,
-      keypair.secretKey,
-      previousBlockHash,
-    );
+    const encrypted = await dcrypto.encrypt(message, key, previousBlockHash);
+    const decrypted = await dcrypto.decrypt(encrypted, key, previousBlockHash);
 
     const encryptionMemory = dcrypto.loadAsymmetricMemory.encrypt(
       message.length,
@@ -34,7 +28,7 @@ describe("Encryption and decryption with Ed25519 derived keys test suite.", () =
     });
     const encryptedWithModule = await dcrypto.encrypt(
       message,
-      keypair.publicKey,
+      key,
       previousBlockHash,
       encryptionModule,
     );
@@ -48,7 +42,7 @@ describe("Encryption and decryption with Ed25519 derived keys test suite.", () =
     });
     const decryptedWithModule = await dcrypto.decrypt(
       encrypted,
-      keypair.secretKey,
+      key,
       previousBlockHash,
       decryptionModule,
     );
@@ -62,21 +56,17 @@ describe("Encryption and decryption with Ed25519 derived keys test suite.", () =
 
   it("Should be impossible to decrypt with wrong key", async () => {
     const message = await dcrypto.randomBytes(32);
-    const keypair = await dcrypto.keyPair();
+    const key = await dcrypto.randomBytes(crypto_kx_SESSIONKEYBYTES);
 
     const previousBlockHash = await dcrypto.randomBytes(
       crypto_hash_sha512_BYTES,
     );
-    const encrypted = await dcrypto.encrypt(
-      message,
-      keypair.publicKey,
-      previousBlockHash,
-    );
+    const encrypted = await dcrypto.encrypt(message, key, previousBlockHash);
 
-    const anotherKeypair = await dcrypto.keyPair();
+    const anotherKey = await dcrypto.randomBytes(crypto_kx_SESSIONKEYBYTES);
 
     await expect(
-      dcrypto.decrypt(encrypted, anotherKeypair.secretKey, previousBlockHash),
+      dcrypto.decrypt(encrypted, anotherKey, previousBlockHash),
     ).rejects.toThrow("Unsuccessful decryption attempt");
   });
 });

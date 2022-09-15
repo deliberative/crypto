@@ -35,7 +35,11 @@ Finally we introduced some utility functions that do random shuffles, pick rando
 
 The [libsodium](https://github.com/deliberative/libsodium) directory contains a fork of libsodium whose only differences with the master branch of libsodium are name changes to the implementation structs.
 
-The [asymmetric](src/asymmetric) directory contains asymmetric key cryptography functions.
+The [asymmetric](src/asymmetric) directory contains asymmetric key cryptography functions. The encryption/decryption
+schema is AEAD with forward secrecy, meaning that a throwaway x25519 keypair is generated inside WebAssembly to make the
+key exchange with the x25519 equivalent of the client's Ed25519 public key.
+
+The [symmetric](src/symmetric) directory contains AEAD encryption/decryption with a symmetric key.
 
 The [mnemonic](src/mnemonic) directory contains all the relevant to mnemonic generation functions.
 
@@ -117,15 +121,29 @@ const keypair2 = await dcrypto.keyPair();
 // Encryptor generates a random keypair. The public key is contained in the
 // "encrypted" box and the secret key is used for the key exchange with
 // "keypair2.publicKey" and then it is removed from memory.
-const encrypted = await dcrypto.encrypt(message, keypair2.publicKey, hash);
+const encrypted = await dcrypto.encryptForwardSecrecy(
+  message,
+  keypair2.publicKey,
+  hash,
+);
 
-const decrypted = await dcrypto.decrypt(encrypted, keypair2.secretKey, hash);
+const decrypted = await dcrypto.decryptForwardSecrecy(
+  encrypted,
+  keypair2.secretKey,
+  hash,
+);
 
 // To test equality for two Uint8Arrays in js you need to check if each of their elements are equal
 // The === operator does not work
 for (let i = 0; i < message.length; i++) {
   if (message[i] !== decrypted[i]) console.error("Arrays unequal");
 }
+
+const symmetricKey = await dcrypto.randomBytes(
+  dcrypto.interfaces.crypto_kx_SESSIONKEYBYTES,
+);
+const encrypted1 = await dcrypto.encrypt(message, symmetricKey, hash);
+const decrypted1 = await dcrypto.decrypt(encrypted1, key, hash);
 ```
 
 For Shamir secret sharing you can test the following

@@ -21,7 +21,7 @@ import type { DCryptoMethodsModule } from "../c/build/dcryptoMethodsModule";
 
 import {
   crypto_sign_ed25519_PUBLICKEYBYTES,
-  getBoxLen,
+  getForwardSecretBoxEncryptedLen,
 } from "../utils/interfaces";
 
 const encrypt = async (
@@ -65,7 +65,7 @@ const encrypt = async (
   );
   additional.set([...additionalData]);
 
-  const sealedBoxLen = getBoxLen(len);
+  const sealedBoxLen = getForwardSecretBoxEncryptedLen(len);
 
   const ptr4 = dcryptoModule._malloc(
     sealedBoxLen * Uint8Array.BYTES_PER_ELEMENT,
@@ -76,7 +76,7 @@ const encrypt = async (
     sealedBoxLen * Uint8Array.BYTES_PER_ELEMENT,
   );
 
-  const result = dcryptoModule._encrypt_data(
+  const result = dcryptoModule._forward_secretbox_encrypt_data(
     len,
     dataArray.byteOffset,
     pub.byteOffset,

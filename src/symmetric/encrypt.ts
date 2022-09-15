@@ -13,49 +13,47 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import libsodiumMemory from "./memory";
+import dcryptoMemory from "./memory";
 
 import dcryptoMethodsModule from "../c/build/dcryptoMethodsModule";
 
 import type { DCryptoMethodsModule } from "../c/build/dcryptoMethodsModule";
 
 import {
-  crypto_sign_ed25519_SECRETKEYBYTES,
-  getForwardSecretBoxDecryptedLen,
+  crypto_kx_SESSIONKEYBYTES,
+  getEncryptedLen,
 } from "../utils/interfaces";
 
-const decrypt = async (
-  encrypted: Uint8Array,
-  secretKey: Uint8Array,
+const encrypt = async (
+  message: Uint8Array,
+  key: Uint8Array,
   additionalData: Uint8Array,
   module?: DCryptoMethodsModule,
 ): Promise<Uint8Array> => {
-  const len = encrypted.length;
+  const len = message.length;
   const additionalLen = additionalData.length;
 
   const wasmMemory = module
     ? module.wasmMemory
-    : libsodiumMemory.decryptMemory(len, additionalLen);
+    : dcryptoMemory.encryptMemory(len, additionalLen);
 
   const dcryptoModule = module || (await dcryptoMethodsModule({ wasmMemory }));
 
-  const decryptedLen = getForwardSecretBoxDecryptedLen(len);
-
   const ptr1 = dcryptoModule._malloc(len * Uint8Array.BYTES_PER_ELEMENT);
-  const encryptedArray = new Uint8Array(
+  const dataArray = new Uint8Array(
     dcryptoModule.HEAP8.buffer,
     ptr1,
     len * Uint8Array.BYTES_PER_ELEMENT,
   );
-  encryptedArray.set([...encrypted]);
+  dataArray.set([...message]);
 
-  const ptr2 = dcryptoModule._malloc(crypto_sign_ed25519_SECRETKEYBYTES);
-  const sec = new Uint8Array(
+  const ptr2 = dcryptoModule._malloc(crypto_kx_SESSIONKEYBYTES);
+  const k = new Uint8Array(
     dcryptoModule.HEAP8.buffer,
     ptr2,
-    crypto_sign_ed25519_SECRETKEYBYTES,
+    crypto_kx_SESSIONKEYBYTES,
   );
-  sec.set([...secretKey]);
+  k.set([...key]);
 
   const ptr3 = dcryptoModule._malloc(
     additionalLen * Uint8Array.BYTES_PER_ELEMENT,
@@ -67,25 +65,27 @@ const decrypt = async (
   );
   additional.set([...additionalData]);
 
+  const sealedBoxLen = getEncryptedLen(len);
+
   const ptr4 = dcryptoModule._malloc(
-    decryptedLen * Uint8Array.BYTES_PER_ELEMENT,
+    sealedBoxLen * Uint8Array.BYTES_PER_ELEMENT,
   );
-  const decrypted = new Uint8Array(
+  const encrypted = new Uint8Array(
     dcryptoModule.HEAP8.buffer,
     ptr4,
-    decryptedLen * Uint8Array.BYTES_PER_ELEMENT,
+    sealedBoxLen * Uint8Array.BYTES_PER_ELEMENT,
   );
 
-  const result = dcryptoModule._forward_secretbox_decrypt_data(
+  const result = dcryptoModule._encrypt_data(
     len,
-    encryptedArray.byteOffset,
-    sec.byteOffset,
+    dataArray.byteOffset,
+    k.byteOffset,
     additionalLen,
     additional.byteOffset,
-    decrypted.byteOffset,
+    encrypted.byteOffset,
   );
 
-  const decr = new Uint8Array([...decrypted]);
+  const enc = new Uint8Array([...encrypted]);
 
   dcryptoModule._free(ptr1);
   dcryptoModule._free(ptr2);
@@ -93,19 +93,21 @@ const decrypt = async (
   dcryptoModule._free(ptr4);
 
   switch (result) {
-    case 0:
-      return decr;
-    case -1:
-      throw new Error("Decrypted data len will be <= 0.");
-    case -2:
-      throw new Error("Could not create successful key exchange");
-    case -3:
-      throw new Error("Invalid ephemeral key signature");
-    case -4:
-      throw new Error("Unsuccessful decryption attempt");
+    case 0: {
+      return enc;
+    }
+
+    case -1: {
+      throw new Error("Could not convert Ed25519 public key to X25519.");
+    }
+
+    case -2: {
+      throw new Error("Could not create a shared secret.");
+    }
+
     default:
-      throw new Error("Unexpected error occured");
+      throw new Error("An unexpected error occured.");
   }
 };
 
-export default decrypt;
+export default encrypt;

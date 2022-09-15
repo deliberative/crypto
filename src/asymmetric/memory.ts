@@ -25,6 +25,8 @@ import {
   crypto_box_x25519_PUBLICKEYBYTES,
   crypto_box_x25519_SECRETKEYBYTES,
   crypto_box_poly1305_AUTHTAGBYTES,
+  getForwardSecretBoxEncryptedLen,
+  getForwardSecretBoxDecryptedLen,
 } from "../utils/interfaces";
 
 const newKeyPairMemory = (): WebAssembly.Memory => {
@@ -83,11 +85,7 @@ const encryptMemory = (
   messageLen: number,
   additionalDataLen: number,
 ): WebAssembly.Memory => {
-  const sealedBoxLen =
-    crypto_box_x25519_PUBLICKEYBYTES + // ephemeral x25519 public key
-    crypto_box_x25519_NONCEBYTES + // xchacha uses 24 byte nonce while ietf 12
-    messageLen +
-    crypto_box_poly1305_AUTHTAGBYTES; // 16 bytes poly1305 auth tag
+  const sealedBoxLen = getForwardSecretBoxEncryptedLen(messageLen);
   const memoryLen =
     (messageLen +
       crypto_sign_ed25519_PUBLICKEYBYTES +
@@ -107,11 +105,7 @@ const decryptMemory = (
   encryptedLen: number,
   additionalDataLen: number,
 ): WebAssembly.Memory => {
-  const decryptedLen =
-    encryptedLen -
-    crypto_box_x25519_PUBLICKEYBYTES - // x25519 ephemeral
-    crypto_box_x25519_NONCEBYTES - // nonce
-    crypto_box_poly1305_AUTHTAGBYTES; // authTag
+  const decryptedLen = getForwardSecretBoxDecryptedLen(encryptedLen);
   const memoryLen =
     (encryptedLen +
       crypto_sign_ed25519_SECRETKEYBYTES +

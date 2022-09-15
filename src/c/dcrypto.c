@@ -136,7 +136,94 @@ verify_data(const int DATA_LEN, const uint8_t data[DATA_LEN],
 }
 
 __attribute__((used)) void
-calculate_nonce(
+calculate_nonce(uint8_t nonce[crypto_aead_chacha20poly1305_ietf_NPUBBYTES])
+{
+  uint8_t *nonce_random_vector
+      = (uint8_t *)sodium_malloc(crypto_hash_sha512_BYTES * sizeof(uint8_t));
+  randombytes_buf(nonce_random_vector, crypto_hash_sha512_BYTES);
+
+  uint8_t *nonce_sha512
+      = (uint8_t *)malloc(crypto_hash_sha512_BYTES * sizeof(uint8_t));
+  crypto_hash_sha512(nonce_sha512, nonce_random_vector,
+                     crypto_hash_sha512_BYTES);
+  sodium_free(nonce_random_vector);
+
+  memcpy(nonce, nonce_sha512 + crypto_aead_chacha20poly1305_ietf_NPUBBYTES,
+         crypto_aead_chacha20poly1305_ietf_NPUBBYTES);
+  free(nonce_sha512);
+}
+
+/* Returns (nonce || encrypted_data || auth tag) */
+__attribute__((used)) int
+encrypt_data(
+    const int DATA_LEN, const uint8_t data[DATA_LEN],
+    const uint8_t key[crypto_kx_SESSIONKEYBYTES], const int ADDITIONAL_DATA_LEN,
+    const uint8_t additional_data[ADDITIONAL_DATA_LEN],
+    uint8_t encrypted[crypto_aead_chacha20poly1305_ietf_NPUBBYTES + DATA_LEN
+                      + crypto_aead_chacha20poly1305_ietf_ABYTES])
+{
+  unsigned long long CIPHERTEXT_LEN
+      = DATA_LEN + crypto_aead_chacha20poly1305_ietf_ABYTES;
+  uint8_t *ciphertext
+      = (uint8_t *)sodium_malloc(CIPHERTEXT_LEN * sizeof(uint8_t));
+
+  uint8_t *nonce
+      = malloc(crypto_aead_chacha20poly1305_ietf_NPUBBYTES * sizeof(uint8_t));
+  calculate_nonce(nonce);
+
+  crypto_aead_chacha20poly1305_ietf_encrypt(
+      ciphertext, &CIPHERTEXT_LEN, data, DATA_LEN, additional_data,
+      ADDITIONAL_DATA_LEN, NULL, nonce, key);
+
+  memcpy(encrypted, nonce, crypto_aead_chacha20poly1305_ietf_NPUBBYTES);
+  free(nonce);
+
+  memcpy(encrypted + crypto_aead_chacha20poly1305_ietf_NPUBBYTES, ciphertext,
+         CIPHERTEXT_LEN);
+  sodium_free(ciphertext);
+
+  return 0;
+}
+
+__attribute__((used)) int
+decrypt_data(
+    const int ENCRYPTED_LEN, const uint8_t encrypted_data[ENCRYPTED_LEN],
+    const uint8_t key[crypto_kx_SESSIONKEYBYTES], const int ADDITIONAL_DATA_LEN,
+    const uint8_t additional_data[ADDITIONAL_DATA_LEN],
+    uint8_t data[ENCRYPTED_LEN - crypto_aead_chacha20poly1305_ietf_NPUBBYTES
+                 - crypto_aead_chacha20poly1305_ietf_ABYTES])
+{
+  unsigned long long DATA_LEN = ENCRYPTED_LEN
+                                - crypto_aead_chacha20poly1305_ietf_NPUBBYTES
+                                - crypto_aead_chacha20poly1305_ietf_ABYTES;
+
+  if (DATA_LEN <= 0) return -1;
+
+  uint8_t *nonce
+      = malloc(crypto_aead_chacha20poly1305_ietf_NPUBBYTES * sizeof(uint8_t));
+  memcpy(nonce, encrypted_data, crypto_aead_chacha20poly1305_ietf_NPUBBYTES);
+
+  int CIPHERTEXT_LEN
+      = ENCRYPTED_LEN - crypto_aead_chacha20poly1305_ietf_NPUBBYTES;
+  uint8_t *ciphertext = malloc(CIPHERTEXT_LEN * sizeof(uint8_t));
+  memcpy(ciphertext,
+         encrypted_data + crypto_aead_chacha20poly1305_ietf_NPUBBYTES,
+         CIPHERTEXT_LEN);
+
+  int decrypted = crypto_aead_chacha20poly1305_ietf_decrypt(
+      data, &DATA_LEN, NULL, ciphertext, CIPHERTEXT_LEN, additional_data,
+      ADDITIONAL_DATA_LEN, nonce, key);
+
+  free(ciphertext);
+  free(nonce);
+
+  if (decrypted == 0) return 0;
+
+  return -4;
+}
+
+__attribute__((used)) void
+calculate_forward_secret_nonce(
     uint8_t nonce[crypto_aead_chacha20poly1305_ietf_NPUBBYTES],
     const uint8_t ephemeral_x25519_pk[crypto_scalarmult_curve25519_BYTES],
     const uint8_t x25519_pk[crypto_scalarmult_curve25519_BYTES])
@@ -166,7 +253,7 @@ calculate_nonce(
 /* Returns (ephemeral_pk || nonce || encrypted_data || auth tag || signature of
  * ephemeral_pk)  */
 __attribute__((used)) int
-encrypt_data(
+forward_secretbox_encrypt_data(
     const int DATA_LEN, const uint8_t data[DATA_LEN],
     const uint8_t public_key[crypto_sign_ed25519_PUBLICKEYBYTES],
     const int ADDITIONAL_DATA_LEN,
@@ -218,7 +305,7 @@ encrypt_data(
 
   uint8_t *nonce
       = malloc(crypto_aead_chacha20poly1305_ietf_NPUBBYTES * sizeof(uint8_t));
-  calculate_nonce(nonce, ephemeral_x25519_pk, x25519_pk);
+  calculate_forward_secret_nonce(nonce, ephemeral_x25519_pk, x25519_pk);
   free(x25519_pk);
 
   crypto_aead_chacha20poly1305_ietf_encrypt(
@@ -242,7 +329,7 @@ encrypt_data(
 }
 
 __attribute__((used)) int
-decrypt_data(
+forward_secretbox_decrypt_data(
     const int ENCRYPTED_LEN, const uint8_t encrypted_data[ENCRYPTED_LEN],
     const uint8_t secret_key[crypto_sign_ed25519_SECRETKEYBYTES],
     const int ADDITIONAL_DATA_LEN,

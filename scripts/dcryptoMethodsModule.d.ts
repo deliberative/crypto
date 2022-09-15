@@ -45,12 +45,28 @@ export interface DCryptoMethodsModule extends EmscriptenModule {
   _encrypt_data(
     DATA_LEN: number,
     data: number, // Uint8Array,
-    public_key: number, // Uint8Array,
+    key: number, // Uint8Array,
     ADDITIONAL_DATA_LEN: number,
     additional_data: number, // Uint8Array,
     encrypted: number, // Uint8Array,
   ): number;
   _decrypt_data(
+    ENCRYPTED_LEN: number,
+    encrypted_data: number, // Uint8Array,
+    key: number, // Uint8Array,
+    ADDITIONAL_DATA_LEN: number,
+    additional_data: number, // Uint8Array,
+    data: number, // Uint8Array,
+  ): number;
+  _forward_secretbox_encrypt_data(
+    DATA_LEN: number,
+    data: number, // Uint8Array,
+    public_key: number, // Uint8Array,
+    ADDITIONAL_DATA_LEN: number,
+    additional_data: number, // Uint8Array,
+    encrypted: number, // Uint8Array,
+  ): number;
+  _forward_secretbox_decrypt_data(
     ENCRYPTED_LEN: number,
     encrypted_data: number, // Uint8Array,
     secret_key: number, // Uint8Array,

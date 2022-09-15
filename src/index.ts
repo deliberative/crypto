@@ -14,6 +14,7 @@
 // limitations under the License.
 
 import asymmetric from "./asymmetric";
+import symmetric from "./symmetric";
 import mnemonic from "./mnemonic";
 import hash from "./hash";
 import shamir from "./shamir";
@@ -102,7 +103,7 @@ export interface DeliberativeCrypto {
   /**
    * Encrypts
    */
-  encrypt: (
+  encryptForwardSecrecy: (
     message: Uint8Array,
     publicKey: Uint8Array,
     additionalData: Uint8Array,
@@ -112,7 +113,7 @@ export interface DeliberativeCrypto {
   /**
    * Decrypts
    */
-  decrypt: (
+  decryptForwardSecrecy: (
     encrypted: Uint8Array,
     secretKey: Uint8Array,
     additionalData: Uint8Array,
@@ -143,6 +144,37 @@ export interface DeliberativeCrypto {
     keyPairFromSecretKey: () => WebAssembly.Memory;
     sign: (messageLen: number) => WebAssembly.Memory;
     verify: (messageLen: number) => WebAssembly.Memory;
+    encrypt: (
+      messageLen: number,
+      additionalDataLen: number,
+    ) => WebAssembly.Memory;
+    decrypt: (
+      encryptedLen: number,
+      additionalDataLen: number,
+    ) => WebAssembly.Memory;
+  };
+
+  /**
+   * Encrypts
+   */
+  encrypt: (
+    message: Uint8Array,
+    key: Uint8Array,
+    additionalData: Uint8Array,
+    module?: DCryptoMethodsModule,
+  ) => Promise<Uint8Array>;
+
+  /**
+   * Decrypts
+   */
+  decrypt: (
+    encrypted: Uint8Array,
+    key: Uint8Array,
+    additionalData: Uint8Array,
+    module?: DCryptoMethodsModule,
+  ) => Promise<Uint8Array>;
+
+  loadSymmetricMemory: {
     encrypt: (
       messageLen: number,
       additionalDataLen: number,
@@ -207,10 +239,24 @@ export interface DeliberativeCrypto {
     crypto_box_x25519_PUBLICKEYBYTES: number;
     crypto_box_x25519_SECRETKEYBYTES: number;
     crypto_box_x25519_NONCEBYTES: number;
+    crypto_kx_SESSIONKEYBYTES: number;
     crypto_sign_ed25519_BYTES: number;
     crypto_sign_ed25519_SEEDBYTES: number;
     crypto_sign_ed25519_PUBLICKEYBYTES: number;
     crypto_sign_ed25519_SECRETKEYBYTES: number;
+    getEncryptedLen: (messageLen: number, additionalDataLen: number) => number;
+    getDecryptedLen: (
+      encryptedLen: number,
+      additionalDataLen: number,
+    ) => number;
+    getForwardSecretBoxEncryptedLen: (
+      messageLen: number,
+      additionalDataLen: number,
+    ) => number;
+    getForwardSecretBoxDecryptedLen: (
+      encryptedLen: number,
+      additionalDataLen: number,
+    ) => number;
   };
 
   loadModule: EmscriptenModuleFactory<DCryptoMethodsModule>;
@@ -231,8 +277,8 @@ const dcrypto: DeliberativeCrypto = {
   keyPairFromSecretKey: asymmetric.keyPair.keyPairFromSecretKey,
   sign: asymmetric.sign,
   verify: asymmetric.verify,
-  encrypt: asymmetric.encrypt,
-  decrypt: asymmetric.decrypt,
+  encryptForwardSecrecy: asymmetric.encrypt,
+  decryptForwardSecrecy: asymmetric.decrypt,
 
   generateMnemonic: mnemonic.generateMnemonic,
   validateMnemonic: mnemonic.validateMnemonic,
@@ -246,6 +292,13 @@ const dcrypto: DeliberativeCrypto = {
     verify: asymmetric.memory.verifyMemory,
     encrypt: asymmetric.memory.encryptMemory,
     decrypt: asymmetric.memory.decryptMemory,
+  },
+
+  encrypt: symmetric.encrypt,
+  decrypt: symmetric.decrypt,
+  loadSymmetricMemory: {
+    encrypt: symmetric.memory.encryptMemory,
+    decrypt: symmetric.memory.decryptMemory,
   },
 
   sha512: hash.sha512,
@@ -273,6 +326,7 @@ const dcrypto: DeliberativeCrypto = {
     crypto_box_x25519_SECRETKEYBYTES:
       utils.interfaces.crypto_box_x25519_SECRETKEYBYTES,
     crypto_box_x25519_NONCEBYTES: utils.interfaces.crypto_box_x25519_NONCEBYTES,
+    crypto_kx_SESSIONKEYBYTES: utils.interfaces.crypto_kx_SESSIONKEYBYTES,
     crypto_sign_ed25519_BYTES: utils.interfaces.crypto_sign_ed25519_BYTES,
     crypto_sign_ed25519_SEEDBYTES:
       utils.interfaces.crypto_sign_ed25519_SEEDBYTES,
@@ -280,6 +334,12 @@ const dcrypto: DeliberativeCrypto = {
       utils.interfaces.crypto_sign_ed25519_PUBLICKEYBYTES,
     crypto_sign_ed25519_SECRETKEYBYTES:
       utils.interfaces.crypto_sign_ed25519_SECRETKEYBYTES,
+    getEncryptedLen: utils.interfaces.getEncryptedLen,
+    getDecryptedLen: utils.interfaces.getDecryptedLen,
+    getForwardSecretBoxEncryptedLen:
+      utils.interfaces.getForwardSecretBoxEncryptedLen,
+    getForwardSecretBoxDecryptedLen:
+      utils.interfaces.getForwardSecretBoxDecryptedLen,
   },
 
   loadModule: dcryptoMethodsModule,

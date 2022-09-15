@@ -20,13 +20,13 @@ describe("Browser-based tests.", () => {
       crypto_hash_sha512_BYTES,
     );
 
-    const encrypted = await dcrypto.encrypt(
+    const encrypted = await dcrypto.encryptForwardSecrecy(
       message,
       keypair.publicKey,
       previousBlockHash,
     );
 
-    const decrypted = await dcrypto.decrypt(
+    const decrypted = await dcrypto.decryptForwardSecrecy(
       encrypted,
       keypair.secretKey,
       previousBlockHash,
@@ -40,6 +40,9 @@ describe("Browser-based tests.", () => {
   test("Loading libsodium wasm module in the browser and crypto operations work.", async () => {
     const randomBytes = await dcrypto.randomBytes(256);
     const hash = await dcrypto.sha512(randomBytes);
+    const key = await dcrypto.randomBytes(
+      dcrypto.interfaces.crypto_kx_SESSIONKEYBYTES,
+    );
     const keypair = await dcrypto.keyPair();
     const signature = await dcrypto.sign(randomBytes, keypair.secretKey);
     const verification = await dcrypto.verify(
@@ -47,14 +50,21 @@ describe("Browser-based tests.", () => {
       signature,
       keypair.publicKey,
     );
-    const encrypted = await dcrypto.encrypt(
+    const encrypted = await dcrypto.encryptForwardSecrecy(
       randomBytes,
       keypair.publicKey,
       hash,
     );
-    const decrypted = await dcrypto.decrypt(encrypted, keypair.secretKey, hash);
+    const decrypted = await dcrypto.decryptForwardSecrecy(
+      encrypted,
+      keypair.secretKey,
+      hash,
+    );
+    const encrypted1 = await dcrypto.encrypt(randomBytes, key, hash);
+    const decrypted1 = await dcrypto.decrypt(encrypted1, key, hash);
     expect(verification).toBe(true);
     expect(arraysAreEqual(randomBytes, decrypted)).toBe(true);
+    expect(arraysAreEqual(randomBytes, decrypted1)).toBe(true);
   });
 
   test("Loading shamir wasm module in the browser and splitting/restoring works.", async () => {

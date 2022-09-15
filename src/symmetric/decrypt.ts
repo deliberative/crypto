@@ -20,13 +20,13 @@ import dcryptoMethodsModule from "../c/build/dcryptoMethodsModule";
 import type { DCryptoMethodsModule } from "../c/build/dcryptoMethodsModule";
 
 import {
-  crypto_sign_ed25519_SECRETKEYBYTES,
-  getForwardSecretBoxDecryptedLen,
+  crypto_kx_SESSIONKEYBYTES,
+  getDecryptedLen,
 } from "../utils/interfaces";
 
 const decrypt = async (
   encrypted: Uint8Array,
-  secretKey: Uint8Array,
+  key: Uint8Array,
   additionalData: Uint8Array,
   module?: DCryptoMethodsModule,
 ): Promise<Uint8Array> => {
@@ -39,7 +39,7 @@ const decrypt = async (
 
   const dcryptoModule = module || (await dcryptoMethodsModule({ wasmMemory }));
 
-  const decryptedLen = getForwardSecretBoxDecryptedLen(len);
+  const decryptedLen = getDecryptedLen(len);
 
   const ptr1 = dcryptoModule._malloc(len * Uint8Array.BYTES_PER_ELEMENT);
   const encryptedArray = new Uint8Array(
@@ -49,13 +49,13 @@ const decrypt = async (
   );
   encryptedArray.set([...encrypted]);
 
-  const ptr2 = dcryptoModule._malloc(crypto_sign_ed25519_SECRETKEYBYTES);
-  const sec = new Uint8Array(
+  const ptr2 = dcryptoModule._malloc(crypto_kx_SESSIONKEYBYTES);
+  const k = new Uint8Array(
     dcryptoModule.HEAP8.buffer,
     ptr2,
-    crypto_sign_ed25519_SECRETKEYBYTES,
+    crypto_kx_SESSIONKEYBYTES,
   );
-  sec.set([...secretKey]);
+  k.set([...key]);
 
   const ptr3 = dcryptoModule._malloc(
     additionalLen * Uint8Array.BYTES_PER_ELEMENT,
@@ -76,10 +76,10 @@ const decrypt = async (
     decryptedLen * Uint8Array.BYTES_PER_ELEMENT,
   );
 
-  const result = dcryptoModule._forward_secretbox_decrypt_data(
+  const result = dcryptoModule._decrypt_data(
     len,
     encryptedArray.byteOffset,
-    sec.byteOffset,
+    k.byteOffset,
     additionalLen,
     additional.byteOffset,
     decrypted.byteOffset,

@@ -59,7 +59,11 @@ const main = async () => {
     `,
     );
 
-    const encrypted = await dcrypto.encrypt(message, keypair2.publicKey, hash);
+    const encrypted = await dcrypto.encryptForwardSecrecy(
+      message,
+      keypair2.publicKey,
+      hash,
+    );
 
     console.log(
       `AEAD encrypted box for random message and keypair2: ${Buffer.from(
@@ -67,7 +71,7 @@ const main = async () => {
       ).toString("hex")}`,
     );
 
-    const decrypted = await dcrypto.decrypt(
+    const decrypted = await dcrypto.decryptForwardSecrecy(
       encrypted,
       keypair2.secretKey,
       hash,
