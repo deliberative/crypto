@@ -7,10 +7,6 @@ export interface DCryptoMethodsModule extends EmscriptenModule {
     data: number, // Uint8Array, // byteOffset
     hash: number, // Uint8Array
   ): number;
-  _random_bytes(
-    SIZE: number,
-    array: number, // Uint8Array
-  ): number;
   _argon2(
     MNEMONIC_LEN: number,
     seed: number, // Uint8Array
@@ -74,7 +70,6 @@ export interface DCryptoMethodsModule extends EmscriptenModule {
     additional_data: number, // Uint8Array,
     data: number, // Uint8Array,
   ): number;
-  _random_number_in_range(MIN: number, MAX: number): number;
   _split_secret(
     SHARES_LEN: number,
     THRESHOLD: number,

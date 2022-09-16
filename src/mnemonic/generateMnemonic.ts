@@ -13,9 +13,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import wordlist from "./wordlist.json";
+import dutils from "@deliberative/utils";
 
-import randomBytes from "../utils/randomBytes";
+import wordlist from "./wordlist.json";
 
 import sha512 from "../hash/sha512";
 
@@ -35,7 +35,7 @@ const generateMnemonic = async (
     throw new Error("English wordlist could not be loaded.");
   }
 
-  const entropy = await randomBytes(strength / 8);
+  const entropy = await dutils.randomBytes(strength / 8);
 
   // 128 <= ENT <= 256
   if (entropy.length < 16) {

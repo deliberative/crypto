@@ -70,14 +70,6 @@ sha512(const int DATA_LEN, const uint8_t data[DATA_LEN],
 }
 
 __attribute__((used)) int
-random_bytes(const int SIZE, uint8_t array[SIZE])
-{
-  randombytes_buf(array, SIZE);
-
-  return 0;
-}
-
-__attribute__((used)) int
 argon2(const int MNEMONIC_LEN, uint8_t seed[crypto_sign_ed25519_SEEDBYTES],
        const char mnemonic[MNEMONIC_LEN],
        const uint8_t salt[crypto_pwhash_argon2id_SALTBYTES])
@@ -393,44 +385,6 @@ forward_secretbox_decrypt_data(
   if (decrypted == 0) return 0;
 
   return -4;
-}
-
-__attribute__((used)) int
-random_number_in_range(const int MIN, const int MAX)
-{
-  size_t i;
-
-  const int RANGE = MAX - MIN;
-  const int BYTES_NEEDED = ceil(log2(RANGE) / 8);
-  const int MAX_RANGE = pow(pow(2, 8), BYTES_NEEDED);
-  const int EXTENDED_RANGE = floor(MAX_RANGE / RANGE) * RANGE;
-
-  uint8_t *randomBytes = malloc(BYTES_NEEDED * sizeof(uint8_t));
-
-  int randomInteger = EXTENDED_RANGE;
-  while (randomInteger >= EXTENDED_RANGE)
-  {
-    randombytes_buf(randomBytes, BYTES_NEEDED);
-
-    randomInteger = 0;
-    for (i = 0; i < BYTES_NEEDED; i++)
-    {
-      randomInteger <<= 8;
-      randomInteger += randomBytes[i];
-    }
-
-    if (randomInteger < EXTENDED_RANGE)
-    {
-      free(randomBytes);
-      randomInteger %= RANGE;
-
-      return MIN + randomInteger;
-    }
-  }
-
-  free(randomBytes);
-
-  return randomInteger;
 }
 
 __attribute__((used)) int

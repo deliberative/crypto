@@ -1,4 +1,5 @@
 import dcrypto from "@deliberative/crypto";
+import dutils from "@deliberative/utils";
 
 const main = async () => {
   try {
@@ -29,7 +30,7 @@ const main = async () => {
     );
 
     // Random Uint8Array array of 32 elements
-    const message = await dcrypto.randomBytes(32);
+    const message = await dutils.randomBytes(32);
 
     console.log(
       `Random message to sign: ${Buffer.from(message).toString("hex")}`,
@@ -113,7 +114,7 @@ const main = async () => {
 
     // Remove 80 shares to see if it will still work
     const lessShares = shares.slice(0, shares.length - 80);
-    const lessSharesRandom = await dcrypto.arrayRandomShuffle(lessShares);
+    const lessSharesRandom = await dutils.arrayRandomShuffle(lessShares);
 
     // Should be equal to sk1 and keypair.secretKey
     const sk2 = await dcrypto.restoreSecret(lessSharesRandom);
@@ -136,51 +137,6 @@ const main = async () => {
       )} will be differet from the secret key ${Buffer.from(
         keypair.secretKey,
       ).toString("hex")}`,
-    );
-
-    const someRandomArray = await dcrypto.randomBytes(12); // 12 byte array
-    console.log("Some random array");
-    console.log(someRandomArray);
-
-    // Cryptographic shuffling
-    const someRandomArrayShuffled = await dcrypto.arrayRandomShuffle(
-      someRandomArray,
-    );
-    console.log("The same array shuffled");
-    console.log(someRandomArrayShuffled);
-
-    // Choose 5 elements from someRandomArray uniformly.
-    const someRandomSubArray = await dcrypto.arrayRandomSubset(
-      someRandomArray,
-      5,
-    ); // 5 elements
-    console.log("5 random elements of the array");
-    console.log(someRandomSubArray);
-
-    // Choose 5 other elements and chances are that the arrays are different
-    const someOtherRandomSubArray = await dcrypto.arrayRandomSubset(
-      someRandomArray,
-      5,
-    );
-    console.log(
-      "Another 5 random elements from the array. They should be different from the previous ones",
-    );
-    console.log(someOtherRandomSubArray);
-
-    const min = 0;
-    const max = 100;
-    const someRandomNumberBetween0and100 = await dcrypto.randomNumberInRange(
-      min,
-      max,
-    );
-    console.log(
-      `A random number from ${min} to ${max} is ${someRandomNumberBetween0and100}`,
-    );
-
-    const someOtherRandomNumberBetween0and100 =
-      await dcrypto.randomNumberInRange(min, max);
-    console.log(
-      `Another random number from ${min} to ${max} is ${someOtherRandomNumberBetween0and100}`,
     );
   } catch (err) {
     console.error(err);

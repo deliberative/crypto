@@ -13,13 +13,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import dutils from "@deliberative/utils";
+
 import sha512 from "./sha512";
 
 import dcryptoMemory from "./memory";
 
 import dcryptoMethodsModule from "../c/build/dcryptoMethodsModule";
 
-import arraysAreEqual from "../utils/arraysAreEqual";
 import { crypto_hash_sha512_BYTES } from "../utils/interfaces";
 
 /**
@@ -82,7 +83,7 @@ const verifyMerkleProof = async (
     result.set(await sha512(concatHashes, wasmModule));
   }
 
-  return arraysAreEqual(result, root);
+  return await dutils.arraysAreEqual(result, root);
 };
 
 export default verifyMerkleProof;

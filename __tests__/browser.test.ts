@@ -2,6 +2,8 @@
  * @jest-environment jsdom
  */
 
+import dutils from "@deliberative/utils";
+
 import dcrypto from "../src";
 
 import {
@@ -9,14 +11,12 @@ import {
   crypto_hash_sha512_BYTES,
 } from "../src/utils/interfaces";
 
-import arraysAreEqual from "../src/utils/arraysAreEqual";
-
 describe("Browser-based tests.", () => {
   test("Generating random bytes with webcrypto works.", async () => {
-    const message = await dcrypto.randomBytes(32);
+    const message = await dutils.randomBytes(32);
     const keypair = await dcrypto.keyPair();
 
-    const previousBlockHash = await dcrypto.randomBytes(
+    const previousBlockHash = await dutils.randomBytes(
       crypto_hash_sha512_BYTES,
     );
 
@@ -38,9 +38,9 @@ describe("Browser-based tests.", () => {
   });
 
   test("Loading libsodium wasm module in the browser and crypto operations work.", async () => {
-    const randomBytes = await dcrypto.randomBytes(256);
+    const randomBytes = await dutils.randomBytes(256);
     const hash = await dcrypto.sha512(randomBytes);
-    const key = await dcrypto.randomBytes(
+    const key = await dutils.randomBytes(
       dcrypto.interfaces.crypto_kx_SESSIONKEYBYTES,
     );
     const keypair = await dcrypto.keyPair();
@@ -63,8 +63,8 @@ describe("Browser-based tests.", () => {
     const encrypted1 = await dcrypto.encrypt(randomBytes, key, hash);
     const decrypted1 = await dcrypto.decrypt(encrypted1, key, hash);
     expect(verification).toBe(true);
-    expect(arraysAreEqual(randomBytes, decrypted)).toBe(true);
-    expect(arraysAreEqual(randomBytes, decrypted1)).toBe(true);
+    expect(await dutils.arraysAreEqual(randomBytes, decrypted)).toBe(true);
+    expect(await dutils.arraysAreEqual(randomBytes, decrypted1)).toBe(true);
   });
 
   test("Loading shamir wasm module in the browser and splitting/restoring works.", async () => {
@@ -84,7 +84,7 @@ describe("Browser-based tests.", () => {
       splitModule,
     );
 
-    const shuffled = await dcrypto.arrayRandomShuffle(shares);
+    const shuffled = await dutils.arrayRandomShuffle(shares);
 
     const shamirRestoreMemory = dcrypto.loadShamirMemory.restoreSecret(
       crypto_sign_ed25519_SECRETKEYBYTES,
@@ -95,16 +95,18 @@ describe("Browser-based tests.", () => {
     });
     const reconstructed = await dcrypto.restoreSecret(shuffled, restoreModule);
 
-    expect(arraysAreEqual(keypair.secretKey, reconstructed)).toBe(true);
+    expect(await dutils.arraysAreEqual(keypair.secretKey, reconstructed)).toBe(
+      true,
+    );
   });
 
   test("Loading utils wasm module in the browser and operations work.", async () => {
     const min = 1;
     const max = 256000;
-    const someNumber = await dcrypto.randomNumberInRange(min, max);
-    const someOtherNumber = await dcrypto.randomNumberInRange(min, max);
+    const someNumber = await dutils.randomNumberInRange(min, max);
+    const someOtherNumber = await dutils.randomNumberInRange(min, max);
     const someArray = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    const reshuffled = await dcrypto.arrayRandomShuffle(someArray);
+    const reshuffled = await dutils.arrayRandomShuffle(someArray);
     let everyElementInSamePlace = true;
     for (let i = 0; i < reshuffled.length; i++) {
       if (someArray[i] !== reshuffled[i]) {

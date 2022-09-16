@@ -1,3 +1,5 @@
+import dutils from "@deliberative/utils";
+
 import dcrypto from "../src";
 
 import {
@@ -5,14 +7,12 @@ import {
   crypto_kx_SESSIONKEYBYTES,
 } from "../src/utils/interfaces";
 
-import arraysAreEqual from "../src/utils/arraysAreEqual";
-
 describe("Encryption and decryption with symmetric key test suite.", () => {
   test("Encryption and decryption work.", async () => {
-    const message = await dcrypto.randomBytes(32);
-    const key = await dcrypto.randomBytes(crypto_kx_SESSIONKEYBYTES);
+    const message = await dutils.randomBytes(32);
+    const key = await dutils.randomBytes(crypto_kx_SESSIONKEYBYTES);
 
-    const previousBlockHash = await dcrypto.randomBytes(
+    const previousBlockHash = await dutils.randomBytes(
       crypto_hash_sha512_BYTES,
     );
 
@@ -50,20 +50,24 @@ describe("Encryption and decryption with symmetric key test suite.", () => {
     expect(decrypted[0]).toBe(message[0]);
     expect(decrypted[1]).toBe(message[1]);
     expect(decrypted[31]).toBe(message[31]);
-    expect(arraysAreEqual(encryptedWithModule, encrypted)).toBe(false);
-    expect(arraysAreEqual(decryptedWithModule, decrypted)).toBe(true);
+    expect(await dutils.arraysAreEqual(encryptedWithModule, encrypted)).toBe(
+      false,
+    );
+    expect(await dutils.arraysAreEqual(decryptedWithModule, decrypted)).toBe(
+      true,
+    );
   });
 
   it("Should be impossible to decrypt with wrong key", async () => {
-    const message = await dcrypto.randomBytes(32);
-    const key = await dcrypto.randomBytes(crypto_kx_SESSIONKEYBYTES);
+    const message = await dutils.randomBytes(32);
+    const key = await dutils.randomBytes(crypto_kx_SESSIONKEYBYTES);
 
-    const previousBlockHash = await dcrypto.randomBytes(
+    const previousBlockHash = await dutils.randomBytes(
       crypto_hash_sha512_BYTES,
     );
     const encrypted = await dcrypto.encrypt(message, key, previousBlockHash);
 
-    const anotherKey = await dcrypto.randomBytes(crypto_kx_SESSIONKEYBYTES);
+    const anotherKey = await dutils.randomBytes(crypto_kx_SESSIONKEYBYTES);
 
     await expect(
       dcrypto.decrypt(encrypted, anotherKey, previousBlockHash),

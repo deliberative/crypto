@@ -1,7 +1,7 @@
 {
   "name": "@deliberative/crypto",
   "description": "Libsodium and Shamir secret sharing wasm module for nodejs and the browser.",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "repository": {
     "type": "git",
     "url": "https://github.com/deliberative/crypto.git"
@@ -58,7 +58,7 @@
     "postbuild": "node scripts/post.js",
     "build:debug": "npm-run-all -s wasm:debug code:debug postbuild",
     "jest": "jest --config jest.config.json",
-    "test": "npm-run-all -s valgrind wasm jest",
+    "test": "npm-run-all -s wasm jest",
     "preformat": "clang-format-all src/",
     "format": "prettier --write src examples/js __tests__",
     "postformat": "clang-format-all examples/",
@@ -66,6 +66,9 @@
     "prepublishOnly": "npm-run-all -s lint test build",
     "preversion": "npm-run-all -s lint format",
     "docs": "typedoc --out docs --excludeInternal src/index.ts"
+  },
+  "dependencies": {
+    "@deliberative/utils": "^0.1.3"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^22.0.0",

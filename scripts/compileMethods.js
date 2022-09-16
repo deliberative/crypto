@@ -70,7 +70,6 @@ ${testing} \
 _malloc,\
 _free,\
 _sha512,\
-_random_bytes,\
 _argon2,\
 _new_keypair,\
 _keypair_from_seed,\
@@ -79,7 +78,6 @@ _sign_data,\
 _verify_data,\
 _encrypt_data,\
 _decrypt_data,\
-_random_number_in_range,\
 _split_secret,\
 _restore_secret \
 -s EXPORT_NAME=dcryptoMethodsModule \

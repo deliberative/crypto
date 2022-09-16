@@ -1,15 +1,15 @@
+import dutils from "@deliberative/utils";
+
 import dcrypto from "../src";
 
 import { crypto_hash_sha512_BYTES } from "../src/utils/interfaces";
 
-import arraysAreEqual from "../src/utils/arraysAreEqual";
-
 describe("Encryption and decryption with Ed25519 derived keys test suite.", () => {
   test("Encryption and decryption work.", async () => {
-    const message = await dcrypto.randomBytes(32);
+    const message = await dutils.randomBytes(32);
     const keypair = await dcrypto.keyPair();
 
-    const previousBlockHash = await dcrypto.randomBytes(
+    const previousBlockHash = await dutils.randomBytes(
       crypto_hash_sha512_BYTES,
     );
 
@@ -56,15 +56,19 @@ describe("Encryption and decryption with Ed25519 derived keys test suite.", () =
     expect(decrypted[0]).toBe(message[0]);
     expect(decrypted[1]).toBe(message[1]);
     expect(decrypted[31]).toBe(message[31]);
-    expect(arraysAreEqual(encryptedWithModule, encrypted)).toBe(false);
-    expect(arraysAreEqual(decryptedWithModule, decrypted)).toBe(true);
+    expect(await dutils.arraysAreEqual(encryptedWithModule, encrypted)).toBe(
+      false,
+    );
+    expect(await dutils.arraysAreEqual(decryptedWithModule, decrypted)).toBe(
+      true,
+    );
   });
 
   it("Should be impossible to decrypt with wrong key", async () => {
-    const message = await dcrypto.randomBytes(32);
+    const message = await dutils.randomBytes(32);
     const keypair = await dcrypto.keyPair();
 
-    const previousBlockHash = await dcrypto.randomBytes(
+    const previousBlockHash = await dutils.randomBytes(
       crypto_hash_sha512_BYTES,
     );
     const encrypted = await dcrypto.encryptForwardSecrecy(

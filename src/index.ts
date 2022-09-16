@@ -28,38 +28,6 @@ import type { DCryptoMethodsModule } from "./c/build/dcryptoMethodsModule";
 
 export interface DeliberativeCrypto {
   /**
-   * Generates a Uint8Array of size n full with random bytes
-   */
-  randomBytes: (
-    n: number,
-    module?: DCryptoMethodsModule,
-  ) => Promise<Uint8Array>;
-
-  /**
-   * Get an integer between min and max with uniform probability
-   */
-  randomNumberInRange: (
-    min: number,
-    max: number,
-    module?: DCryptoMethodsModule,
-  ) => Promise<number>;
-
-  /**
-   * Fisher-Yates random shuffle of elements of an array
-   */
-  arrayRandomShuffle: <T>(array: T[]) => Promise<T[]>;
-
-  /**
-   * Fisher-Yates random shuffle then slice of array
-   */
-  arrayRandomSubset: <T>(array: T[], elements: number) => Promise<T[]>;
-
-  loadUtilsMemory: {
-    randomBytes: (bytes: number) => WebAssembly.Memory;
-    randomNumberInRange: (min: number, max: number) => WebAssembly.Memory;
-  };
-
-  /**
    * Generate a new Ed25519 keypair
    */
   keyPair: (module?: DCryptoMethodsModule) => Promise<SignKeyPair>;
@@ -263,15 +231,6 @@ export interface DeliberativeCrypto {
 }
 
 const dcrypto: DeliberativeCrypto = {
-  randomBytes: utils.randomBytes,
-  randomNumberInRange: utils.randomNumberInRange,
-  arrayRandomShuffle: utils.arrayRandomShuffle,
-  arrayRandomSubset: utils.arrayRandomSubset,
-  loadUtilsMemory: {
-    randomBytes: utils.memory.randomBytesMemory,
-    randomNumberInRange: utils.memory.randomNumberInRangeMemory,
-  },
-
   keyPair: asymmetric.keyPair.newKeyPair,
   keyPairFromSeed: asymmetric.keyPair.keyPairFromSeed,
   keyPairFromSecretKey: asymmetric.keyPair.keyPairFromSecretKey,

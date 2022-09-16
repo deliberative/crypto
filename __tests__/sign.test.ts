@@ -1,6 +1,6 @@
-import dcrypto from "../src";
+import dutils from "@deliberative/utils";
 
-import arraysAreEqual from "../src/utils/arraysAreEqual";
+import dcrypto from "../src";
 
 import {
   crypto_sign_ed25519_PUBLICKEYBYTES,
@@ -20,13 +20,16 @@ describe("Signing and verifying with Ed25519 keys test suite.", () => {
     expect(keypair.secretKey.length).toBe(crypto_sign_ed25519_SECRETKEYBYTES);
     expect(keypair.publicKey.length).toBe(crypto_sign_ed25519_PUBLICKEYBYTES);
 
-    expect(arraysAreEqual(keypair.secretKey, someOtherKeypair.secretKey)).toBe(
-      false,
-    );
+    expect(
+      await dutils.arraysAreEqual(
+        keypair.secretKey,
+        someOtherKeypair.secretKey,
+      ),
+    ).toBe(false);
   });
 
   test("Generating a new keypair from a random seed works.", async () => {
-    const seed = await dcrypto.randomBytes(crypto_sign_ed25519_SEEDBYTES);
+    const seed = await dutils.randomBytes(crypto_sign_ed25519_SEEDBYTES);
     const keypair = await dcrypto.keyPairFromSeed(seed);
 
     const wasmMemory = dcrypto.loadAsymmetricMemory.keyPairFromSeed();
@@ -37,7 +40,9 @@ describe("Signing and verifying with Ed25519 keys test suite.", () => {
     expect(keypair.secretKey.length).toBe(crypto_sign_ed25519_SECRETKEYBYTES);
     expect(keypair.publicKey.length).toBe(crypto_sign_ed25519_PUBLICKEYBYTES);
 
-    expect(arraysAreEqual(sameKeypair.secretKey, keypair.secretKey)).toBe(true);
+    expect(
+      await dutils.arraysAreEqual(sameKeypair.secretKey, keypair.secretKey),
+    ).toBe(true);
   });
 
   test("Generating a new keypair from a secret key works.", async () => {
@@ -54,16 +59,18 @@ describe("Signing and verifying with Ed25519 keys test suite.", () => {
     expect(typeof keypair === "object").toBe(true);
     expect(keypair.secretKey.length).toBe(crypto_sign_ed25519_SECRETKEYBYTES);
     expect(keypair.publicKey.length).toBe(crypto_sign_ed25519_PUBLICKEYBYTES);
-    expect(arraysAreEqual(original.publicKey, keypair.publicKey)).toBe(true);
+    expect(
+      await dutils.arraysAreEqual(original.publicKey, keypair.publicKey),
+    ).toBe(true);
 
-    expect(arraysAreEqual(sameKeypair.secretKey, original.secretKey)).toBe(
-      true,
-    );
+    expect(
+      await dutils.arraysAreEqual(sameKeypair.secretKey, original.secretKey),
+    ).toBe(true);
   });
 
   test("Signing a Uint8Array message works.", async () => {
     const keyPair = await dcrypto.keyPair();
-    const randomMessage = await dcrypto.randomBytes(256);
+    const randomMessage = await dutils.randomBytes(256);
     const signature = await dcrypto.sign(randomMessage, keyPair.secretKey);
 
     const wasmMemory = dcrypto.loadAsymmetricMemory.sign(randomMessage.length);
@@ -77,13 +84,13 @@ describe("Signing and verifying with Ed25519 keys test suite.", () => {
     expect(signature !== null).toBe(true);
     expect(signature.length).toBe(64);
 
-    expect(arraysAreEqual(signature, otherSignature)).toBe(true);
+    expect(await dutils.arraysAreEqual(signature, otherSignature)).toBe(true);
   });
 
   test("Verifying the signature of a Uint8Array message works.", async () => {
     const mnemonic = await dcrypto.generateMnemonic();
     const keypair = await dcrypto.keyPairFromMnemonic(mnemonic);
-    const randomMessage = await dcrypto.randomBytes(256);
+    const randomMessage = await dutils.randomBytes(256);
     const signature = await dcrypto.sign(randomMessage, keypair.secretKey);
     const verification = await dcrypto.verify(
       randomMessage,
@@ -109,7 +116,7 @@ describe("Signing and verifying with Ed25519 keys test suite.", () => {
   test("Verifying signature with wrong key should return false.", async () => {
     const rightKeyPair = await dcrypto.keyPair();
     const wrongKeyPair = await dcrypto.keyPair();
-    const randomMessage = await dcrypto.randomBytes(10240);
+    const randomMessage = await dutils.randomBytes(10240);
     const signature = await dcrypto.sign(randomMessage, rightKeyPair.secretKey);
     const verification = await dcrypto.verify(
       randomMessage,
