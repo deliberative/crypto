@@ -75,7 +75,7 @@ const dcrypto = require("@deliberative/crypto");
 or as UMD in the browser with
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/@deliberative/crypto@0.4.1/lib/index.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@deliberative/crypto@0.5.3/lib/index.min.js"></script>
 ```
 
 ## Examples
@@ -176,43 +176,6 @@ const evenLessShares = lessShares.slice(0, lessShares.length - 1);
 const sk3 = await dcrypto.restoreSecret(evenLessShares);
 
 console.log("sk3 and kaypair.secretKey are NOT equal");
-```
-
-For cryptographic array utilities you can use the following features
-
-```typescript
-import dcrypto from "@deliberative/crypto";
-
-const someRandomArray = await dcrypto.randomBytes(12); // 12 byte array
-console.log(someRandomArray);
-
-// Cryptographic shuffling
-const someRandomArrayShuffled = await dcrypto.arrayRandomShuffle(
-  someRandomArray,
-);
-console.log(someRandomArrayShuffled);
-
-// Choose 5 elements from someRandomArray uniformly.
-const someRandomSubArray = await dcrypto.arrayRandomSubset(someRandomArray, 5); // 5 elements
-console.log(someRandomSubArray);
-
-// Choose 5 other elements and chances are that the arrays are different
-const someOtherRandomSubArray = await dcrypto.arrayRandomSubset(
-  someRandomArray,
-  5,
-);
-console.log(someOtherRandomSubArray);
-
-const someRandomNumberBetween0and100 = await dcrypto.randomNumberInRange(
-  0,
-  100,
-);
-const someOtherRandomNumberBetween0and100 = await dcrypto.randomNumberInRange(
-  0,
-  100,
-);
-console.log(someRandomNumberBetween0and100);
-console.log(someOtherRandomNumberBetween0and100);
 ```
 
 For more examples you can see the [tests](__tests__) directory.

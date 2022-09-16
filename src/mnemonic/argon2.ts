@@ -13,9 +13,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import dutils from "@deliberative/utils";
-
 import mnemonicMemory from "./memory";
+
+import randomBytes from "../utils/randomBytes";
 
 import {
   crypto_sign_ed25519_SEEDBYTES,
@@ -42,7 +42,7 @@ const argon2 = async (
   const mnemonicInt8Array = new Int8Array(mnemonicBuffer);
   const mnemonicArrayLen = mnemonicInt8Array.length;
 
-  salt = salt || (await dutils.randomBytes(crypto_pwhash_argon2id_SALTBYTES));
+  salt = salt || (await randomBytes(crypto_pwhash_argon2id_SALTBYTES));
 
   const wasmMemory = module
     ? module.wasmMemory

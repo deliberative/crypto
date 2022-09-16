@@ -13,10 +13,10 @@ import {
 
 describe("Browser-based tests.", () => {
   test("Generating random bytes with webcrypto works.", async () => {
-    const message = await dutils.randomBytes(32);
+    const message = await dcrypto.randomBytes(32);
     const keypair = await dcrypto.keyPair();
 
-    const previousBlockHash = await dutils.randomBytes(
+    const previousBlockHash = await dcrypto.randomBytes(
       crypto_hash_sha512_BYTES,
     );
 
@@ -38,9 +38,9 @@ describe("Browser-based tests.", () => {
   });
 
   test("Loading libsodium wasm module in the browser and crypto operations work.", async () => {
-    const randomBytes = await dutils.randomBytes(256);
+    const randomBytes = await dcrypto.randomBytes(256);
     const hash = await dcrypto.sha512(randomBytes);
-    const key = await dutils.randomBytes(
+    const key = await dcrypto.randomBytes(
       dcrypto.interfaces.crypto_kx_SESSIONKEYBYTES,
     );
     const keypair = await dcrypto.keyPair();

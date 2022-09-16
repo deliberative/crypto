@@ -21,21 +21,21 @@ describe("Starting the Shamir test suite.", () => {
   });
 
   it("Should be impossible to split a secret with threshold less than 2.", async () => {
-    const secret = await dutils.randomBytes(256);
+    const secret = await dcrypto.randomBytes(256);
     await expect(dcrypto.splitSecret(secret, 10, 1)).rejects.toThrow(
       "Threshold is less than 2",
     );
   });
 
   it("Should be impossible to split a secret into shares less than threshold.", async () => {
-    const secret = await dutils.randomBytes(256);
+    const secret = await dcrypto.randomBytes(256);
     await expect(dcrypto.splitSecret(secret, 10, 11)).rejects.toThrow(
       "Shares are less than threshold",
     );
   });
 
   it("Should be impossible to split a secret into more than 255 shares.", async () => {
-    const secret = await dutils.randomBytes(256);
+    const secret = await dcrypto.randomBytes(256);
     await expect(dcrypto.splitSecret(secret, 256, 11)).rejects.toThrow(
       "Shares exceed 255",
     );

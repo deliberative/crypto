@@ -2,6 +2,10 @@
 
 export interface DCryptoMethodsModule extends EmscriptenModule {
   wasmMemory: WebAssembly.Memory;
+  _random_bytes(
+    SIZE: number,
+    array: number, // Uint8Array
+  ): number;
   _sha512(
     DATA_LEN: number,
     data: number, // Uint8Array, // byteOffset

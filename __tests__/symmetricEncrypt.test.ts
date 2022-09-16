@@ -9,10 +9,10 @@ import {
 
 describe("Encryption and decryption with symmetric key test suite.", () => {
   test("Encryption and decryption work.", async () => {
-    const message = await dutils.randomBytes(32);
-    const key = await dutils.randomBytes(crypto_kx_SESSIONKEYBYTES);
+    const message = await dcrypto.randomBytes(32);
+    const key = await dcrypto.randomBytes(crypto_kx_SESSIONKEYBYTES);
 
-    const previousBlockHash = await dutils.randomBytes(
+    const previousBlockHash = await dcrypto.randomBytes(
       crypto_hash_sha512_BYTES,
     );
 
@@ -59,15 +59,15 @@ describe("Encryption and decryption with symmetric key test suite.", () => {
   });
 
   it("Should be impossible to decrypt with wrong key", async () => {
-    const message = await dutils.randomBytes(32);
-    const key = await dutils.randomBytes(crypto_kx_SESSIONKEYBYTES);
+    const message = await dcrypto.randomBytes(32);
+    const key = await dcrypto.randomBytes(crypto_kx_SESSIONKEYBYTES);
 
-    const previousBlockHash = await dutils.randomBytes(
+    const previousBlockHash = await dcrypto.randomBytes(
       crypto_hash_sha512_BYTES,
     );
     const encrypted = await dcrypto.encrypt(message, key, previousBlockHash);
 
-    const anotherKey = await dutils.randomBytes(crypto_kx_SESSIONKEYBYTES);
+    const anotherKey = await dcrypto.randomBytes(crypto_kx_SESSIONKEYBYTES);
 
     await expect(
       dcrypto.decrypt(encrypted, anotherKey, previousBlockHash),

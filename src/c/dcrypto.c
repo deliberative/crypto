@@ -63,6 +63,14 @@
 #include "./shamir/polynomial.c"
 
 __attribute__((used)) int
+random_bytes(const int SIZE, uint8_t array[SIZE])
+{
+  randombytes_buf(array, SIZE);
+
+  return 0;
+}
+
+__attribute__((used)) int
 sha512(const int DATA_LEN, const uint8_t data[DATA_LEN],
        uint8_t hash[crypto_hash_sha512_BYTES])
 {

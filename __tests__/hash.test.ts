@@ -1,5 +1,3 @@
-import dutils from "@deliberative/utils";
-
 import dcrypto from "../src";
 
 describe("Sha512 and Merkle root test suite.", () => {
@@ -13,7 +11,7 @@ describe("Sha512 and Merkle root test suite.", () => {
   test("Merkle root calculation works.", async () => {
     const tree: Uint8Array[] = [];
     for (let i = 0; i < 201; i++) {
-      const rand = await dutils.randomBytes(128);
+      const rand = await dcrypto.randomBytes(128);
       tree.push(rand);
     }
 
@@ -33,7 +31,7 @@ describe("Sha512 and Merkle root test suite.", () => {
     const elements = 201;
     const elementIndex = 99;
     for (let i = 0; i < elements; i++) {
-      const rand = await dutils.randomBytes(128);
+      const rand = await dcrypto.randomBytes(128);
 
       if (i === elementIndex) element.set([...rand]);
 
@@ -64,7 +62,7 @@ describe("Sha512 and Merkle root test suite.", () => {
     const elements = 200;
     const elementIndex = 99;
     for (let i = 0; i < elements; i++) {
-      const rand = await dutils.randomBytes(128);
+      const rand = await dcrypto.randomBytes(128);
 
       if (i === elementIndex) element.set([...rand]);
 

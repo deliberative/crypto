@@ -96,7 +96,7 @@ export default [
         file: pkg.main,
         format: "cjs",
         esModule: false,
-        interop: "defaultOnly",
+        interop: "default",
         exports: "default",
         sourcemap: true,
       },

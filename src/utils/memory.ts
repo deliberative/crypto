@@ -13,10 +13,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import randomBytes from "./randomBytes";
-import interfaces from "./interfaces";
+import memoryLenToPages from "./memoryLenToPages";
+
+const randomBytesMemory = (bytes: number): WebAssembly.Memory => {
+  const memoryLen = bytes * Uint8Array.BYTES_PER_ELEMENT;
+
+  const pages = memoryLenToPages(memoryLen);
+
+  return new WebAssembly.Memory({ initial: pages, maximum: pages });
+};
 
 export default {
-  randomBytes,
-  interfaces,
+  randomBytesMemory,
 };
