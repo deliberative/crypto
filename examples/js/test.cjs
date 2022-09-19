@@ -30,7 +30,7 @@ const main = async () => {
     );
 
     // Random Uint8Array array of 32 elements
-    const message = await dcrypto.randomBytes(32);
+    const message = await dutils.randomBytes(32);
 
     console.log(
       `Random message to sign: ${Buffer.from(message).toString("hex")}`,

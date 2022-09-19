@@ -6,10 +6,10 @@ import { crypto_hash_sha512_BYTES } from "../src/utils/interfaces";
 
 describe("Encryption and decryption with Ed25519 derived keys test suite.", () => {
   test("Encryption and decryption work.", async () => {
-    const message = await dcrypto.randomBytes(32);
+    const message = await dutils.randomBytes(32);
     const keypair = await dcrypto.keyPair();
 
-    const previousBlockHash = await dcrypto.randomBytes(
+    const previousBlockHash = await dutils.randomBytes(
       crypto_hash_sha512_BYTES,
     );
 
@@ -65,10 +65,10 @@ describe("Encryption and decryption with Ed25519 derived keys test suite.", () =
   });
 
   it("Should be impossible to decrypt with wrong key", async () => {
-    const message = await dcrypto.randomBytes(32);
+    const message = await dutils.randomBytes(32);
     const keypair = await dcrypto.keyPair();
 
-    const previousBlockHash = await dcrypto.randomBytes(
+    const previousBlockHash = await dutils.randomBytes(
       crypto_hash_sha512_BYTES,
     );
     const encrypted = await dcrypto.encryptForwardSecrecy(

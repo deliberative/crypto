@@ -1,15 +1,18 @@
 const fs = require("fs");
 const path = require("path");
 
-const esmPath = path.join(process.cwd(), "lib", "index.mjs");
+const esmPath = path.join(process.cwd(), "lib", "index.node.mjs");
 
-const esmBundle = fs.readFileSync(esmPath);
+const esmRequire = `\
+import crypto from \"crypto\";\n\
+`;
+
+const esmBundle = fs.readFileSync(esmPath, "utf8");
 fs.writeFileSync(
   esmPath,
   `\
-import \{ dirname \} from \"path\";\n\
-import \{ createRequire \} from \"module\";\n\
-globalThis.__dirname = dirname(import.meta.url).substring(7);\n\
-globalThis.require = createRequire(import.meta.url);\n\
-${esmBundle}`,
+${esmRequire} \
+${esmBundle
+  .replace('var crypto = require("crypto");', "")
+  .replace('var crypto=require("crypto");', "")}`,
 );

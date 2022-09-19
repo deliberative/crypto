@@ -4,6 +4,7 @@ dist
 *.o
 *valgrind*.txt
 .npmrc
+deliberative*.tgz
 
 # Logs
 logs

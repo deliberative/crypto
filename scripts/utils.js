@@ -48,6 +48,7 @@ const withJS = ` \
 -s MODULARIZE=1 \
 -s MAIN_MODULE=2 \
 -s SINGLE_FILE=1 \
+-s ENVIRONMENT='webview' \
 -s STRICT_JS=1 \
 -s EXPORT_ES6=1 \
 -s USE_ES6_IMPORT_META=0 \
@@ -59,7 +60,7 @@ const memory = `\
 -s ALLOW_MEMORY_GROWTH=1 \
 -s MEMORY_GROWTH_LINEAR_STEP=64kb \
 -s INITIAL_MEMORY=2mb \
--s MAXIMUM_MEMORY=100mb \
+-s MAXIMUM_MEMORY=1gb \
 -s TOTAL_STACK=1mb \
 -s SUPPORT_BIG_ENDIAN=1 \
 `;

@@ -29,7 +29,7 @@ describe("Signing and verifying with Ed25519 keys test suite.", () => {
   });
 
   test("Generating a new keypair from a random seed works.", async () => {
-    const seed = await dcrypto.randomBytes(crypto_sign_ed25519_SEEDBYTES);
+    const seed = await dutils.randomBytes(crypto_sign_ed25519_SEEDBYTES);
     const keypair = await dcrypto.keyPairFromSeed(seed);
 
     const wasmMemory = dcrypto.loadAsymmetricMemory.keyPairFromSeed();
@@ -70,7 +70,7 @@ describe("Signing and verifying with Ed25519 keys test suite.", () => {
 
   test("Signing a Uint8Array message works.", async () => {
     const keyPair = await dcrypto.keyPair();
-    const randomMessage = await dcrypto.randomBytes(256);
+    const randomMessage = await dutils.randomBytes(256);
     const signature = await dcrypto.sign(randomMessage, keyPair.secretKey);
 
     const wasmMemory = dcrypto.loadAsymmetricMemory.sign(randomMessage.length);
@@ -90,7 +90,7 @@ describe("Signing and verifying with Ed25519 keys test suite.", () => {
   test("Verifying the signature of a Uint8Array message works.", async () => {
     const mnemonic = await dcrypto.generateMnemonic();
     const keypair = await dcrypto.keyPairFromMnemonic(mnemonic);
-    const randomMessage = await dcrypto.randomBytes(256);
+    const randomMessage = await dutils.randomBytes(256);
     const signature = await dcrypto.sign(randomMessage, keypair.secretKey);
     const verification = await dcrypto.verify(
       randomMessage,
@@ -116,7 +116,7 @@ describe("Signing and verifying with Ed25519 keys test suite.", () => {
   test("Verifying signature with wrong key should return false.", async () => {
     const rightKeyPair = await dcrypto.keyPair();
     const wrongKeyPair = await dcrypto.keyPair();
-    const randomMessage = await dcrypto.randomBytes(10240);
+    const randomMessage = await dutils.randomBytes(10240);
     const signature = await dcrypto.sign(randomMessage, rightKeyPair.secretKey);
     const verification = await dcrypto.verify(
       randomMessage,

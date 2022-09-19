@@ -28,14 +28,6 @@ import type { DCryptoMethodsModule } from "./c/build/dcryptoMethodsModule";
 
 export interface DeliberativeCrypto {
   /**
-   * Generates a Uint8Array of size n full with random bytes
-   */
-  randomBytes: (
-    n: number,
-    module?: DCryptoMethodsModule,
-  ) => Promise<Uint8Array>;
-
-  /**
    * Generate a new Ed25519 keypair
    */
   keyPair: (module?: DCryptoMethodsModule) => Promise<SignKeyPair>;
@@ -239,8 +231,6 @@ export interface DeliberativeCrypto {
 }
 
 const dcrypto: DeliberativeCrypto = {
-  randomBytes: utils.randomBytes,
-
   keyPair: asymmetric.keyPair.newKeyPair,
   keyPairFromSeed: asymmetric.keyPair.keyPairFromSeed,
   keyPairFromSecretKey: asymmetric.keyPair.keyPairFromSecretKey,

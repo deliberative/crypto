@@ -1,7 +1,7 @@
 {
   "name": "@deliberative/crypto",
   "description": "Libsodium and Shamir secret sharing wasm module for nodejs and the browser.",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "repository": {
     "type": "git",
     "url": "https://github.com/deliberative/crypto.git"
@@ -41,8 +41,19 @@
   "browser": "lib/index.min.js",
   "types": "lib/index.d.ts",
   "exports": {
-    "require": "./lib/index.cjs",
-    "import": "./lib/index.mjs"
+    ".": {
+      "node": {
+        "module": "./lib/index.node.mjs",
+        "require": "./lib/index.cjs",
+        "import": "./lib/index.node.mjs"
+      },
+      "browser": {
+        "import": "./lib/index.mjs",
+        "require": "./lib/index.cjs"
+      },
+      "default": "./lib/index.min.js"
+    },
+    "./package.json": "./package.json"
   },
   "files": [
     "lib/**/*"
@@ -67,8 +78,12 @@
     "preversion": "npm-run-all -s lint format",
     "docs": "typedoc --out docs --excludeInternal src/index.ts"
   },
+  "dependencies": {
+    "@deliberative/utils": "^0.1.3"
+  },
   "devDependencies": {
-    "@deliberative/utils": "^0.1.3",
+    "@babel/preset-env": "^7.19.1",
+    "@rollup/plugin-babel": "^5.3.1",
     "@rollup/plugin-commonjs": "^22.0.0",
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^14.0.0",

@@ -29,7 +29,8 @@ We have also introduced function that can split and restore a secret through the
 
 Another feature of the library is a mnemonic generation, validation and Ed25519 key pair from mnemonic that was inspired by [bip39](https://github.com/bitcoinjs/bip39) but instead of Blake2b we use Argon2 and instead of SHA256 we use SHA512, both of which can be found in libsodium.
 
-Finally we introduced some utility functions that do random shuffles, pick random subsets of Uint8Arrays etc.
+For utility functions such as random bytes generation, random shuffles, random slices of arrays etc. you can use
+[@deliberative/utils](https://github.com/deliberative/utils).
 
 ## Files
 
@@ -88,6 +89,7 @@ For Curve25519 public key cryptography we have the following methods
 
 ```typescript
 import dcrypto from "@deliberative/crypto";
+import dutils from "@deliberative/utils";
 
 // Words from dictionary create random seed for Ed25519 private key.
 // Default entropy is 128bits, which results in 12 words.
@@ -105,7 +107,7 @@ console.log(
 );
 
 // Generates a Uint8Array(128) full of random bytes
-const message = await dcrypto.randomBytes(128);
+const message = await dutils.randomBytes(128);
 
 // EdDSA
 const signature = await dcrypto.sign(message, keypair.secretKey);
@@ -139,7 +141,7 @@ for (let i = 0; i < message.length; i++) {
   if (message[i] !== decrypted[i]) console.error("Arrays unequal");
 }
 
-const symmetricKey = await dcrypto.randomBytes(
+const symmetricKey = await dutils.randomBytes(
   dcrypto.interfaces.crypto_kx_SESSIONKEYBYTES,
 );
 const encrypted1 = await dcrypto.encrypt(message, symmetricKey, hash);

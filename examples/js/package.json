@@ -44,6 +44,7 @@
     "npm": ">=8"
   },
   "dependencies": {
-    "@deliberative/crypto": "file:deliberative-crypto-0.5.2.tgz"
+    "@deliberative/crypto": "file:deliberative-crypto-0.5.4.tgz",
+    "@deliberative/utils": "^0.1.5"
   }
 }

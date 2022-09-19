@@ -25,6 +25,7 @@ const plugins = [
   resolve({
     jsnext: true,
     main: true,
+    module: true,
     browser: true,
     preferBuiltins: false,
   }),
@@ -83,6 +84,7 @@ export default [
   {
     input,
     plugins,
+    external: ["module"],
     output: [
       {
         file: pkg.module,
@@ -93,10 +95,18 @@ export default [
         sourcemap: true,
       },
       {
+        file: pkg.module.replace(".mjs", ".node.mjs"),
+        format: "es",
+        esModule: true,
+        interop: "esModule",
+        exports: "named",
+        sourcemap: true,
+      },
+      {
         file: pkg.main,
         format: "cjs",
         esModule: false,
-        interop: "default",
+        interop: "defaultOnly",
         exports: "default",
         sourcemap: true,
       },
