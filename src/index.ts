@@ -69,7 +69,7 @@ export interface DeliberativeCrypto {
   ) => Promise<boolean>;
 
   /**
-   * Encrypts
+   * Encrypts end-to-end with a throwaway keyPair.
    */
   encryptForwardSecrecy: (
     message: Uint8Array,
@@ -79,7 +79,7 @@ export interface DeliberativeCrypto {
   ) => Promise<Uint8Array>;
 
   /**
-   * Decrypts
+   * Decrypts end-to-end with the public key of a throwaway keyPair.
    */
   decryptForwardSecrecy: (
     encrypted: Uint8Array,
@@ -123,7 +123,7 @@ export interface DeliberativeCrypto {
   };
 
   /**
-   * Encrypts
+   * Encrypts with encryption key
    */
   encrypt: (
     message: Uint8Array,
@@ -133,7 +133,7 @@ export interface DeliberativeCrypto {
   ) => Promise<Uint8Array>;
 
   /**
-   * Decrypts
+   * Decrypts with encryption key
    */
   decrypt: (
     encrypted: Uint8Array,
@@ -212,19 +212,10 @@ export interface DeliberativeCrypto {
     crypto_sign_ed25519_SEEDBYTES: number;
     crypto_sign_ed25519_PUBLICKEYBYTES: number;
     crypto_sign_ed25519_SECRETKEYBYTES: number;
-    getEncryptedLen: (messageLen: number, additionalDataLen: number) => number;
-    getDecryptedLen: (
-      encryptedLen: number,
-      additionalDataLen: number,
-    ) => number;
-    getForwardSecretBoxEncryptedLen: (
-      messageLen: number,
-      additionalDataLen: number,
-    ) => number;
-    getForwardSecretBoxDecryptedLen: (
-      encryptedLen: number,
-      additionalDataLen: number,
-    ) => number;
+    getEncryptedLen: (messageLen: number) => number;
+    getDecryptedLen: (encryptedLen: number) => number;
+    getForwardSecretBoxEncryptedLen: (messageLen: number) => number;
+    getForwardSecretBoxDecryptedLen: (encryptedLen: number) => number;
   };
 
   loadModule: EmscriptenModuleFactory<DCryptoMethodsModule>;
