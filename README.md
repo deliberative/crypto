@@ -76,7 +76,7 @@ const dcrypto = require("@deliberative/crypto");
 or as UMD in the browser with
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/@deliberative/crypto@0.5.4/lib/index.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@deliberative/crypto@latest/lib/index.min.js"></script>
 ```
 
 ## Examples
