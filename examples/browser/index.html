@@ -2,7 +2,6 @@
 <html>
   <body>
     <script src="https://cdn.jsdelivr.net/npm/@deliberative/crypto@latest/lib/index.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@deliberative/utils@latest/lib/index.min.js"></script>
     <script type="text/javascript">
       const uint8ToHex = (array) => {
         return array.reduce(
@@ -40,7 +39,7 @@
           );
 
           // Random Uint8Array array of 32 elements
-          const message = await dutils.randomBytes(32);
+          const message = await dcrypto.randomBytes(32);
 
           console.log(`Random message to sign: ${uint8ToHex(message)}`);
 
@@ -120,7 +119,7 @@
 
           // Remove 80 shares to see if it will still work
           const lessShares = shares.slice(0, shares.length - 80);
-          const lessSharesRandom = await dutils.arrayRandomShuffle(lessShares);
+          const lessSharesRandom = await dcrypto.arrayRandomShuffle(lessShares);
 
           // Should be equal to sk1 and keypair.secretKey
           const sk2 = await dcrypto.restoreSecret(lessSharesRandom);
@@ -131,7 +130,10 @@
           );
 
           // Remove 11 more and now we are bellow the threshold
-          const evenLessShares = lessShares.slice(0, lessShares.length - 11);
+          const evenLessShares = await dcrypto.arrayRandomSubset(
+            lessShares,
+            lessShares.length - 11,
+          );
 
           // Should not be equal to sk1 and sk2.
           const sk3 = await dcrypto.restoreSecret(evenLessShares);

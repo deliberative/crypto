@@ -13,9 +13,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import dutils from "@deliberative/utils";
-
 import wordlist from "./wordlist.json";
+
+import randomBytes from "../utils/randomBytes";
 
 import sha512 from "../hash/sha512";
 
@@ -31,24 +31,17 @@ const generateMnemonic = async (
     throw new TypeError("Mnemonic strength needs to be multiple of 32.");
   }
 
-  if (!wordlist) {
-    throw new Error("English wordlist could not be loaded.");
-  }
+  if (!wordlist) throw new Error("English wordlist could not be loaded.");
 
-  const entropy = await dutils.randomBytes(strength / 8);
+  const entropy = await randomBytes(strength / 8);
 
   // 128 <= ENT <= 256
-  if (entropy.length < 16) {
-    throw new TypeError("Entropy length too small.");
-  }
+  if (entropy.length < 16) throw new TypeError("Entropy length too small.");
 
-  if (entropy.length > 32) {
-    throw new TypeError("Entropy length too large.");
-  }
+  if (entropy.length > 32) throw new TypeError("Entropy length too large.");
 
-  if (entropy.length % 4 !== 0) {
+  if (entropy.length % 4 !== 0)
     throw new TypeError("Entropy length is not multiple of 4.");
-  }
 
   const entropyBits = entropy.reduce(
     (str, byte) => str + byte.toString(2).padStart(8, "0"),

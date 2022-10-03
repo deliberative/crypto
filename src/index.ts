@@ -106,22 +106,6 @@ export interface DeliberativeCrypto {
     password?: string,
   ) => Promise<SignKeyPair>;
 
-  loadAsymmetricMemory: {
-    newKeyPair: () => WebAssembly.Memory;
-    keyPairFromSeed: () => WebAssembly.Memory;
-    keyPairFromSecretKey: () => WebAssembly.Memory;
-    sign: (messageLen: number) => WebAssembly.Memory;
-    verify: (messageLen: number) => WebAssembly.Memory;
-    encrypt: (
-      messageLen: number,
-      additionalDataLen: number,
-    ) => WebAssembly.Memory;
-    decrypt: (
-      encryptedLen: number,
-      additionalDataLen: number,
-    ) => WebAssembly.Memory;
-  };
-
   /**
    * Encrypts with encryption key
    */
@@ -142,17 +126,6 @@ export interface DeliberativeCrypto {
     module?: DCryptoMethodsModule,
   ) => Promise<Uint8Array>;
 
-  loadSymmetricMemory: {
-    encrypt: (
-      messageLen: number,
-      additionalDataLen: number,
-    ) => WebAssembly.Memory;
-    decrypt: (
-      encryptedLen: number,
-      additionalDataLen: number,
-    ) => WebAssembly.Memory;
-  };
-
   sha512: (
     data: Uint8Array,
     module?: DCryptoMethodsModule,
@@ -169,14 +142,6 @@ export interface DeliberativeCrypto {
     leaves: Uint8Array,
   ) => Promise<boolean>;
 
-  loadHashMemory: {
-    sha512: (arrayLen: number) => WebAssembly.Memory;
-    merkleRoot: (maxDataLen: number) => {
-      initialMemory: WebAssembly.Memory;
-      subsequentMemory: WebAssembly.Memory;
-    };
-  };
-
   /*
    * Shamir secret sharing related
    */
@@ -192,16 +157,7 @@ export interface DeliberativeCrypto {
     module?: DCryptoMethodsModule,
   ) => Promise<Uint8Array>;
 
-  loadShamirMemory: {
-    splitSecret: (
-      secretLen: number,
-      sharesLen: number,
-      threshold: number,
-    ) => WebAssembly.Memory;
-    restoreSecret: (secretLen: number, sharesLen: number) => WebAssembly.Memory;
-  };
-
-  interfaces: {
+  constants: {
     crypto_hash_sha512_BYTES: number;
     crypto_box_poly1305_AUTHTAGBYTES: number;
     crypto_box_x25519_PUBLICKEYBYTES: number;
@@ -212,13 +168,88 @@ export interface DeliberativeCrypto {
     crypto_sign_ed25519_SEEDBYTES: number;
     crypto_sign_ed25519_PUBLICKEYBYTES: number;
     crypto_sign_ed25519_SECRETKEYBYTES: number;
-    getEncryptedLen: (messageLen: number) => number;
-    getDecryptedLen: (encryptedLen: number) => number;
-    getForwardSecretBoxEncryptedLen: (messageLen: number) => number;
-    getForwardSecretBoxDecryptedLen: (encryptedLen: number) => number;
   };
 
+  getSymmetricSecretBoxEncryptedLen: (messageLen: number) => number;
+  getSymmetricSecretBoxDecryptedLen: (encryptedLen: number) => number;
+  getForwardSecretBoxEncryptedLen: (messageLen: number) => number;
+  getForwardSecretBoxDecryptedLen: (encryptedLen: number) => number;
+
+  itemIndexInArray: <T>(
+    array: T[],
+    item: T,
+    serializer?: (i: T) => Uint8Array,
+    module?: DCryptoMethodsModule,
+  ) => Promise<number>;
+  itemsIndexesInArray: <T>(
+    array: T[],
+    items: T[],
+    serializer?: (i: T) => Uint8Array,
+    module?: DCryptoMethodsModule,
+  ) => Promise<number[]>;
+
+  randomBytes: (
+    n: number,
+    module?: DCryptoMethodsModule,
+  ) => Promise<Uint8Array>;
+  randomNumberInRange: (
+    min: number,
+    max: number,
+    module?: DCryptoMethodsModule,
+  ) => Promise<number>;
+  arrayRandomShuffle: <T>(array: T[]) => Promise<T[]>;
+  arrayRandomSubset: <T>(array: T[], elements: number) => Promise<T[]>;
+
   loadModule: EmscriptenModuleFactory<DCryptoMethodsModule>;
+  loadWasmMemory: {
+    newKeyPair: () => WebAssembly.Memory;
+    keyPairFromSeed: () => WebAssembly.Memory;
+    keyPairFromSecretKey: () => WebAssembly.Memory;
+
+    sign: (messageLen: number) => WebAssembly.Memory;
+    verify: (messageLen: number) => WebAssembly.Memory;
+
+    forwardSecretEncrypt: (
+      messageLen: number,
+      additionalDataLen: number,
+    ) => WebAssembly.Memory;
+    forwardSecretDecrypt: (
+      encryptedLen: number,
+      additionalDataLen: number,
+    ) => WebAssembly.Memory;
+
+    symmetricKeyEncrypt: (
+      messageLen: number,
+      additionalDataLen: number,
+    ) => WebAssembly.Memory;
+    symmetricKeyDecrypt: (
+      encryptedLen: number,
+      additionalDataLen: number,
+    ) => WebAssembly.Memory;
+
+    sha512: (arrayLen: number) => WebAssembly.Memory;
+    merkleRoot: (maxDataLen: number) => {
+      initialMemory: WebAssembly.Memory;
+      subsequentMemory: WebAssembly.Memory;
+    };
+
+    splitSecret: (
+      secretLen: number,
+      sharesLen: number,
+      threshold: number,
+    ) => WebAssembly.Memory;
+    restoreSecret: (secretLen: number, sharesLen: number) => WebAssembly.Memory;
+
+    itemIndexInArray: (arrayLen: number, itemLen: number) => WebAssembly.Memory;
+    itemsIndexesInArray: (
+      arrayLen: number,
+      itemsArrayLen: number,
+      itemLen: number,
+    ) => WebAssembly.Memory;
+
+    randomBytes: (bytes: number) => WebAssembly.Memory;
+    randomNumberInRange: (min: number, max: number) => WebAssembly.Memory;
+  };
 }
 
 const dcrypto: DeliberativeCrypto = {
@@ -234,40 +265,18 @@ const dcrypto: DeliberativeCrypto = {
   validateMnemonic: mnemonic.validateMnemonic,
   keyPairFromMnemonic: mnemonic.keyPairFromMnemonic,
 
-  loadAsymmetricMemory: {
-    newKeyPair: asymmetric.memory.newKeyPairMemory,
-    keyPairFromSeed: asymmetric.memory.keyPairFromSeedMemory,
-    keyPairFromSecretKey: asymmetric.memory.keyPairFromSecretKeyMemory,
-    sign: asymmetric.memory.signMemory,
-    verify: asymmetric.memory.verifyMemory,
-    encrypt: asymmetric.memory.encryptMemory,
-    decrypt: asymmetric.memory.decryptMemory,
-  },
-
   encrypt: symmetric.encrypt,
   decrypt: symmetric.decrypt,
-  loadSymmetricMemory: {
-    encrypt: symmetric.memory.encryptMemory,
-    decrypt: symmetric.memory.decryptMemory,
-  },
 
   sha512: hash.sha512,
   getMerkleRoot: hash.getMerkleRoot,
   getMerkleProofArtifacts: hash.getMerkleProofArtifacts,
   verifyMerkleProof: hash.verifyMerkleProof,
-  loadHashMemory: {
-    sha512: hash.memory.sha512Memory,
-    merkleRoot: hash.memory.merkleRootMemory,
-  },
 
   splitSecret: shamir.splitSecret,
   restoreSecret: shamir.restoreSecret,
-  loadShamirMemory: {
-    splitSecret: shamir.memory.splitSecretMemory,
-    restoreSecret: shamir.memory.restoreSecretMemory,
-  },
 
-  interfaces: {
+  constants: {
     crypto_hash_sha512_BYTES: utils.interfaces.crypto_hash_sha512_BYTES,
     crypto_box_poly1305_AUTHTAGBYTES:
       utils.interfaces.crypto_box_poly1305_AUTHTAGBYTES,
@@ -284,15 +293,49 @@ const dcrypto: DeliberativeCrypto = {
       utils.interfaces.crypto_sign_ed25519_PUBLICKEYBYTES,
     crypto_sign_ed25519_SECRETKEYBYTES:
       utils.interfaces.crypto_sign_ed25519_SECRETKEYBYTES,
-    getEncryptedLen: utils.interfaces.getEncryptedLen,
-    getDecryptedLen: utils.interfaces.getDecryptedLen,
-    getForwardSecretBoxEncryptedLen:
-      utils.interfaces.getForwardSecretBoxEncryptedLen,
-    getForwardSecretBoxDecryptedLen:
-      utils.interfaces.getForwardSecretBoxDecryptedLen,
   },
 
+  getSymmetricSecretBoxEncryptedLen: utils.interfaces.getEncryptedLen,
+  getSymmetricSecretBoxDecryptedLen: utils.interfaces.getDecryptedLen,
+  getForwardSecretBoxEncryptedLen:
+    utils.interfaces.getForwardSecretBoxEncryptedLen,
+  getForwardSecretBoxDecryptedLen:
+    utils.interfaces.getForwardSecretBoxDecryptedLen,
+
+  itemIndexInArray: utils.itemIndexInArray,
+  itemsIndexesInArray: utils.itemsIndexesInArray,
+  randomBytes: utils.randomBytes,
+  randomNumberInRange: utils.randomNumberInRange,
+  arrayRandomShuffle: utils.arrayRandomShuffle,
+  arrayRandomSubset: utils.arrayRandomSubset,
+
   loadModule: dcryptoMethodsModule,
+  loadWasmMemory: {
+    newKeyPair: asymmetric.memory.newKeyPairMemory,
+    keyPairFromSeed: asymmetric.memory.keyPairFromSeedMemory,
+    keyPairFromSecretKey: asymmetric.memory.keyPairFromSecretKeyMemory,
+
+    sign: asymmetric.memory.signMemory,
+    verify: asymmetric.memory.verifyMemory,
+
+    forwardSecretEncrypt: asymmetric.memory.encryptMemory,
+    forwardSecretDecrypt: asymmetric.memory.decryptMemory,
+
+    symmetricKeyEncrypt: symmetric.memory.encryptMemory,
+    symmetricKeyDecrypt: symmetric.memory.decryptMemory,
+
+    sha512: hash.memory.sha512Memory,
+    merkleRoot: hash.memory.merkleRootMemory,
+
+    splitSecret: shamir.memory.splitSecretMemory,
+    restoreSecret: shamir.memory.restoreSecretMemory,
+
+    itemIndexInArray: utils.memory.itemIndexInArray,
+    itemsIndexesInArray: utils.memory.itemsIndexesInArray,
+
+    randomBytes: utils.memory.randomBytes,
+    randomNumberInRange: utils.memory.randomNumberInRange,
+  },
 };
 
 export default dcrypto;

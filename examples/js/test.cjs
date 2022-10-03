@@ -1,5 +1,4 @@
 const dcrypto = require("@deliberative/crypto");
-const dutils = require("@deliberative/utils");
 
 const main = async () => {
   try {
@@ -30,7 +29,7 @@ const main = async () => {
     );
 
     // Random Uint8Array array of 32 elements
-    const message = await dutils.randomBytes(32);
+    const message = await dcrypto.randomBytes(32);
 
     console.log(
       `Random message to sign: ${Buffer.from(message).toString("hex")}`,
@@ -114,7 +113,7 @@ const main = async () => {
 
     // Remove 80 shares to see if it will still work
     const lessShares = shares.slice(0, shares.length - 80);
-    const lessSharesRandom = await dutils.arrayRandomShuffle(lessShares);
+    const lessSharesRandom = await dcrypto.arrayRandomShuffle(lessShares);
 
     // Should be equal to sk1 and keypair.secretKey
     const sk2 = await dcrypto.restoreSecret(lessSharesRandom);
@@ -127,7 +126,10 @@ const main = async () => {
     );
 
     // Remove 11 more and now we are bellow the threshold
-    const evenLessShares = lessShares.slice(0, lessShares.length - 11);
+    const evenLessShares = await dcrypto.arrayRandomSubset(
+      lessShares,
+      lessShares.length - 11,
+    );
 
     // Should not be equal to sk1 and sk2.
     const sk3 = await dcrypto.restoreSecret(evenLessShares);

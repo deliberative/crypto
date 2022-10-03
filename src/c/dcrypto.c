@@ -461,3 +461,132 @@ restore_secret(const int SHARES_LEN, const int SECRET_LEN,
 
   return 0;
 }
+
+// Output is the index of the element
+__attribute__((used)) int
+item_index_in_array(const size_t ARRAY_LEN,
+                    const uint8_t array[ARRAY_LEN * crypto_hash_sha512_BYTES],
+                    const uint8_t item[crypto_hash_sha512_BYTES])
+{
+  size_t i, j;
+
+  for (i = 0; i < ARRAY_LEN; i++)
+  {
+    bool found = true;
+    for (j = 0; j < crypto_hash_sha512_BYTES; j++)
+    {
+      if (array[i * crypto_hash_sha512_BYTES + j] != item[j])
+      {
+        found = false;
+        break;
+      }
+    }
+
+    if (found) return i;
+  }
+
+  return -1;
+}
+
+// Output is an array of indexes of the elements
+__attribute__((used)) void
+items_indexes_in_array(
+    const size_t ARRAY_LEN, const size_t ITEMS_ARRAY_LEN,
+    const uint8_t array[ARRAY_LEN * crypto_hash_sha512_BYTES],
+    const uint8_t items[ITEMS_ARRAY_LEN * crypto_hash_sha512_BYTES],
+    int32_t indexes[ITEMS_ARRAY_LEN])
+{
+  size_t i, j, k;
+
+  for (i = 0; i < ITEMS_ARRAY_LEN; i++)
+  {
+    // We start with all items unfound
+    indexes[i] = -1;
+  }
+
+  if (ITEMS_ARRAY_LEN > ARRAY_LEN) return;
+
+  int itemsFound = 0;
+  for (i = 0; i < ARRAY_LEN; i++)
+  {
+    if (itemsFound == ITEMS_ARRAY_LEN) return;
+
+    for (j = 0; j < ITEMS_ARRAY_LEN; j++)
+    {
+      bool found = true;
+      for (k = 0; k < crypto_hash_sha512_BYTES; k++)
+      {
+        if (array[i * crypto_hash_sha512_BYTES + k]
+            != items[j * crypto_hash_sha512_BYTES + k])
+        {
+          found = false;
+          break;
+        }
+      }
+
+      if (found)
+      {
+        if (indexes[j] == -1)
+        {
+          indexes[j] = i;
+          itemsFound++;
+
+          break;
+        }
+        else
+        {
+          // Duplicate item found
+          indexes[j] = -2;
+
+          return;
+        }
+      }
+    }
+  }
+}
+
+__attribute__((used)) int
+random_bytes(const int SIZE, uint8_t array[SIZE])
+{
+  randombytes_buf(array, SIZE);
+
+  return 0;
+}
+
+__attribute__((used)) int
+random_number_in_range(const int MIN, const int MAX)
+{
+  size_t i;
+
+  const int RANGE = MAX - MIN;
+  const int BYTES_NEEDED = ceil(log2(RANGE) / 8);
+  const int MAX_RANGE = pow(pow(2, 8), BYTES_NEEDED);
+  const int EXTENDED_RANGE = floor(MAX_RANGE / RANGE) * RANGE;
+
+  uint8_t *randomBytes = malloc(BYTES_NEEDED * sizeof(uint8_t));
+
+  int randomInteger = EXTENDED_RANGE;
+  while (randomInteger >= EXTENDED_RANGE)
+  {
+    randombytes_buf(randomBytes, BYTES_NEEDED);
+
+    randomInteger = 0;
+    for (i = 0; i < BYTES_NEEDED; i++)
+    {
+      randomInteger <<= 8;
+      randomInteger += randomBytes[i];
+    }
+
+    if (randomInteger < EXTENDED_RANGE)
+    {
+      free(randomBytes);
+      randomInteger %= RANGE;
+
+      return MIN + randomInteger;
+    }
+  }
+
+  free(randomBytes);
+
+  return randomInteger;
+}

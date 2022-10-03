@@ -13,10 +13,10 @@ import {
 
 describe("Browser-based tests.", () => {
   test("Generating random bytes with webcrypto works.", async () => {
-    const message = await dutils.randomBytes(32);
+    const message = await dcrypto.randomBytes(32);
     const keypair = await dcrypto.keyPair();
 
-    const previousBlockHash = await dutils.randomBytes(
+    const previousBlockHash = await dcrypto.randomBytes(
       crypto_hash_sha512_BYTES,
     );
 
@@ -38,10 +38,10 @@ describe("Browser-based tests.", () => {
   });
 
   test("Loading libsodium wasm module in the browser and crypto operations work.", async () => {
-    const randomBytes = await dutils.randomBytes(256);
+    const randomBytes = await dcrypto.randomBytes(256);
     const hash = await dcrypto.sha512(randomBytes);
-    const key = await dutils.randomBytes(
-      dcrypto.interfaces.crypto_kx_SESSIONKEYBYTES,
+    const key = await dcrypto.randomBytes(
+      dcrypto.constants.crypto_kx_SESSIONKEYBYTES,
     );
     const keypair = await dcrypto.keyPair();
     const signature = await dcrypto.sign(randomBytes, keypair.secretKey);
@@ -68,7 +68,7 @@ describe("Browser-based tests.", () => {
   });
 
   test("Loading shamir wasm module in the browser and splitting/restoring works.", async () => {
-    const shamirSplitMemory = dcrypto.loadShamirMemory.splitSecret(
+    const shamirSplitMemory = dcrypto.loadWasmMemory.splitSecret(
       crypto_sign_ed25519_SECRETKEYBYTES,
       20,
       11,
@@ -84,9 +84,9 @@ describe("Browser-based tests.", () => {
       splitModule,
     );
 
-    const shuffled = await dutils.arrayRandomShuffle(shares);
+    const shuffled = await dcrypto.arrayRandomShuffle(shares);
 
-    const shamirRestoreMemory = dcrypto.loadShamirMemory.restoreSecret(
+    const shamirRestoreMemory = dcrypto.loadWasmMemory.restoreSecret(
       crypto_sign_ed25519_SECRETKEYBYTES,
       20,
     );
@@ -103,10 +103,10 @@ describe("Browser-based tests.", () => {
   test("Loading utils wasm module in the browser and operations work.", async () => {
     const min = 1;
     const max = 256000;
-    const someNumber = await dutils.randomNumberInRange(min, max);
-    const someOtherNumber = await dutils.randomNumberInRange(min, max);
+    const someNumber = await dcrypto.randomNumberInRange(min, max);
+    const someOtherNumber = await dcrypto.randomNumberInRange(min, max);
     const someArray = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    const reshuffled = await dutils.arrayRandomShuffle(someArray);
+    const reshuffled = await dcrypto.arrayRandomShuffle(someArray);
     let everyElementInSamePlace = true;
     for (let i = 0; i < reshuffled.length; i++) {
       if (someArray[i] !== reshuffled[i]) {

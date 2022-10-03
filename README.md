@@ -84,12 +84,12 @@ or as UMD in the browser with
 You can visit the [examples](examples/js) folder, where you will find examples in
 [CommonJS](examples/js/test.cjs), [ES module](examples/js/test.mjs) and
 [html in the browser](examples/js/test.html).
+For thorough tests of every exposed function you can look the [**tests**](__tests__) folder.
 
 For Curve25519 public key cryptography we have the following methods
 
 ```typescript
 import dcrypto from "@deliberative/crypto";
-import dutils from "@deliberative/utils";
 
 // Words from dictionary create random seed for Ed25519 private key.
 // Default entropy is 128bits, which results in 12 words.
@@ -107,7 +107,7 @@ console.log(
 );
 
 // Generates a Uint8Array(128) full of random bytes
-const message = await dutils.randomBytes(128);
+const message = await dcrypto.randomBytes(128);
 
 // EdDSA
 const signature = await dcrypto.sign(message, keypair.secretKey);
@@ -141,7 +141,7 @@ for (let i = 0; i < message.length; i++) {
   if (message[i] !== decrypted[i]) console.error("Arrays unequal");
 }
 
-const symmetricKey = await dutils.randomBytes(
+const symmetricKey = await dcrypto.randomBytes(
   dcrypto.interfaces.crypto_kx_SESSIONKEYBYTES,
 );
 const encrypted1 = await dcrypto.encrypt(message, symmetricKey, hash);

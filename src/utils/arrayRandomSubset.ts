@@ -13,22 +13,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import interfaces from "./interfaces";
-import itemIndexInArray from "./itemIndexInArray";
-import itemsIndexesInArray from "./itemsIndexesInArray";
 import arrayRandomShuffle from "./arrayRandomShuffle";
-import arrayRandomSubset from "./arrayRandomSubset";
-import randomBytes from "./randomBytes";
-import randomNumberInRange from "./randomNumberInRange";
-import memory from "./memory";
 
-export default {
-  itemIndexInArray,
-  itemsIndexesInArray,
-  arrayRandomShuffle,
-  arrayRandomSubset,
-  randomBytes,
-  randomNumberInRange,
-  memory,
-  interfaces,
+/**
+ * @function
+ * Random slice of an array.
+ *
+ * @param array: The array to get random slice from.
+ * @param elements: Number of elements.
+ *
+ * @returns Promise<T[]>
+ */
+const arrayRandomSubset = async <T>(
+  array: T[],
+  elements: number,
+): Promise<T[]> => {
+  const n = array.length;
+
+  // Sanity check
+  if (n < elements || n < 2)
+    throw new Error("Not enough elements in the array");
+
+  const shuffled = await arrayRandomShuffle(array);
+
+  return shuffled.slice(0, elements);
 };
+
+export default arrayRandomSubset;
