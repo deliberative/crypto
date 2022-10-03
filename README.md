@@ -29,9 +29,6 @@ We have also introduced function that can split and restore a secret through the
 
 Another feature of the library is a mnemonic generation, validation and Ed25519 key pair from mnemonic that was inspired by [bip39](https://github.com/bitcoinjs/bip39) but instead of Blake2b we use Argon2 and instead of SHA256 we use SHA512, both of which can be found in libsodium.
 
-For utility functions such as random bytes generation, random shuffles, random slices of arrays etc. you can use
-[@deliberative/utils](https://github.com/deliberative/utils).
-
 ## Files
 
 The [libsodium](https://github.com/deliberative/libsodium) directory contains a fork of libsodium whose only differences with the master branch of libsodium are name changes to the implementation structs.

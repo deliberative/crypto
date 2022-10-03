@@ -2,6 +2,7 @@ import dutils from "@deliberative/utils";
 
 import dcrypto from "../src";
 
+jest.setTimeout(10000);
 describe("Sha512 and Merkle root test suite.", () => {
   test("Public key SHA512 hash works.", async () => {
     const mnemonic = await dcrypto.generateMnemonic();
