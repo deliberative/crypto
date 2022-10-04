@@ -15,24 +15,15 @@
 
 import memoryLenToPages from "./memoryLenToPages";
 
-const itemIndexInArray = (
-  arrayLen: number,
-  itemLen: number,
-): WebAssembly.Memory => {
-  const memoryLen = (arrayLen + 1) * itemLen * Uint8Array.BYTES_PER_ELEMENT;
+import { crypto_hash_sha512_BYTES } from "./interfaces";
 
-  const pages = memoryLenToPages(memoryLen);
-
-  return new WebAssembly.Memory({ initial: pages, maximum: pages });
-};
-
-const itemsIndexesInArray = (
+const needleInHaystack = (
   arrayLen: number,
   itemsArrayLen: number,
-  itemLen: number,
 ): WebAssembly.Memory => {
   const memoryLen =
-    (arrayLen * itemLen + itemsArrayLen * (itemLen + 1)) *
+    (arrayLen * crypto_hash_sha512_BYTES +
+      itemsArrayLen * (crypto_hash_sha512_BYTES + 1)) *
     Uint8Array.BYTES_PER_ELEMENT;
 
   const pages = memoryLenToPages(memoryLen);
@@ -57,8 +48,7 @@ const randomNumberInRange = (min: number, max: number): WebAssembly.Memory => {
 };
 
 export default {
-  itemIndexInArray,
-  itemsIndexesInArray,
+  needleInHaystack,
   randomBytes,
   randomNumberInRange,
 };

@@ -1,5 +1,3 @@
-import dutils from "@deliberative/utils";
-
 import dcrypto from "../src";
 
 describe("Starting the cryptographic random utils test suite.", () => {
@@ -114,13 +112,14 @@ describe("Starting the cryptographic random utils test suite.", () => {
     arrayOfArrays.push(arr1);
     arrayOfArrays.push(arr2);
     arrayOfArrays.push(arr4);
-    const occurrence = await dcrypto.itemIndexInArray(arrayOfArrays, arr1);
+    const occurrence = await dcrypto.needleInHaystack([arr1], arrayOfArrays);
 
-    expect(occurrence).toBe(2);
+    expect(occurrence).toStrictEqual([2]);
 
-    const occurrence1 = await dcrypto.itemIndexInArray(arrayOfArrays1, arr1);
+    const occurrence1 = await dcrypto.needleInHaystack([arr1], arrayOfArrays1);
 
-    expect(occurrence1).toBe(-1);
+    // -1 means item not found,
+    expect(occurrence1).toStrictEqual([-1]);
   });
 
   test("Finding out the indexes of items in an array works.", async () => {
@@ -128,21 +127,13 @@ describe("Starting the cryptographic random utils test suite.", () => {
     arrayOfArrays2.push(arr4);
     arrayOfArrays2.push(arr2);
 
-    const indexes = await dcrypto.itemsIndexesInArray(
-      arrayOfArrays1,
+    const indexes = await dcrypto.needleInHaystack(
       arrayOfArrays2,
+      arrayOfArrays1,
     );
 
     expect(indexes[0]).toBe(1);
     expect(indexes[1]).toBe(0);
-  });
-
-  it("Should throw an error if one of the items is not in the array.", async () => {
-    const arrayOfArrays3: Uint8Array[] = [new Uint8Array(len).fill(15)];
-
-    await expect(
-      dcrypto.itemsIndexesInArray(arrayOfArrays1, arrayOfArrays3),
-    ).rejects.toThrow("Item with index 0 was not found in the array.");
   });
 
   interface SomeRandomInterface {
@@ -171,44 +162,100 @@ describe("Starting the cryptographic random utils test suite.", () => {
 
   const arrayOfArrays3: SomeRandomInterface[] = [arr5, arr6, arr7];
 
+  const numberToUint8Array = (n: number): Uint8Array => {
+    return Uint8Array.of(
+      (n & 0xff000000) >> 24,
+      (n & 0x00ff0000) >> 16,
+      (n & 0x0000ff00) >> 8,
+      (n & 0x000000ff) >> 0,
+    );
+  };
+
   const someRandomInterfaceSerializer = (item: SomeRandomInterface) => {
     const uint8 = new Uint8Array(4 * 3 * Uint8Array.BYTES_PER_ELEMENT);
 
-    uint8.set(dutils.numberToUint8Array(Number(item.val1)));
+    uint8.set(numberToUint8Array(Number(item.val1)));
     uint8.set(
-      dutils.numberToUint8Array(Number(item.val2)),
+      numberToUint8Array(Number(item.val2)),
       4 * Uint8Array.BYTES_PER_ELEMENT,
     );
     uint8.set(
-      dutils.numberToUint8Array(Number(item.val3)),
+      numberToUint8Array(Number(item.val3)),
       8 * Uint8Array.BYTES_PER_ELEMENT,
     );
 
     return uint8;
   };
 
-  test("Finding out if item is in array with serializer works.", async () => {
-    const occurrence = await dcrypto.itemIndexInArray(
+  it("Should throw errors if needles or haystacks are invalid.", async () => {
+    await expect(
+      dcrypto.needleInHaystack(
+        [],
+        arrayOfArrays3,
+        someRandomInterfaceSerializer,
+      ),
+    ).rejects.toThrow(
+      "Needles and haystack should have at least one element each.",
+    );
+
+    await expect(
+      dcrypto.needleInHaystack([arr6], [], someRandomInterfaceSerializer),
+    ).rejects.toThrow(
+      "Needles and haystack should have at least one element each.",
+    );
+
+    await expect(
+      dcrypto.needleInHaystack(
+        arrayOfArrays3,
+        [arr6],
+        someRandomInterfaceSerializer,
+      ),
+    ).rejects.toThrow(
+      "Haystack should be superset of needles, so it should have bigger length.",
+    );
+
+    await expect(
+      dcrypto.needleInHaystack([arr6], arrayOfArrays3),
+    ).rejects.toThrow(
+      "It is mandatory to provide a serializer for non-Uint8Array items",
+    );
+  });
+
+  test("Finding out the needles in the haystack with serializer works.", async () => {
+    const occurrence = await dcrypto.needleInHaystack(
+      [arr6],
       arrayOfArrays3,
-      arr6,
       someRandomInterfaceSerializer,
     );
 
-    expect(occurrence).toBe(1);
-  });
+    expect(occurrence).toStrictEqual([1]);
 
-  test("Finding out the indexes of items in an array with serializer works.", async () => {
     const arrayOfArrays4: SomeRandomInterface[] = [];
     arrayOfArrays4.push(arr7);
     arrayOfArrays4.push(arr5);
 
-    const indexes = await dcrypto.itemsIndexesInArray(
-      arrayOfArrays3,
+    const indexes = await dcrypto.needleInHaystack(
       arrayOfArrays4,
+      arrayOfArrays3,
       someRandomInterfaceSerializer,
     );
 
     expect(indexes[0]).toBe(2);
     expect(indexes[1]).toBe(0);
+
+    const wasmMemory = dcrypto.loadWasmMemory.needleInHaystack(
+      arrayOfArrays3.length,
+      arrayOfArrays4.length,
+    );
+    const module = await dcrypto.loadModule({ wasmMemory });
+    const indexes1 = await dcrypto.needleInHaystack(
+      arrayOfArrays4,
+      arrayOfArrays3,
+      someRandomInterfaceSerializer,
+      module,
+    );
+
+    expect(indexes1[0]).toBe(2);
+    expect(indexes1[1]).toBe(0);
   });
 });

@@ -78,17 +78,17 @@ const splitSecret = async (
       return values;
     }
 
-    case -1: {
-      throw new Error("Threshold is less than 2");
-    }
-
-    case -2: {
-      throw new Error("Shares are less than threshold");
-    }
-
-    case -3: {
-      throw new Error("Shares exceed 255");
-    }
+    // case -1: {
+    //   throw new Error("Threshold is less than 2");
+    // }
+    //
+    // case -2: {
+    //   throw new Error("Shares are less than threshold");
+    // }
+    //
+    // case -3: {
+    //   throw new Error("Shares exceed 255");
+    // }
 
     default: {
       throw new Error("Unexpected error occured");

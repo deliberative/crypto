@@ -2,14 +2,23 @@
  * @jest-environment jsdom
  */
 
-import dutils from "@deliberative/utils";
-
 import dcrypto from "../src";
 
 import {
   crypto_sign_ed25519_SECRETKEYBYTES,
   crypto_hash_sha512_BYTES,
 } from "../src/utils/interfaces";
+
+const arraysAreEqual = (arr1: Uint8Array, arr2: Uint8Array): boolean => {
+  const len = arr1.length;
+  if (len !== arr2.length) return false;
+
+  for (let i = 0; i < len; i++) {
+    if (arr1[i] !== arr2[i]) return false;
+  }
+
+  return true;
+};
 
 describe("Browser-based tests.", () => {
   test("Generating random bytes with webcrypto works.", async () => {
@@ -60,11 +69,15 @@ describe("Browser-based tests.", () => {
       keypair.secretKey,
       hash,
     );
-    const encrypted1 = await dcrypto.encrypt(randomBytes, key, hash);
-    const decrypted1 = await dcrypto.decrypt(encrypted1, key, hash);
+    const encrypted1 = await dcrypto.encryptSymmetricKey(
+      randomBytes,
+      key,
+      hash,
+    );
+    const decrypted1 = await dcrypto.decryptSymmetricKey(encrypted1, key, hash);
     expect(verification).toBe(true);
-    expect(await dutils.arraysAreEqual(randomBytes, decrypted)).toBe(true);
-    expect(await dutils.arraysAreEqual(randomBytes, decrypted1)).toBe(true);
+    expect(arraysAreEqual(randomBytes, decrypted)).toBe(true);
+    expect(arraysAreEqual(randomBytes, decrypted1)).toBe(true);
   });
 
   test("Loading shamir wasm module in the browser and splitting/restoring works.", async () => {
@@ -95,9 +108,7 @@ describe("Browser-based tests.", () => {
     });
     const reconstructed = await dcrypto.restoreSecret(shuffled, restoreModule);
 
-    expect(await dutils.arraysAreEqual(keypair.secretKey, reconstructed)).toBe(
-      true,
-    );
+    expect(arraysAreEqual(keypair.secretKey, reconstructed)).toBe(true);
   });
 
   test("Loading utils wasm module in the browser and operations work.", async () => {

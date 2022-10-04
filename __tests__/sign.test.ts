@@ -1,5 +1,3 @@
-import dutils from "@deliberative/utils";
-
 import dcrypto from "../src";
 
 import {
@@ -7,6 +5,17 @@ import {
   crypto_sign_ed25519_SECRETKEYBYTES,
   crypto_sign_ed25519_SEEDBYTES,
 } from "../src/utils/interfaces";
+
+const arraysAreEqual = (arr1: Uint8Array, arr2: Uint8Array): boolean => {
+  const len = arr1.length;
+  if (len !== arr2.length) return false;
+
+  for (let i = 0; i < len; i++) {
+    if (arr1[i] !== arr2[i]) return false;
+  }
+
+  return true;
+};
 
 describe("Signing and verifying with Ed25519 keys test suite.", () => {
   test("Generating a new keypair works.", async () => {
@@ -20,12 +29,9 @@ describe("Signing and verifying with Ed25519 keys test suite.", () => {
     expect(keypair.secretKey.length).toBe(crypto_sign_ed25519_SECRETKEYBYTES);
     expect(keypair.publicKey.length).toBe(crypto_sign_ed25519_PUBLICKEYBYTES);
 
-    expect(
-      await dutils.arraysAreEqual(
-        keypair.secretKey,
-        someOtherKeypair.secretKey,
-      ),
-    ).toBe(false);
+    expect(arraysAreEqual(keypair.secretKey, someOtherKeypair.secretKey)).toBe(
+      false,
+    );
   });
 
   test("Generating a new keypair from a random seed works.", async () => {
@@ -40,9 +46,7 @@ describe("Signing and verifying with Ed25519 keys test suite.", () => {
     expect(keypair.secretKey.length).toBe(crypto_sign_ed25519_SECRETKEYBYTES);
     expect(keypair.publicKey.length).toBe(crypto_sign_ed25519_PUBLICKEYBYTES);
 
-    expect(
-      await dutils.arraysAreEqual(sameKeypair.secretKey, keypair.secretKey),
-    ).toBe(true);
+    expect(arraysAreEqual(sameKeypair.secretKey, keypair.secretKey)).toBe(true);
   });
 
   test("Generating a new keypair from a secret key works.", async () => {
@@ -59,13 +63,11 @@ describe("Signing and verifying with Ed25519 keys test suite.", () => {
     expect(typeof keypair === "object").toBe(true);
     expect(keypair.secretKey.length).toBe(crypto_sign_ed25519_SECRETKEYBYTES);
     expect(keypair.publicKey.length).toBe(crypto_sign_ed25519_PUBLICKEYBYTES);
-    expect(
-      await dutils.arraysAreEqual(original.publicKey, keypair.publicKey),
-    ).toBe(true);
+    expect(arraysAreEqual(original.publicKey, keypair.publicKey)).toBe(true);
 
-    expect(
-      await dutils.arraysAreEqual(sameKeypair.secretKey, original.secretKey),
-    ).toBe(true);
+    expect(arraysAreEqual(sameKeypair.secretKey, original.secretKey)).toBe(
+      true,
+    );
   });
 
   test("Signing a Uint8Array message works.", async () => {
@@ -84,7 +86,7 @@ describe("Signing and verifying with Ed25519 keys test suite.", () => {
     expect(signature !== null).toBe(true);
     expect(signature.length).toBe(64);
 
-    expect(await dutils.arraysAreEqual(signature, otherSignature)).toBe(true);
+    expect(arraysAreEqual(signature, otherSignature)).toBe(true);
   });
 
   test("Verifying the signature of a Uint8Array message works.", async () => {

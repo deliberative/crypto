@@ -90,11 +90,6 @@ export interface DCryptoMethodsModule extends EmscriptenModule {
     secret: number, // Uint8Array,
   ): number;
 
-  _item_index_in_array(
-    ARRAY_LEN: number,
-    array: number, // Uint8Array byteOffset
-    item: number, // Uint8Array byteOffset
-  ): number;
   _items_indexes_in_array(
     ARRAY_LEN: number,
     ITEMS_ARRAY_LEN: number,
@@ -102,6 +97,7 @@ export interface DCryptoMethodsModule extends EmscriptenModule {
     items: number, // Uint8Array byteOffset
     indexes: number, // Array byteOffset
   ): void;
+
   _random_bytes(
     SIZE: number,
     array: number, // Uint8Array

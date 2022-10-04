@@ -1,8 +1,17 @@
-import dutils from "@deliberative/utils";
-
 import dcrypto from "../src";
 
 import { crypto_hash_sha512_BYTES } from "../src/utils/interfaces";
+
+const arraysAreEqual = (arr1: Uint8Array, arr2: Uint8Array): boolean => {
+  const len = arr1.length;
+  if (len !== arr2.length) return false;
+
+  for (let i = 0; i < len; i++) {
+    if (arr1[i] !== arr2[i]) return false;
+  }
+
+  return true;
+};
 
 describe("Encryption and decryption with Ed25519 derived keys test suite.", () => {
   test("Encryption and decryption work.", async () => {
@@ -25,7 +34,7 @@ describe("Encryption and decryption with Ed25519 derived keys test suite.", () =
       previousBlockHash,
     );
 
-    const encryptionMemory = dcrypto.loadWasmMemory.forwardSecretEncrypt(
+    const encryptionMemory = dcrypto.loadWasmMemory.encryptForwardSecret(
       message.length,
       crypto_hash_sha512_BYTES,
     );
@@ -39,7 +48,7 @@ describe("Encryption and decryption with Ed25519 derived keys test suite.", () =
       encryptionModule,
     );
 
-    const decryptionMemory = dcrypto.loadWasmMemory.forwardSecretDecrypt(
+    const decryptionMemory = dcrypto.loadWasmMemory.decryptForwardSecret(
       encrypted.length,
       crypto_hash_sha512_BYTES,
     );
@@ -56,12 +65,8 @@ describe("Encryption and decryption with Ed25519 derived keys test suite.", () =
     expect(decrypted[0]).toBe(message[0]);
     expect(decrypted[1]).toBe(message[1]);
     expect(decrypted[31]).toBe(message[31]);
-    expect(await dutils.arraysAreEqual(encryptedWithModule, encrypted)).toBe(
-      false,
-    );
-    expect(await dutils.arraysAreEqual(decryptedWithModule, decrypted)).toBe(
-      true,
-    );
+    expect(arraysAreEqual(encryptedWithModule, encrypted)).toBe(false);
+    expect(arraysAreEqual(decryptedWithModule, decrypted)).toBe(true);
   });
 
   it("Should be impossible to decrypt with wrong key", async () => {

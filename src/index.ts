@@ -107,9 +107,9 @@ export interface DeliberativeCrypto {
   ) => Promise<SignKeyPair>;
 
   /**
-   * Encrypts with encryption key
+   * Encrypts with symmetric encryption key
    */
-  encrypt: (
+  encryptSymmetricKey: (
     message: Uint8Array,
     key: Uint8Array,
     additionalData: Uint8Array,
@@ -117,9 +117,9 @@ export interface DeliberativeCrypto {
   ) => Promise<Uint8Array>;
 
   /**
-   * Decrypts with encryption key
+   * Decrypts with symmetric encryption key
    */
-  decrypt: (
+  decryptSymmetricKey: (
     encrypted: Uint8Array,
     key: Uint8Array,
     additionalData: Uint8Array,
@@ -175,13 +175,7 @@ export interface DeliberativeCrypto {
   getForwardSecretBoxEncryptedLen: (messageLen: number) => number;
   getForwardSecretBoxDecryptedLen: (encryptedLen: number) => number;
 
-  itemIndexInArray: <T>(
-    array: T[],
-    item: T,
-    serializer?: (i: T) => Uint8Array,
-    module?: DCryptoMethodsModule,
-  ) => Promise<number>;
-  itemsIndexesInArray: <T>(
+  needleInHaystack: <T extends Uint8Array | unknown>(
     array: T[],
     items: T[],
     serializer?: (i: T) => Uint8Array,
@@ -209,20 +203,20 @@ export interface DeliberativeCrypto {
     sign: (messageLen: number) => WebAssembly.Memory;
     verify: (messageLen: number) => WebAssembly.Memory;
 
-    forwardSecretEncrypt: (
+    encryptForwardSecret: (
       messageLen: number,
       additionalDataLen: number,
     ) => WebAssembly.Memory;
-    forwardSecretDecrypt: (
+    decryptForwardSecret: (
       encryptedLen: number,
       additionalDataLen: number,
     ) => WebAssembly.Memory;
 
-    symmetricKeyEncrypt: (
+    encryptSymmetricKey: (
       messageLen: number,
       additionalDataLen: number,
     ) => WebAssembly.Memory;
-    symmetricKeyDecrypt: (
+    decryptSymmetricKey: (
       encryptedLen: number,
       additionalDataLen: number,
     ) => WebAssembly.Memory;
@@ -240,11 +234,9 @@ export interface DeliberativeCrypto {
     ) => WebAssembly.Memory;
     restoreSecret: (secretLen: number, sharesLen: number) => WebAssembly.Memory;
 
-    itemIndexInArray: (arrayLen: number, itemLen: number) => WebAssembly.Memory;
-    itemsIndexesInArray: (
+    needleInHaystack: (
       arrayLen: number,
       itemsArrayLen: number,
-      itemLen: number,
     ) => WebAssembly.Memory;
 
     randomBytes: (bytes: number) => WebAssembly.Memory;
@@ -265,8 +257,8 @@ const dcrypto: DeliberativeCrypto = {
   validateMnemonic: mnemonic.validateMnemonic,
   keyPairFromMnemonic: mnemonic.keyPairFromMnemonic,
 
-  encrypt: symmetric.encrypt,
-  decrypt: symmetric.decrypt,
+  encryptSymmetricKey: symmetric.encrypt,
+  decryptSymmetricKey: symmetric.decrypt,
 
   sha512: hash.sha512,
   getMerkleRoot: hash.getMerkleRoot,
@@ -302,8 +294,8 @@ const dcrypto: DeliberativeCrypto = {
   getForwardSecretBoxDecryptedLen:
     utils.interfaces.getForwardSecretBoxDecryptedLen,
 
-  itemIndexInArray: utils.itemIndexInArray,
-  itemsIndexesInArray: utils.itemsIndexesInArray,
+  needleInHaystack: utils.needleInHaystack,
+
   randomBytes: utils.randomBytes,
   randomNumberInRange: utils.randomNumberInRange,
   arrayRandomShuffle: utils.arrayRandomShuffle,
@@ -318,11 +310,11 @@ const dcrypto: DeliberativeCrypto = {
     sign: asymmetric.memory.signMemory,
     verify: asymmetric.memory.verifyMemory,
 
-    forwardSecretEncrypt: asymmetric.memory.encryptMemory,
-    forwardSecretDecrypt: asymmetric.memory.decryptMemory,
+    encryptForwardSecret: asymmetric.memory.encryptMemory,
+    decryptForwardSecret: asymmetric.memory.decryptMemory,
 
-    symmetricKeyEncrypt: symmetric.memory.encryptMemory,
-    symmetricKeyDecrypt: symmetric.memory.decryptMemory,
+    encryptSymmetricKey: symmetric.memory.encryptMemory,
+    decryptSymmetricKey: symmetric.memory.decryptMemory,
 
     sha512: hash.memory.sha512Memory,
     merkleRoot: hash.memory.merkleRootMemory,
@@ -330,8 +322,7 @@ const dcrypto: DeliberativeCrypto = {
     splitSecret: shamir.memory.splitSecretMemory,
     restoreSecret: shamir.memory.restoreSecretMemory,
 
-    itemIndexInArray: utils.memory.itemIndexInArray,
-    itemsIndexesInArray: utils.memory.itemsIndexesInArray,
+    needleInHaystack: utils.memory.needleInHaystack,
 
     randomBytes: utils.memory.randomBytes,
     randomNumberInRange: utils.memory.randomNumberInRange,

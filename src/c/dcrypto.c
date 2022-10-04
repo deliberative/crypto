@@ -189,8 +189,6 @@ decrypt_data(
                                 - crypto_aead_chacha20poly1305_ietf_NPUBBYTES
                                 - crypto_aead_chacha20poly1305_ietf_ABYTES;
 
-  if (DATA_LEN <= 0) return -1;
-
   uint8_t *nonce
       = malloc(crypto_aead_chacha20poly1305_ietf_NPUBBYTES * sizeof(uint8_t));
   memcpy(nonce, encrypted_data, crypto_aead_chacha20poly1305_ietf_NPUBBYTES);
@@ -211,7 +209,7 @@ decrypt_data(
 
   if (decrypted == 0) return 0;
 
-  return -4;
+  return -1;
 }
 
 __attribute__((used)) void
@@ -337,8 +335,6 @@ forward_secretbox_decrypt_data(
                                 - crypto_aead_chacha20poly1305_ietf_ABYTES
                                 - crypto_sign_ed25519_BYTES;
 
-  if (DATA_LEN <= 0) return -1;
-
   uint8_t *ephemeral_x25519_pk
       = malloc(crypto_scalarmult_curve25519_BYTES * sizeof(uint8_t));
   memcpy(ephemeral_x25519_pk, encrypted_data,
@@ -367,7 +363,7 @@ forward_secretbox_decrypt_data(
     free(nonce);
     sodium_free(client_rx);
 
-    return -2;
+    return -1;
   }
 
   int CIPHERTEXT_LEN = ENCRYPTED_LEN - EPHEMERAL_NONCE_LEN;
@@ -384,7 +380,7 @@ forward_secretbox_decrypt_data(
 
   if (decrypted == 0) return 0;
 
-  return -4;
+  return -2;
 }
 
 __attribute__((used)) int
@@ -462,32 +458,6 @@ restore_secret(const int SHARES_LEN, const int SECRET_LEN,
   return 0;
 }
 
-// Output is the index of the element
-__attribute__((used)) int
-item_index_in_array(const size_t ARRAY_LEN,
-                    const uint8_t array[ARRAY_LEN * crypto_hash_sha512_BYTES],
-                    const uint8_t item[crypto_hash_sha512_BYTES])
-{
-  size_t i, j;
-
-  for (i = 0; i < ARRAY_LEN; i++)
-  {
-    bool found = true;
-    for (j = 0; j < crypto_hash_sha512_BYTES; j++)
-    {
-      if (array[i * crypto_hash_sha512_BYTES + j] != item[j])
-      {
-        found = false;
-        break;
-      }
-    }
-
-    if (found) return i;
-  }
-
-  return -1;
-}
-
 // Output is an array of indexes of the elements
 __attribute__((used)) void
 items_indexes_in_array(
@@ -526,20 +496,10 @@ items_indexes_in_array(
 
       if (found)
       {
-        if (indexes[j] == -1)
-        {
-          indexes[j] = i;
-          itemsFound++;
+        indexes[j] = i;
+        itemsFound++;
 
-          break;
-        }
-        else
-        {
-          // Duplicate item found
-          indexes[j] = -2;
-
-          return;
-        }
+        break;
       }
     }
   }

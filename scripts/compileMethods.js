@@ -79,7 +79,10 @@ _verify_data,\
 _encrypt_data,\
 _decrypt_data,\
 _split_secret,\
-_restore_secret \
+_restore_secret,\
+_items_indexes_in_array,\
+_random_bytes,\
+_random_number_in_range \
 -s EXPORT_NAME=dcryptoMethodsModule \
 -I${libsodiumIncludePath} \
 -I${libsodiumIncludePrivatePath} \

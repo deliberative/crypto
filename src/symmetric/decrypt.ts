@@ -96,12 +96,6 @@ const decrypt = async (
     case 0:
       return decr;
     case -1:
-      throw new Error("Decrypted data len will be <= 0.");
-    case -2:
-      throw new Error("Could not create successful key exchange");
-    case -3:
-      throw new Error("Invalid ephemeral key signature");
-    case -4:
       throw new Error("Unsuccessful decryption attempt");
     default:
       throw new Error("Unexpected error occured");

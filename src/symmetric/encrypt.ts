@@ -97,14 +97,6 @@ const encrypt = async (
       return enc;
     }
 
-    case -1: {
-      throw new Error("Could not convert Ed25519 public key to X25519.");
-    }
-
-    case -2: {
-      throw new Error("Could not create a shared secret.");
-    }
-
     default:
       throw new Error("An unexpected error occured.");
   }

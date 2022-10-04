@@ -14,8 +14,7 @@
 // limitations under the License.
 
 import interfaces from "./interfaces";
-import itemIndexInArray from "./itemIndexInArray";
-import itemsIndexesInArray from "./itemsIndexesInArray";
+import needleInHaystack from "./needleInHaystack";
 import arrayRandomShuffle from "./arrayRandomShuffle";
 import arrayRandomSubset from "./arrayRandomSubset";
 import randomBytes from "./randomBytes";
@@ -23,12 +22,11 @@ import randomNumberInRange from "./randomNumberInRange";
 import memory from "./memory";
 
 export default {
-  itemIndexInArray,
-  itemsIndexesInArray,
+  interfaces,
+  needleInHaystack,
   arrayRandomShuffle,
   arrayRandomSubset,
   randomBytes,
   randomNumberInRange,
   memory,
-  interfaces,
 };

@@ -27,9 +27,9 @@ const generateMnemonic = async (
   strength?: 128 | 160 | 192 | 224 | 256,
 ): Promise<string> => {
   strength = strength || 128;
-  if (strength % 32 !== 0) {
-    throw new TypeError("Mnemonic strength needs to be multiple of 32.");
-  }
+  // if (strength % 32 !== 0) {
+  //   throw new TypeError("Mnemonic strength needs to be multiple of 32.");
+  // }
 
   if (!wordlist) throw new Error("English wordlist could not be loaded.");
 
@@ -40,8 +40,8 @@ const generateMnemonic = async (
 
   if (entropy.length > 32) throw new TypeError("Entropy length too large.");
 
-  if (entropy.length % 4 !== 0)
-    throw new TypeError("Entropy length is not multiple of 4.");
+  // if (entropy.length % 4 !== 0)
+  //   throw new TypeError("Entropy length is not multiple of 4.");
 
   const entropyBits = entropy.reduce(
     (str, byte) => str + byte.toString(2).padStart(8, "0"),

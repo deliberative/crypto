@@ -1,11 +1,20 @@
-import dutils from "@deliberative/utils";
-
 import dcrypto from "../src";
 
 import {
   crypto_sign_ed25519_PUBLICKEYBYTES,
   crypto_sign_ed25519_SECRETKEYBYTES,
 } from "../src/utils/interfaces";
+
+const arraysAreEqual = (arr1: Uint8Array, arr2: Uint8Array): boolean => {
+  const len = arr1.length;
+  if (len !== arr2.length) return false;
+
+  for (let i = 0; i < len; i++) {
+    if (arr1[i] !== arr2[i]) return false;
+  }
+
+  return true;
+};
 
 describe("Signing and verifying with Ed25519 keys test suite.", () => {
   test("Mnemonic generation works.", async () => {
@@ -34,14 +43,11 @@ describe("Signing and verifying with Ed25519 keys test suite.", () => {
     expect(keypair.secretKey.length).toBe(crypto_sign_ed25519_SECRETKEYBYTES);
     expect(keypair.publicKey.length).toBe(crypto_sign_ed25519_PUBLICKEYBYTES);
 
+    expect(arraysAreEqual(keypair.secretKey, anotherKeypair.secretKey)).toBe(
+      true,
+    );
     expect(
-      await dutils.arraysAreEqual(keypair.secretKey, anotherKeypair.secretKey),
-    ).toBe(true);
-    expect(
-      await dutils.arraysAreEqual(
-        keyPairWithPwd.secretKey,
-        anotherKeyPairWithPwd.secretKey,
-      ),
+      arraysAreEqual(keyPairWithPwd.secretKey, anotherKeyPairWithPwd.secretKey),
     ).toBe(true);
   });
 

@@ -13,8 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import dutils from "@deliberative/utils";
-
 import sha512 from "./sha512";
 
 import dcryptoMemory from "./memory";
@@ -22,6 +20,17 @@ import dcryptoMemory from "./memory";
 import dcryptoMethodsModule from "../c/build/dcryptoMethodsModule";
 
 import { crypto_hash_sha512_BYTES } from "../utils/interfaces";
+
+const arraysAreEqual = (arr1: Uint8Array, arr2: Uint8Array): boolean => {
+  const len = arr1.length;
+  if (len !== arr2.length) return false;
+
+  for (let i = 0; i < len; i++) {
+    if (arr1[i] !== arr2[i]) return false;
+  }
+
+  return true;
+};
 
 /**
  * Verifies that the hash was indeed included in the calculation of the Merkle root.
@@ -83,7 +92,7 @@ const verifyMerkleProof = async (
     result.set(await sha512(concatHashes, wasmModule));
   }
 
-  return await dutils.arraysAreEqual(result, root);
+  return arraysAreEqual(result, root);
 };
 
 export default verifyMerkleProof;

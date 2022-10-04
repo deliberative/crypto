@@ -26,58 +26,51 @@ import type { DCryptoMethodsModule } from "../c/build/dcryptoMethodsModule";
 /**
  * @function
  * Returns an array of indexes of items in an array.
+ * If Uint8Array items' length is 64, even after serializer,
+ * then we assume that it is a hash.
  *
- * @param array: The containing array.
- * @param items: The items in question.
+ * @param needles: The subset array of items.
+ * @param haystack: The superset array.
  * @param serializer: Converts item to Uint8Array.
  * @param module: In case we want to cache the WASM loading.
  *
  * @returns Promise<number[]>
  */
-const itemsIndexesInArray = async <T>(
-  array: T[],
-  items: T[],
+const needleInHaystack = async <T extends Uint8Array | unknown>(
+  needles: T[],
+  haystack: T[],
   serializer?: (i: T) => Uint8Array,
   module?: DCryptoMethodsModule,
 ): Promise<number[]> => {
-  const arrayLen = array.length;
-  const itemsArrayLen = items.length;
+  const itemsArrayLen = needles.length;
+  const arrayLen = haystack.length;
 
   if (arrayLen === 0 || itemsArrayLen === 0) {
-    throw new Error("Array and items should have at least one element each.");
+    throw new Error(
+      "Needles and haystack should have at least one element each.",
+    );
   } else if (arrayLen < itemsArrayLen) {
-    throw new Error("Array should be superset of items in length.");
+    throw new Error(
+      "Haystack should be superset of needles, so it should have bigger length.",
+    );
   }
 
-  if (!serializer) {
-    if (ArrayBuffer.isView(items[0]) && ArrayBuffer.isView(array[0])) {
-      if (!(items[0] instanceof DataView) && !(array[0] instanceof DataView)) {
-        if (
-          items[0].constructor.name !== "Uint8Array" ||
-          array[0].constructor.name !== "Uint8Array"
-        )
-          throw new Error(
-            "It is mandatory to provide a serializer for non-Uint8Array items",
-          );
-      } else {
-        throw new Error(
-          "It is mandatory to provide a serializer for non-Uint8Array items",
-        );
-      }
-    } else {
-      throw new Error(
-        "It is mandatory to provide a serializer for non-Uint8Array items",
-      );
-    }
-  }
+  const needlesAreUint8Arrays =
+    ArrayBuffer.isView(needles[0]) &&
+    needles[0].constructor.name === "Uint8Array";
+
+  const haystackIsUint8Arrays =
+    ArrayBuffer.isView(haystack[0]) &&
+    haystack[0].constructor.name === "Uint8Array";
+
+  if (!serializer && !needlesAreUint8Arrays && !haystackIsUint8Arrays)
+    throw new Error(
+      "It is mandatory to provide a serializer for non-Uint8Array items",
+    );
 
   const wasmMemory = module
     ? module.wasmMemory
-    : utilsMemory.itemsIndexesInArray(
-        arrayLen,
-        itemsArrayLen,
-        crypto_hash_sha512_BYTES,
-      );
+    : utilsMemory.needleInHaystack(arrayLen, itemsArrayLen);
 
   const dcryptoModule =
     module ||
@@ -95,8 +88,8 @@ const itemsIndexesInArray = async <T>(
   );
 
   const arrayItemSerialized = serializer
-    ? serializer(array[0])
-    : (array[0] as Uint8Array);
+    ? serializer(haystack[0])
+    : (haystack[0] as Uint8Array);
   const arrayItemSerializedLen = arrayItemSerialized.length;
   const hashWasmMemory = hashMemory.sha512Memory(arrayItemSerializedLen);
   const dcryptoHashModule = await dcryptoMethodsModule({
@@ -106,9 +99,12 @@ const itemsIndexesInArray = async <T>(
   let i;
   for (i = 0; i < arrayLen; i++) {
     const arraySerialized = serializer
-      ? serializer(array[i])
-      : (array[i] as Uint8Array);
-    const hash = await sha512(arraySerialized, dcryptoHashModule);
+      ? serializer(haystack[i])
+      : (haystack[i] as Uint8Array);
+    const hash =
+      arraySerialized.length === crypto_hash_sha512_BYTES
+        ? arraySerialized
+        : await sha512(arraySerialized, dcryptoHashModule);
     arr.set([...hash], i * crypto_hash_sha512_BYTES);
   }
 
@@ -122,9 +118,12 @@ const itemsIndexesInArray = async <T>(
   );
   for (i = 0; i < itemsArrayLen; i++) {
     const itemSerialized = serializer
-      ? serializer(items[i])
-      : (items[i] as Uint8Array);
-    const itemHash = await sha512(itemSerialized, dcryptoHashModule);
+      ? serializer(needles[i])
+      : (needles[i] as Uint8Array);
+    const itemHash =
+      itemSerialized.length === crypto_hash_sha512_BYTES
+        ? itemSerialized
+        : await sha512(itemSerialized, dcryptoHashModule);
     itms.set([...itemHash], i * crypto_hash_sha512_BYTES);
   }
 
@@ -150,20 +149,7 @@ const itemsIndexesInArray = async <T>(
 
   const indexes: number[] = [];
   for (i = 0; i < itemsArrayLen; i++) {
-    if (indxs[i] >= 0) {
-      indexes.push(indxs[i]);
-    } else {
-      if (indxs[i] === -1) {
-        dcryptoModule._free(ptr3);
-        throw new Error(`Item with index ${i} was not found in the array.`);
-      } else if (indxs[i] === -2) {
-        dcryptoModule._free(ptr3);
-        throw new Error(`Item with index ${i} has a duplicate.`);
-      } else {
-        dcryptoModule._free(ptr3);
-        throw new Error("Unexpected error occured.");
-      }
-    }
+    indexes.push(indxs[i]);
   }
 
   dcryptoModule._free(ptr3);
@@ -171,4 +157,4 @@ const itemsIndexesInArray = async <T>(
   return indexes;
 };
 
-export default itemsIndexesInArray;
+export default needleInHaystack;
