@@ -48,7 +48,6 @@ const withJS = ` \
 -s MODULARIZE=1 \
 -s MAIN_MODULE=2 \
 -s SINGLE_FILE=1 \
--s ENVIRONMENT='webview' \
 -s STRICT_JS=1 \
 -s EXPORT_ES6=1 \
 -s USE_ES6_IMPORT_META=0 \

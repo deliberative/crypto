@@ -29,6 +29,9 @@ We have also introduced function that can split and restore a secret through the
 
 Another feature of the library is a mnemonic generation, validation and Ed25519 key pair from mnemonic that was inspired by [bip39](https://github.com/bitcoinjs/bip39) but instead of Blake2b we use Argon2 and instead of SHA256 we use SHA512, both of which can be found in libsodium.
 
+A last feature is the ability to calculare Merkle roots, proofs and validate proofs from trees of arbitrary types, as
+long as you provide a serializer.
+
 ## Files
 
 The [libsodium](https://github.com/deliberative/libsodium) directory contains a fork of libsodium whose only differences with the master branch of libsodium are name changes to the implementation structs.

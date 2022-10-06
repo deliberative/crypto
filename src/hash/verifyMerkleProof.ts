@@ -13,86 +13,80 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import sha512 from "./sha512";
-
 import dcryptoMemory from "./memory";
 
 import dcryptoMethodsModule from "../c/build/dcryptoMethodsModule";
 
 import { crypto_hash_sha512_BYTES } from "../utils/interfaces";
 
-const arraysAreEqual = (arr1: Uint8Array, arr2: Uint8Array): boolean => {
-  const len = arr1.length;
-  if (len !== arr2.length) return false;
-
-  for (let i = 0; i < len; i++) {
-    if (arr1[i] !== arr2[i]) return false;
-  }
-
-  return true;
-};
-
 /**
  * Verifies that the hash was indeed included in the calculation of the Merkle root.
  * @param hash: The hash of the base element in question.
  * @param root: The Merkle root.
- * @param proofArtifacts: The first element is the first leave that was added for the calculation etc. The last
+ * @param proof: The first element is the first leave that was added for the calculation etc. The last
  * byte is either 0 or 1, indicating whether it is to the left or to the right in the tree.
  */
 const verifyMerkleProof = async (
   hash: Uint8Array,
   root: Uint8Array,
-  proofArtifacts: Uint8Array,
+  proof: Uint8Array,
 ): Promise<boolean> => {
-  if (proofArtifacts.length % (crypto_hash_sha512_BYTES + 1) !== 0)
-    throw new Error("Wrong proof artifact length");
+  const proofLen = proof.length;
+  // if (proofLen % (crypto_hash_sha512_BYTES + 1) !== 0)
+  //   throw new Error("Proof length not multiple of 65.");
 
-  const wasmMemory = dcryptoMemory.sha512Memory(2 * crypto_hash_sha512_BYTES);
-  const wasmModule = await dcryptoMethodsModule({
+  const wasmMemory = dcryptoMemory.verifyMerkleProofMemory(proofLen);
+  const module = await dcryptoMethodsModule({
     wasmMemory,
   });
 
-  const result = new Uint8Array(crypto_hash_sha512_BYTES);
-  const concatHashes = new Uint8Array(2 * crypto_hash_sha512_BYTES);
+  const ptr1 = module._malloc(crypto_hash_sha512_BYTES);
+  const elementHash = new Uint8Array(
+    module.HEAP8.buffer,
+    ptr1,
+    crypto_hash_sha512_BYTES,
+  );
+  elementHash.set([...hash]);
 
-  const leavesLen = proofArtifacts.length / (crypto_hash_sha512_BYTES + 1);
+  const ptr2 = module._malloc(crypto_hash_sha512_BYTES);
+  const rootArray = new Uint8Array(
+    module.HEAP8.buffer,
+    ptr2,
+    crypto_hash_sha512_BYTES,
+  );
+  rootArray.set([...root]);
 
-  let isLeft = false;
+  const ptr3 = module._malloc(proofLen);
+  const proofArray = new Uint8Array(module.HEAP8.buffer, ptr3, proofLen);
+  proofArray.set([...proof]);
 
-  result.set([...hash]);
-  for (let i = 0; i < leavesLen; i++) {
-    const position = proofArtifacts.slice(
-      i * (crypto_hash_sha512_BYTES + 1) + crypto_hash_sha512_BYTES,
-      (i + 1) * (crypto_hash_sha512_BYTES + 1),
-    );
+  const result = module._verify_merkle_proof(
+    proofLen,
+    elementHash.byteOffset,
+    rootArray.byteOffset,
+    proofArray.byteOffset,
+  );
 
-    if (position[0] !== 0 && position[0] !== 1)
-      throw new Error(`Wrong proofLeaves format at position ${i}`);
+  module._free(ptr1);
+  module._free(ptr2);
+  module._free(ptr3);
 
-    isLeft = position[0] === 0;
+  switch (result) {
+    case 0:
+      return true;
 
-    if (isLeft) {
-      concatHashes.set([
-        ...proofArtifacts.slice(
-          i * (crypto_hash_sha512_BYTES + 1),
-          i * (crypto_hash_sha512_BYTES + 1) + crypto_hash_sha512_BYTES,
-        ),
-        ...result,
-      ]);
-    } else {
-      concatHashes.set([
-        ...result,
-        ...proofArtifacts.slice(
-          i * (crypto_hash_sha512_BYTES + 1),
-          i * (crypto_hash_sha512_BYTES + 1) + crypto_hash_sha512_BYTES,
-        ),
-      ]);
-    }
+    case 1:
+      return false;
 
-    result.set(await sha512(concatHashes, wasmModule));
+    case -1:
+      throw new Error("Proof length not multiple of 65.");
+
+    case -2:
+      throw new Error("Proof artifact position is neither left nor right.");
+
+    default:
+      throw new Error("Unexpected error occured.");
   }
-
-  return arraysAreEqual(result, root);
 };
 
 export default verifyMerkleProof;

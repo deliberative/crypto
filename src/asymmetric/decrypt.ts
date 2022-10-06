@@ -95,8 +95,8 @@ const decrypt = async (
   switch (result) {
     case 0:
       return decr;
-    case -1:
-      throw new Error("Could not create successful key exchange");
+    // case -1:
+    //   throw new Error("Could not create successful key exchange");
     case -2:
       throw new Error("Unsuccessful decryption attempt");
     default:

@@ -93,17 +93,14 @@ const encrypt = async (
   dcryptoModule._free(ptr4);
 
   switch (result) {
-    case 0: {
+    case 0:
       return enc;
-    }
 
-    case -1: {
+    case -1:
       throw new Error("Could not convert Ed25519 public key to X25519.");
-    }
 
-    case -2: {
-      throw new Error("Could not create a shared secret.");
-    }
+    // case -2:
+    //   throw new Error("Could not create a shared secret.");
 
     default:
       throw new Error("An unexpected error occured.");

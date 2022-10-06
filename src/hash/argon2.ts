@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import mnemonicMemory from "./memory";
+import hashMemory from "./memory";
 
 import randomBytes from "../utils/randomBytes";
 
@@ -46,7 +46,7 @@ const argon2 = async (
 
   const wasmMemory = module
     ? module.wasmMemory
-    : mnemonicMemory.argon2Memory(mnemonicArrayLen);
+    : hashMemory.argon2Memory(mnemonicArrayLen);
 
   const dcryptoModule = module || (await dcryptoMethodsModule({ wasmMemory }));
 

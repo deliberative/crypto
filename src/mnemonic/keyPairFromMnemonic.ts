@@ -14,9 +14,9 @@
 // limitations under the License.
 
 import validateMnemonic from "./validateMnemonic";
-import argon2 from "./argon2";
 
 import sha512 from "../hash/sha512";
+import argon2 from "../hash/argon2";
 
 import keyPair from "../asymmetric/keyPair";
 
@@ -36,9 +36,9 @@ const keyPairFromMnemonic = async (mnemonic: string, password?: string) => {
   const salt = new Uint8Array(crypto_pwhash_argon2id_SALTBYTES);
 
   if (password) {
-    const pwdHash = await sha512(
-      Uint8Array.from(Buffer.from(password, "utf8")),
-    );
+    const encoder = new TextEncoder();
+    const pwdBuffer = encoder.encode(password).buffer;
+    const pwdHash = await sha512(new Uint8Array(pwdBuffer));
 
     salt.set(
       pwdHash.slice(

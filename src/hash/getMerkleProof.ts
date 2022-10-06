@@ -23,44 +23,30 @@ import { crypto_hash_sha512_BYTES } from "../utils/interfaces";
 
 /**
  * @function
- * Returns the Merkle root of a tree.
- * If Uint8Array items' length is 64, even after serializer,
- * then we assume that it is a hash.
+ * Returns the Merkle proof of an element of a tree.
+ * Can be used as a receipt of a transaction etc.
  *
  * @param tree: The tree.
+ * @param element: The element.
  * @param serializer: Converts leaves into Uint8Array.
  *
  * @returns Promise<Uint8Array>
  */
-const getMerkleRoot = async <T extends Uint8Array | unknown>(
+const getMerkleProof = async <T extends Uint8Array | unknown>(
   tree: T[],
+  element: T,
   serializer?: (i: T) => Uint8Array,
 ): Promise<Uint8Array> => {
   const treeLen = tree.length;
   if (treeLen === 0) {
-    throw new Error("Cannot calculate Merkle root of tree with no leaves.");
+    throw new Error("Cannot calculate Merkle proof of element of empty tree.");
   } else if (treeLen === 1) {
-    const leafIsUint8Array =
-      ArrayBuffer.isView(tree[0]) && tree[0].constructor.name === "Uint8Array";
-    if (!serializer && leafIsUint8Array) {
-      return await sha512(tree[0] as Uint8Array);
-    } else if (serializer && !leafIsUint8Array) {
-      const serialized = serializer(tree[0]);
-
-      return await sha512(serialized);
-    }
-    // Cannot happen due to typeguards.
-    // else if (serializer && leafIsUint8Array) {
-    //   throw new Error(
-    //     "Did not need to provide a serializer since leaf is Uint8Array",
-    //   );
-    // }
-    else {
-      throw new Error("Tree leaf not Uint8Array, needs serializer.");
-    }
+    throw new Error(
+      "No point in calculating proof of a tree with single leaf.",
+    );
   }
 
-  const wasmMemory = dcryptoMemory.getMerkleRootMemory(treeLen);
+  const wasmMemory = dcryptoMemory.getMerkleProofMemory(treeLen);
   const module = await dcryptoMethodsModule({
     wasmMemory,
   });
@@ -81,12 +67,10 @@ const getMerkleRoot = async <T extends Uint8Array | unknown>(
       ArrayBuffer.isView(leaf) && leaf.constructor.name === "Uint8Array";
     if (!serializer && leafIsUint8Array) {
       hash = await sha512(leaf as Uint8Array, module);
-      // hashes.push(hash);
       leavesHashed.set([...hash], i * crypto_hash_sha512_BYTES);
     } else if (serializer && !leafIsUint8Array) {
       serialized = serializer(leaf);
       hash = await sha512(serialized, module);
-      // hashes.push(hash);
       leavesHashed.set([...hash], i * crypto_hash_sha512_BYTES);
     }
     // Cannot happen due to typeguards
@@ -102,34 +86,61 @@ const getMerkleRoot = async <T extends Uint8Array | unknown>(
   }
 
   const ptr2 = module._malloc(crypto_hash_sha512_BYTES);
-  const rootWasm = new Uint8Array(
+  const elementHash = new Uint8Array(
     module.HEAP8.buffer,
     ptr2,
     crypto_hash_sha512_BYTES,
   );
+  leafIsUint8Array =
+    ArrayBuffer.isView(element) && element.constructor.name === "Uint8Array";
+  if (!serializer && leafIsUint8Array) {
+    hash = await sha512(element as Uint8Array);
+    elementHash.set([...hash]);
+  } else if (serializer && !leafIsUint8Array) {
+    serialized = serializer(element);
+    hash = await sha512(serialized);
+    elementHash.set([...hash]);
+  }
+  // Cannot happen due to typeguards
+  // else if (serializer && leafIsUint8Array) {
+  //   throw new Error(
+  //     "Did not need to provide a serializer since element is Uint8Array",
+  //   );
+  // }
+  // Cannot happen due to typeguards from tree
+  // else {
+  //   throw new Error("Element not Uint8Array, needs serializer.");
+  // }
 
-  const result = module._get_merkle_root(
+  const ptr3 = module._malloc(treeLen * (crypto_hash_sha512_BYTES + 1));
+  const proof = new Uint8Array(
+    module.HEAP8.buffer,
+    ptr3,
+    treeLen * (crypto_hash_sha512_BYTES + 1),
+  );
+
+  const result = module._get_merkle_proof(
     treeLen,
     leavesHashed.byteOffset,
-    rootWasm.byteOffset,
+    elementHash.byteOffset,
+    proof.byteOffset,
   );
 
   module._free(ptr1);
+  module._free(ptr2);
 
   switch (result) {
-    case 0: {
-      const root = Uint8Array.from([...rootWasm]);
-      module._free(ptr2);
-
-      return root;
-    }
+    case -1:
+      module._free(ptr3);
+      throw new Error("Element not in tree.");
 
     default: {
-      module._free(ptr2);
+      const proofArray = Uint8Array.from([...proof.slice(0, result)]);
+      module._free(ptr3);
 
-      throw new Error("Unexpected error occured");
+      return proofArray;
     }
   }
 };
 
-export default getMerkleRoot;
+export default getMerkleProof;

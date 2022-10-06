@@ -15,43 +15,65 @@
 
 import memoryLenToPages from "../utils/memoryLenToPages";
 
-import { crypto_hash_sha512_BYTES } from "../utils/interfaces";
+import {
+  crypto_sign_ed25519_SEEDBYTES,
+  crypto_pwhash_argon2id_SALTBYTES,
+  crypto_hash_sha512_BYTES,
+} from "../utils/interfaces";
 
 const sha512Memory = (arrayLen: number): WebAssembly.Memory => {
-  const memoryLen =
-    (arrayLen + crypto_hash_sha512_BYTES) * Uint8Array.BYTES_PER_ELEMENT;
+  const memoryLen = arrayLen + crypto_hash_sha512_BYTES;
   const pages = memoryLenToPages(memoryLen);
 
   return new WebAssembly.Memory({ initial: pages, maximum: pages });
 };
 
-const merkleRootMemory = (
-  maxDataLen: number,
-): {
-  initialMemory: WebAssembly.Memory;
-  subsequentMemory: WebAssembly.Memory;
-} => {
-  const initialMemoryLen =
-    (maxDataLen + crypto_hash_sha512_BYTES) * Uint8Array.BYTES_PER_ELEMENT;
-  const initialMemoryPages = memoryLenToPages(initialMemoryLen);
+const argon2Memory = (mnemonicLen: number): WebAssembly.Memory => {
+  const memoryLen =
+    (75 * 1024 * 1024 +
+      mnemonicLen +
+      crypto_sign_ed25519_SEEDBYTES +
+      crypto_pwhash_argon2id_SALTBYTES) *
+    Uint8Array.BYTES_PER_ELEMENT;
+  const pages = memoryLenToPages(memoryLen);
 
-  const subsequentMemoryLen =
-    3 * crypto_hash_sha512_BYTES * Uint8Array.BYTES_PER_ELEMENT;
-  const subsequentMemoryPages = memoryLenToPages(subsequentMemoryLen);
+  return new WebAssembly.Memory({ initial: pages, maximum: pages });
+};
 
-  return {
-    initialMemory: new WebAssembly.Memory({
-      initial: initialMemoryPages,
-      maximum: initialMemoryPages,
-    }),
-    subsequentMemory: new WebAssembly.Memory({
-      initial: subsequentMemoryPages,
-      maximum: subsequentMemoryPages,
-    }),
-  };
+const getMerkleRootMemory = (leavesLen: number): WebAssembly.Memory => {
+  const memoryLen = (2 * leavesLen + 3) * crypto_hash_sha512_BYTES;
+  const memoryPages = memoryLenToPages(memoryLen);
+
+  return new WebAssembly.Memory({
+    initial: memoryPages,
+    maximum: memoryPages,
+  });
+};
+
+const getMerkleProofMemory = (leavesLen: number): WebAssembly.Memory => {
+  const memoryLen = (3 * leavesLen + 4) * crypto_hash_sha512_BYTES + leavesLen;
+  const memoryPages = memoryLenToPages(memoryLen);
+
+  return new WebAssembly.Memory({
+    initial: memoryPages,
+    maximum: memoryPages,
+  });
+};
+
+const verifyMerkleProofMemory = (proofLen: number): WebAssembly.Memory => {
+  const memoryLen = proofLen + 5 * crypto_hash_sha512_BYTES;
+  const memoryPages = memoryLenToPages(memoryLen);
+
+  return new WebAssembly.Memory({
+    initial: memoryPages,
+    maximum: memoryPages,
+  });
 };
 
 export default {
   sha512Memory,
-  merkleRootMemory,
+  argon2Memory,
+  getMerkleRootMemory,
+  getMerkleProofMemory,
+  verifyMerkleProofMemory,
 };

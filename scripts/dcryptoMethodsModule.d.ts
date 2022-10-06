@@ -103,6 +103,24 @@ export interface DCryptoMethodsModule extends EmscriptenModule {
     array: number, // Uint8Array
   ): number;
   _random_number_in_range(MIN: number, MAX: number): number;
+
+  _get_merkle_root(
+    LEAVES_LEN: number,
+    leaves_hashed: number, // Uint8Array.byteOffset
+    root: number, // Uint8Array.byteOffset
+  ): number;
+  _get_merkle_proof(
+    LEAVES_LEN: number,
+    leaves_hashed: number, // Uint8Array.byteOffset
+    element_hash: number, // Uint8Array.byteOffset
+    proof: number, // Uint8Array.byteOffset
+  ): number;
+  _verify_merkle_proof(
+    PROOF_LEN: number,
+    element_hash: number, // Uint8Array.byteOffset
+    root: number, // Uint8Array.byteOffset
+    proof: number, // Uint8Array.byteOffset
+  ): number;
 }
 
 declare const dcryptoMethodsModule: EmscriptenModuleFactory<DCryptoMethodsModule>;

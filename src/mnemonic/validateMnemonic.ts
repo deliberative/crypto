@@ -15,7 +15,7 @@
 
 import wordlist from "./wordlist.json";
 
-import hash from "../hash";
+import sha512 from "../hash/sha512";
 
 const normalize = (str: string) => {
   return (str || "").normalize("NFKD");
@@ -64,7 +64,7 @@ const mnemonicToEntropy = async (mnemonic: string): Promise<boolean> => {
     throw new Error("Entropy length must be a multiple of 4.");
 
   const CS = entropy.length / 4;
-  const entropyHash = await hash.sha512(Uint8Array.from([...entropy]));
+  const entropyHash = await sha512(Uint8Array.from([...entropy]));
   const newChecksum = entropyHash
     .reduce((str, byte) => str + byte.toString(2).padStart(8, "0"), "")
     .slice(0, CS);

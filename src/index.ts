@@ -131,10 +131,14 @@ export interface DeliberativeCrypto {
     module?: DCryptoMethodsModule,
   ) => Promise<Uint8Array>;
 
-  getMerkleRoot: (tree: Uint8Array[]) => Promise<Uint8Array>;
-  getMerkleProofArtifacts: (
-    tree: Uint8Array[],
-    elementIndex: number,
+  getMerkleRoot: <T extends Uint8Array | unknown>(
+    tree: T[],
+    serializer?: (i: T) => Uint8Array,
+  ) => Promise<Uint8Array>;
+  getMerkleProof: <T extends Uint8Array | unknown>(
+    tree: T[],
+    element: T,
+    serializer?: (i: T) => Uint8Array,
   ) => Promise<Uint8Array>;
   verifyMerkleProof: (
     hash: Uint8Array,
@@ -222,10 +226,9 @@ export interface DeliberativeCrypto {
     ) => WebAssembly.Memory;
 
     sha512: (arrayLen: number) => WebAssembly.Memory;
-    merkleRoot: (maxDataLen: number) => {
-      initialMemory: WebAssembly.Memory;
-      subsequentMemory: WebAssembly.Memory;
-    };
+    getMerkleRoot: (leavesLen: number) => WebAssembly.Memory;
+    getMerkleProof: (leavesLen: number) => WebAssembly.Memory;
+    verifyMerkleProof: (proofLen: number) => WebAssembly.Memory;
 
     splitSecret: (
       secretLen: number,
@@ -262,7 +265,7 @@ const dcrypto: DeliberativeCrypto = {
 
   sha512: hash.sha512,
   getMerkleRoot: hash.getMerkleRoot,
-  getMerkleProofArtifacts: hash.getMerkleProofArtifacts,
+  getMerkleProof: hash.getMerkleProof,
   verifyMerkleProof: hash.verifyMerkleProof,
 
   splitSecret: shamir.splitSecret,
@@ -317,7 +320,9 @@ const dcrypto: DeliberativeCrypto = {
     decryptSymmetricKey: symmetric.memory.decryptMemory,
 
     sha512: hash.memory.sha512Memory,
-    merkleRoot: hash.memory.merkleRootMemory,
+    getMerkleRoot: hash.memory.getMerkleRootMemory,
+    getMerkleProof: hash.memory.getMerkleProofMemory,
+    verifyMerkleProof: hash.memory.verifyMerkleProofMemory,
 
     splitSecret: shamir.memory.splitSecretMemory,
     restoreSecret: shamir.memory.restoreSecretMemory,

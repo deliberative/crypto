@@ -17,7 +17,8 @@
   ],
   "coveragePathIgnorePatterns": [
     "<rootDir>/node_modules/",
-    "<rootDir>/src/wasmLoaders/emscriptenImports.ts"
+    "<rootDir>/src/wasmLoaders/emscriptenImports.ts",
+    "<rootDir>/src/c/build/dcryptoMethodsModule.d.ts"
   ],
   "coverageReporters": ["json", "text", "lcov", "jest-badges"],
   "coverageDirectory": "coverage",

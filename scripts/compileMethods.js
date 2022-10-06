@@ -82,7 +82,10 @@ _split_secret,\
 _restore_secret,\
 _items_indexes_in_array,\
 _random_bytes,\
-_random_number_in_range \
+_random_number_in_range,\
+_get_merkle_root,\
+_get_merkle_proof,\
+_verify_merkle_proof \
 -s EXPORT_NAME=dcryptoMethodsModule \
 -I${libsodiumIncludePath} \
 -I${libsodiumIncludePrivatePath} \

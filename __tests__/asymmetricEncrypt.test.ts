@@ -91,5 +91,22 @@ describe("Encryption and decryption with Ed25519 derived keys test suite.", () =
         previousBlockHash,
       ),
     ).rejects.toThrow("Unsuccessful decryption attempt");
+
+    const zeroKeyPair = {
+      publicKey: new Uint8Array(
+        dcrypto.constants.crypto_sign_ed25519_PUBLICKEYBYTES,
+      ).fill(0),
+      secretKey: new Uint8Array(
+        dcrypto.constants.crypto_sign_ed25519_SECRETKEYBYTES,
+      ).fill(0),
+    };
+
+    await expect(
+      dcrypto.encryptForwardSecrecy(
+        message,
+        zeroKeyPair.publicKey,
+        previousBlockHash,
+      ),
+    ).rejects.toThrow("Could not convert Ed25519 public key to X25519.");
   });
 });
