@@ -18,6 +18,17 @@ export interface SignKeyPair {
   secretKey: Uint8Array;
 }
 
+export type TypedArray =
+  | Int8Array
+  | Uint8Array
+  | Int16Array
+  | Uint16Array
+  | Int32Array
+  | Uint32Array
+  | Uint8ClampedArray
+  | Float32Array
+  | Float64Array;
+
 export const crypto_hash_sha512_BYTES = 64 * Uint8Array.BYTES_PER_ELEMENT;
 export const crypto_secretbox_KEYBYTES = 32 * Uint8Array.BYTES_PER_ELEMENT;
 export const crypto_secretbox_NONCEBYTES = 24 * Uint8Array.BYTES_PER_ELEMENT;

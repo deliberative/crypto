@@ -131,13 +131,13 @@ export interface DeliberativeCrypto {
     module?: DCryptoMethodsModule,
   ) => Promise<Uint8Array>;
 
-  getMerkleRoot: <T extends Uint8Array | unknown>(
-    tree: T[],
+  getMerkleRoot: <T>(
+    tree: (T | Uint8Array)[],
     serializer?: (i: T) => Uint8Array,
   ) => Promise<Uint8Array>;
-  getMerkleProof: <T extends Uint8Array | unknown>(
-    tree: T[],
-    element: T,
+  getMerkleProof: <T>(
+    tree: (T | Uint8Array)[],
+    element: T | Uint8Array,
     serializer?: (i: T) => Uint8Array,
   ) => Promise<Uint8Array>;
   verifyMerkleProof: (
@@ -179,9 +179,9 @@ export interface DeliberativeCrypto {
   getForwardSecretBoxEncryptedLen: (messageLen: number) => number;
   getForwardSecretBoxDecryptedLen: (encryptedLen: number) => number;
 
-  needleInHaystack: <T extends Uint8Array | unknown>(
-    array: T[],
-    items: T[],
+  needleInHaystack: <T>(
+    array: (T | Uint8Array)[],
+    items: (T | Uint8Array)[],
     serializer?: (i: T) => Uint8Array,
     module?: DCryptoMethodsModule,
   ) => Promise<number[]>;

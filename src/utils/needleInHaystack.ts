@@ -14,6 +14,7 @@
 // limitations under the License.
 
 import utilsMemory from "./memory";
+import isUint8Array from "./isUint8Array";
 import { crypto_hash_sha512_BYTES } from "./interfaces";
 
 import sha512 from "../hash/sha512";
@@ -36,9 +37,9 @@ import type { DCryptoMethodsModule } from "../c/build/dcryptoMethodsModule";
  *
  * @returns Promise<number[]>
  */
-const needleInHaystack = async <T extends Uint8Array | unknown>(
-  needles: T[],
-  haystack: T[],
+const needleInHaystack = async <T>(
+  needles: (T | Uint8Array)[],
+  haystack: (T | Uint8Array)[],
   serializer?: (i: T) => Uint8Array,
   module?: DCryptoMethodsModule,
 ): Promise<number[]> => {
@@ -55,14 +56,8 @@ const needleInHaystack = async <T extends Uint8Array | unknown>(
     );
   }
 
-  const needlesAreUint8Arrays =
-    ArrayBuffer.isView(needles[0]) &&
-    needles[0].constructor.name === "Uint8Array";
-
-  const haystackIsUint8Arrays =
-    ArrayBuffer.isView(haystack[0]) &&
-    haystack[0].constructor.name === "Uint8Array";
-
+  const needlesAreUint8Arrays = isUint8Array(needles[0]);
+  const haystackIsUint8Arrays = isUint8Array(haystack[0]);
   if (!serializer && !needlesAreUint8Arrays && !haystackIsUint8Arrays)
     throw new Error(
       "It is mandatory to provide a serializer for non-Uint8Array items",
@@ -87,9 +82,11 @@ const needleInHaystack = async <T extends Uint8Array | unknown>(
     arrayLen * crypto_hash_sha512_BYTES * Uint8Array.BYTES_PER_ELEMENT,
   );
 
-  const arrayItemSerialized = serializer
-    ? serializer(haystack[0])
-    : (haystack[0] as Uint8Array);
+  const arrayItemSerialized = haystackIsUint8Arrays
+    ? (haystack[0] as Uint8Array)
+    : serializer
+    ? serializer(haystack[0] as T)
+    : new Uint8Array(32); // will never happen
   const arrayItemSerializedLen = arrayItemSerialized.length;
   const hashWasmMemory = hashMemory.sha512Memory(arrayItemSerializedLen);
   const dcryptoHashModule = await dcryptoMethodsModule({
@@ -98,9 +95,11 @@ const needleInHaystack = async <T extends Uint8Array | unknown>(
 
   let i;
   for (i = 0; i < arrayLen; i++) {
-    const arraySerialized = serializer
-      ? serializer(haystack[i])
-      : (haystack[i] as Uint8Array);
+    const arraySerialized = haystackIsUint8Arrays
+      ? (haystack[i] as Uint8Array)
+      : serializer
+      ? serializer(haystack[i] as T)
+      : new Uint8Array(32); // will never happen
     const hash =
       arraySerialized.length === crypto_hash_sha512_BYTES
         ? arraySerialized
@@ -117,9 +116,11 @@ const needleInHaystack = async <T extends Uint8Array | unknown>(
     itemsArrayLen * crypto_hash_sha512_BYTES * Uint8Array.BYTES_PER_ELEMENT,
   );
   for (i = 0; i < itemsArrayLen; i++) {
-    const itemSerialized = serializer
-      ? serializer(needles[i])
-      : (needles[i] as Uint8Array);
+    const itemSerialized = needlesAreUint8Arrays
+      ? (needles[i] as Uint8Array)
+      : serializer
+      ? serializer(needles[i] as T)
+      : new Uint8Array(32); // will never happen
     const itemHash =
       itemSerialized.length === crypto_hash_sha512_BYTES
         ? itemSerialized

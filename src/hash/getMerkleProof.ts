@@ -17,6 +17,8 @@ import sha512 from "./sha512";
 
 import dcryptoMemory from "./memory";
 
+import isUint8Array from "../utils/isUint8Array";
+
 import dcryptoMethodsModule from "../c/build/dcryptoMethodsModule";
 
 import { crypto_hash_sha512_BYTES } from "../utils/interfaces";
@@ -32,9 +34,9 @@ import { crypto_hash_sha512_BYTES } from "../utils/interfaces";
  *
  * @returns Promise<Uint8Array>
  */
-const getMerkleProof = async <T extends Uint8Array | unknown>(
-  tree: T[],
-  element: T,
+const getMerkleProof = async <T>(
+  tree: (T | Uint8Array)[],
+  element: T | Uint8Array,
   serializer?: (i: T) => Uint8Array,
 ): Promise<Uint8Array> => {
   const treeLen = tree.length;
@@ -45,6 +47,13 @@ const getMerkleProof = async <T extends Uint8Array | unknown>(
       "No point in calculating proof of a tree with single leaf.",
     );
   }
+
+  const leavesAreUint8Arrays = isUint8Array(tree[0]);
+  const elementIsUint8Array = isUint8Array(element);
+  if (!serializer && (!leavesAreUint8Arrays || !elementIsUint8Array))
+    throw new Error(
+      "It is mandatory to provide a serializer for non-Uint8Array items",
+    );
 
   const wasmMemory = dcryptoMemory.getMerkleProofMemory(treeLen);
   const module = await dcryptoMethodsModule({
@@ -63,25 +72,14 @@ const getMerkleProof = async <T extends Uint8Array | unknown>(
   let hash: Uint8Array;
   let serialized: Uint8Array;
   for (const leaf of tree) {
-    leafIsUint8Array =
-      ArrayBuffer.isView(leaf) && leaf.constructor.name === "Uint8Array";
-    if (!serializer && leafIsUint8Array) {
-      hash = await sha512(leaf as Uint8Array, module);
-      leavesHashed.set([...hash], i * crypto_hash_sha512_BYTES);
-    } else if (serializer && !leafIsUint8Array) {
-      serialized = serializer(leaf);
-      hash = await sha512(serialized, module);
-      leavesHashed.set([...hash], i * crypto_hash_sha512_BYTES);
-    }
-    // Cannot happen due to typeguards
-    // else if (serializer && leafIsUint8Array) {
-    //   throw new Error(
-    //     "Did not need to provide a serializer since leaf is Uint8Array",
-    //   );
-    // }
-    else {
-      throw new Error("Tree leaf not Uint8Array, needs serializer.");
-    }
+    leafIsUint8Array = isUint8Array(leaf);
+    serialized = leafIsUint8Array
+      ? (leaf as Uint8Array)
+      : serializer
+      ? serializer(leaf as T)
+      : new Uint8Array(32); // will never happen
+    hash = await sha512(serialized, module);
+    leavesHashed.set([...hash], i * crypto_hash_sha512_BYTES);
     i++;
   }
 
@@ -91,26 +89,13 @@ const getMerkleProof = async <T extends Uint8Array | unknown>(
     ptr2,
     crypto_hash_sha512_BYTES,
   );
-  leafIsUint8Array =
-    ArrayBuffer.isView(element) && element.constructor.name === "Uint8Array";
-  if (!serializer && leafIsUint8Array) {
-    hash = await sha512(element as Uint8Array);
-    elementHash.set([...hash]);
-  } else if (serializer && !leafIsUint8Array) {
-    serialized = serializer(element);
-    hash = await sha512(serialized);
-    elementHash.set([...hash]);
-  }
-  // Cannot happen due to typeguards
-  // else if (serializer && leafIsUint8Array) {
-  //   throw new Error(
-  //     "Did not need to provide a serializer since element is Uint8Array",
-  //   );
-  // }
-  // Cannot happen due to typeguards from tree
-  // else {
-  //   throw new Error("Element not Uint8Array, needs serializer.");
-  // }
+  const elementSerialized = elementIsUint8Array
+    ? element
+    : serializer
+    ? serializer(element)
+    : new Uint8Array(32); // will never happen
+  hash = await sha512(elementSerialized);
+  elementHash.set([...hash]);
 
   const ptr3 = module._malloc(treeLen * (crypto_hash_sha512_BYTES + 1));
   const proof = new Uint8Array(

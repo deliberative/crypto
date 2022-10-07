@@ -17,6 +17,8 @@ import sha512 from "./sha512";
 
 import dcryptoMemory from "./memory";
 
+import isUint8Array from "../utils/isUint8Array";
+
 import dcryptoMethodsModule from "../c/build/dcryptoMethodsModule";
 
 import { crypto_hash_sha512_BYTES } from "../utils/interfaces";
@@ -32,32 +34,24 @@ import { crypto_hash_sha512_BYTES } from "../utils/interfaces";
  *
  * @returns Promise<Uint8Array>
  */
-const getMerkleRoot = async <T extends Uint8Array | unknown>(
-  tree: T[],
+const getMerkleRoot = async <T>(
+  tree: (T | Uint8Array)[],
   serializer?: (i: T) => Uint8Array,
 ): Promise<Uint8Array> => {
   const treeLen = tree.length;
   if (treeLen === 0) {
     throw new Error("Cannot calculate Merkle root of tree with no leaves.");
   } else if (treeLen === 1) {
-    const leafIsUint8Array =
-      ArrayBuffer.isView(tree[0]) && tree[0].constructor.name === "Uint8Array";
-    if (!serializer && leafIsUint8Array) {
-      return await sha512(tree[0] as Uint8Array);
-    } else if (serializer && !leafIsUint8Array) {
-      const serialized = serializer(tree[0]);
-
-      return await sha512(serialized);
-    }
-    // Cannot happen due to typeguards.
-    // else if (serializer && leafIsUint8Array) {
-    //   throw new Error(
-    //     "Did not need to provide a serializer since leaf is Uint8Array",
-    //   );
-    // }
-    else {
+    const leafIsUint8Array = isUint8Array(tree[0]);
+    if (!leafIsUint8Array && !serializer)
       throw new Error("Tree leaf not Uint8Array, needs serializer.");
-    }
+    const leafSerialized = leafIsUint8Array
+      ? (tree[0] as Uint8Array)
+      : serializer
+      ? serializer(tree[0] as T)
+      : new Uint8Array(32); // will never happen
+
+    return await sha512(leafSerialized);
   }
 
   const wasmMemory = dcryptoMemory.getMerkleRootMemory(treeLen);
@@ -77,27 +71,17 @@ const getMerkleRoot = async <T extends Uint8Array | unknown>(
   let hash: Uint8Array;
   let serialized: Uint8Array;
   for (const leaf of tree) {
-    leafIsUint8Array =
-      ArrayBuffer.isView(leaf) && leaf.constructor.name === "Uint8Array";
-    if (!serializer && leafIsUint8Array) {
-      hash = await sha512(leaf as Uint8Array, module);
-      // hashes.push(hash);
-      leavesHashed.set([...hash], i * crypto_hash_sha512_BYTES);
-    } else if (serializer && !leafIsUint8Array) {
-      serialized = serializer(leaf);
-      hash = await sha512(serialized, module);
-      // hashes.push(hash);
-      leavesHashed.set([...hash], i * crypto_hash_sha512_BYTES);
-    }
-    // Cannot happen due to typeguards
-    // else if (serializer && leafIsUint8Array) {
-    //   throw new Error(
-    //     "Did not need to provide a serializer since leaf is Uint8Array",
-    //   );
-    // }
-    else {
+    leafIsUint8Array = isUint8Array(leaf);
+    if (!leafIsUint8Array && !serializer)
       throw new Error("Tree leaf not Uint8Array, needs serializer.");
-    }
+
+    serialized = leafIsUint8Array
+      ? (leaf as Uint8Array)
+      : serializer
+      ? serializer(leaf as T)
+      : new Uint8Array(32); // will never happen
+    hash = await sha512(serialized, module);
+    leavesHashed.set([...hash], i * crypto_hash_sha512_BYTES);
     i++;
   }
 

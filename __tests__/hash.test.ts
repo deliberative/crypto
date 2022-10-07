@@ -198,22 +198,40 @@ describe("Sha512 and Merkle root test suite.", () => {
       someRandomInterfaceSerializer,
     );
 
-    const proof = await dcrypto.getMerkleProof(
+    const arr6Serialized = someRandomInterfaceSerializer(arr6);
+    const proof1 = await dcrypto.getMerkleProof(
       arrayOfArrays3,
+      arr6Serialized,
+      someRandomInterfaceSerializer,
+    );
+
+    const arrayOfArrays3Serialized: Uint8Array[] = [];
+    for (let i = 0; i < arrayOfArrays3.length; i++) {
+      arrayOfArrays3Serialized.push(
+        someRandomInterfaceSerializer(arrayOfArrays3[i]),
+      );
+    }
+    const proof2 = await dcrypto.getMerkleProof(
+      arrayOfArrays3Serialized,
       arr6,
       someRandomInterfaceSerializer,
     );
 
-    const arr6Serialized = someRandomInterfaceSerializer(arr6);
     const elementHash = await dcrypto.sha512(arr6Serialized);
-
-    const verification = await dcrypto.verifyMerkleProof(
+    const verification1 = await dcrypto.verifyMerkleProof(
       elementHash,
       root,
-      proof,
+      proof1,
     );
 
-    expect(verification).toBe(true);
+    const verification2 = await dcrypto.verifyMerkleProof(
+      elementHash,
+      root,
+      proof2,
+    );
+
+    expect(verification1).toBe(true);
+    expect(verification2).toBe(true);
 
     const root1 = await dcrypto.getMerkleRoot(
       [arr6],
@@ -253,7 +271,7 @@ describe("Sha512 and Merkle root test suite.", () => {
     );
 
     await expect(dcrypto.getMerkleProof(arrayOfArrays3, arr6)).rejects.toThrow(
-      "Tree leaf not Uint8Array, needs serializer.",
+      "It is mandatory to provide a serializer for non-Uint8Array items",
     );
   });
 });

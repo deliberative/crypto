@@ -13,22 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import interfaces from "./interfaces";
-import isUint8Array from "./isUint8Array";
-import needleInHaystack from "./needleInHaystack";
-import arrayRandomShuffle from "./arrayRandomShuffle";
-import arrayRandomSubset from "./arrayRandomSubset";
-import randomBytes from "./randomBytes";
-import randomNumberInRange from "./randomNumberInRange";
-import memory from "./memory";
-
-export default {
-  interfaces,
-  isUint8Array,
-  needleInHaystack,
-  arrayRandomShuffle,
-  arrayRandomSubset,
-  randomBytes,
-  randomNumberInRange,
-  memory,
+const isUint8Array = (item: Uint8Array | unknown): item is Uint8Array => {
+  return (item as Uint8Array).byteOffset !== undefined;
 };
+
+export default isUint8Array;
