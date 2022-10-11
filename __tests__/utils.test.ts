@@ -12,7 +12,7 @@ describe("Starting the cryptographic random utils test suite.", () => {
   test("Generation with module works.", async () => {
     const len = 34 * 1024;
     const randomBytesMemory = dcrypto.loadWasmMemory.randomBytes(len);
-    const randomBytesModule = await dcrypto.loadModule({
+    const randomBytesModule = await dcrypto.loadWasmModule({
       wasmMemory: randomBytesMemory,
     });
 
@@ -247,7 +247,7 @@ describe("Starting the cryptographic random utils test suite.", () => {
       arrayOfArrays3.length,
       arrayOfArrays4.length,
     );
-    const module = await dcrypto.loadModule({ wasmMemory });
+    const module = await dcrypto.loadWasmModule({ wasmMemory });
     const indexes1 = await dcrypto.needleInHaystack(
       arrayOfArrays4,
       arrayOfArrays3,

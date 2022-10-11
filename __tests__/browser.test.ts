@@ -86,7 +86,7 @@ describe("Browser-based tests.", () => {
       20,
       11,
     );
-    const splitModule = await dcrypto.loadModule({
+    const splitModule = await dcrypto.loadWasmModule({
       wasmMemory: shamirSplitMemory,
     });
     const keypair = await dcrypto.keyPair();
@@ -103,7 +103,7 @@ describe("Browser-based tests.", () => {
       crypto_sign_ed25519_SECRETKEYBYTES,
       20,
     );
-    const restoreModule = await dcrypto.loadModule({
+    const restoreModule = await dcrypto.loadWasmModule({
       wasmMemory: shamirRestoreMemory,
     });
     const reconstructed = await dcrypto.restoreSecret(shuffled, restoreModule);

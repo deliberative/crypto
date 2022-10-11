@@ -22,7 +22,7 @@ describe("Signing and verifying with Ed25519 keys test suite.", () => {
     const keypair = await dcrypto.keyPair();
 
     const wasmMemory = dcrypto.loadWasmMemory.newKeyPair();
-    const module = await dcrypto.loadModule({ wasmMemory });
+    const module = await dcrypto.loadWasmModule({ wasmMemory });
     const someOtherKeypair = await dcrypto.keyPair(module);
 
     expect(typeof keypair === "object").toBe(true);
@@ -39,7 +39,7 @@ describe("Signing and verifying with Ed25519 keys test suite.", () => {
     const keypair = await dcrypto.keyPairFromSeed(seed);
 
     const wasmMemory = dcrypto.loadWasmMemory.keyPairFromSeed();
-    const module = await dcrypto.loadModule({ wasmMemory });
+    const module = await dcrypto.loadWasmModule({ wasmMemory });
     const sameKeypair = await dcrypto.keyPairFromSeed(seed, module);
 
     expect(typeof keypair === "object").toBe(true);
@@ -54,7 +54,7 @@ describe("Signing and verifying with Ed25519 keys test suite.", () => {
     const keypair = await dcrypto.keyPairFromSecretKey(original.secretKey);
 
     const wasmMemory = dcrypto.loadWasmMemory.keyPairFromSecretKey();
-    const module = await dcrypto.loadModule({ wasmMemory });
+    const module = await dcrypto.loadWasmModule({ wasmMemory });
     const sameKeypair = await dcrypto.keyPairFromSecretKey(
       original.secretKey,
       module,
@@ -76,7 +76,7 @@ describe("Signing and verifying with Ed25519 keys test suite.", () => {
     const signature = await dcrypto.sign(randomMessage, keyPair.secretKey);
 
     const wasmMemory = dcrypto.loadWasmMemory.sign(randomMessage.length);
-    const module = await dcrypto.loadModule({ wasmMemory });
+    const module = await dcrypto.loadWasmModule({ wasmMemory });
     const otherSignature = await dcrypto.sign(
       randomMessage,
       keyPair.secretKey,
@@ -101,7 +101,7 @@ describe("Signing and verifying with Ed25519 keys test suite.", () => {
     );
 
     const wasmMemory = dcrypto.loadWasmMemory.verify(randomMessage.length);
-    const module = await dcrypto.loadModule({ wasmMemory });
+    const module = await dcrypto.loadWasmModule({ wasmMemory });
     const otherVerification = await dcrypto.verify(
       randomMessage,
       signature,

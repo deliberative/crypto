@@ -180,6 +180,37 @@ const sk3 = await dcrypto.restoreSecret(evenLessShares);
 console.log("sk3 and kaypair.secretKey are NOT equal");
 ```
 
+In order to find the Merkle root, proof and to verify the proof you can do the following:
+
+```typescript
+import dcrypto from "@deliberative/crypto";
+
+const randomArrays: Uint8Array[] = [];
+for (let i = 0; i < 50; i++) {
+  randomArrays.push(await dcrypto.randomBytes(32));
+}
+
+// dcrypto.constants.crypto_hash_sha512_BYTES
+// Function also accepts any type of data but it then requires a serializer function.
+const randomArraysMerkleRoot = await dcrypto.getMerkleRoot(randomArrays);
+
+// Multiple of dcrypto.constants.crypto_hash_sha512_BYTES
+const randomArrayMerkleProof = await dcrypto.getMerkleProof(
+  randomArrays,
+  randomArrays[43],
+);
+
+const elementHash = await dcrypto.sha512(randomArrays[43]);
+
+const verify = await dcrypto.verifyMerkleProof(
+  elementHash,
+  randomArraysMerkleRoot,
+  randomArrayMerkleProof,
+);
+
+console.log(verify); // should be true
+```
+
 For more examples you can see the [tests](__tests__) directory.
 
 ## Development

@@ -40,7 +40,7 @@ describe("Encryption and decryption with symmetric key test suite.", () => {
       message.length,
       crypto_hash_sha512_BYTES,
     );
-    const encryptionModule = await dcrypto.loadModule({
+    const encryptionModule = await dcrypto.loadWasmModule({
       wasmMemory: encryptionMemory,
     });
     const encryptedWithModule = await dcrypto.encryptSymmetricKey(
@@ -54,7 +54,7 @@ describe("Encryption and decryption with symmetric key test suite.", () => {
       encrypted.length,
       crypto_hash_sha512_BYTES,
     );
-    const decryptionModule = await dcrypto.loadModule({
+    const decryptionModule = await dcrypto.loadWasmModule({
       wasmMemory: decryptionMemory,
     });
     const decryptedWithModule = await dcrypto.decryptSymmetricKey(
