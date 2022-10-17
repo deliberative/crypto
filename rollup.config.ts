@@ -5,10 +5,10 @@ import replace from "@rollup/plugin-replace";
 import typescript from "@rollup/plugin-typescript";
 import { wasm } from "@rollup/plugin-wasm";
 import url from "@rollup/plugin-url";
-import { terser } from "rollup-plugin-terser";
+// import { terser } from "rollup-plugin-terser";
 import analyzer from "rollup-plugin-analyzer";
 
-import pkg from "./package.json";
+import pkg from "./package.json" assert { type: "json" };
 
 const production = process.env.NODE_ENV === "production";
 const dir = "lib";
@@ -23,9 +23,9 @@ const plugins = [
   commonjs(),
 
   resolve({
-    jsnext: true,
-    main: true,
-    module: true,
+    // jsnext: true,
+    // main: true,
+    // module: true,
     browser: true,
     preferBuiltins: false,
   }),
@@ -57,17 +57,17 @@ export default [
     plugins: [
       ...plugins,
 
-      terser({
-        ecma: 2020,
-        mangle: { toplevel: true },
-        compress: {
-          module: true,
-          toplevel: true,
-          unsafe_arrows: true,
-          drop_console: true,
-          drop_debugger: true,
-        },
-      }),
+      // terser({
+      //   ecma: 2020,
+      //   mangle: { toplevel: true },
+      //   compress: {
+      //     module: true,
+      //     toplevel: true,
+      //     unsafe_arrows: true,
+      //     drop_console: true,
+      //     drop_debugger: true,
+      // },
+      // }),
     ],
     output: {
       name: "dcrypto",

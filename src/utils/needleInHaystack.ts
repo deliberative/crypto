@@ -30,10 +30,10 @@ import type { DCryptoMethodsModule } from "../c/build/dcryptoMethodsModule";
  * If Uint8Array items' length is 64, even after serializer,
  * then we assume that it is a hash.
  *
- * @param needles: The subset array of items.
- * @param haystack: The superset array.
- * @param serializer: Converts item to Uint8Array.
- * @param module: In case we want to cache the WASM loading.
+ * @param needles The subset array of items.
+ * @param haystack The superset array.
+ * @param serializer Converts item to Uint8Array.
+ * @param module In case we want to cache the WASM loading.
  *
  * @returns Promise<number[]>
  */
