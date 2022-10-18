@@ -5,6 +5,7 @@ dist
 *valgrind*.txt
 .npmrc
 deliberative*.tgz
+dcryptoMethodsModule.js
 
 # Logs
 logs

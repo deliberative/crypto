@@ -40,40 +40,7 @@ const argon2Memory = (mnemonicLen: number): WebAssembly.Memory => {
   return new WebAssembly.Memory({ initial: pages, maximum: pages });
 };
 
-const getMerkleRootMemory = (leavesLen: number): WebAssembly.Memory => {
-  const memoryLen = (2 * leavesLen + 3) * crypto_hash_sha512_BYTES;
-  const memoryPages = memoryLenToPages(memoryLen);
-
-  return new WebAssembly.Memory({
-    initial: memoryPages,
-    maximum: memoryPages,
-  });
-};
-
-const getMerkleProofMemory = (leavesLen: number): WebAssembly.Memory => {
-  const memoryLen = (3 * leavesLen + 4) * crypto_hash_sha512_BYTES + leavesLen;
-  const memoryPages = memoryLenToPages(memoryLen);
-
-  return new WebAssembly.Memory({
-    initial: memoryPages,
-    maximum: memoryPages,
-  });
-};
-
-const verifyMerkleProofMemory = (proofLen: number): WebAssembly.Memory => {
-  const memoryLen = proofLen + 5 * crypto_hash_sha512_BYTES;
-  const memoryPages = memoryLenToPages(memoryLen);
-
-  return new WebAssembly.Memory({
-    initial: memoryPages,
-    maximum: memoryPages,
-  });
-};
-
 export default {
   sha512Memory,
   argon2Memory,
-  getMerkleRootMemory,
-  getMerkleProofMemory,
-  verifyMerkleProofMemory,
 };

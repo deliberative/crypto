@@ -13,10 +13,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import sha512 from "./sha512";
-
 import dcryptoMemory from "./memory";
 
+import sha512 from "../hash/sha512";
 import isUint8Array from "../utils/isUint8Array";
 
 import dcryptoMethodsModule from "../c/build/dcryptoMethodsModule";

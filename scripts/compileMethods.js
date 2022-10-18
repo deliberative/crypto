@@ -85,6 +85,7 @@ _random_bytes,\
 _random_number_in_range,\
 _get_merkle_root,\
 _get_merkle_proof,\
+_get_merkle_root_from_proof,\
 _verify_merkle_proof \
 -s EXPORT_NAME=dcryptoMethodsModule \
 -I${libsodiumIncludePath} \

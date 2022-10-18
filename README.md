@@ -44,8 +44,10 @@ The [symmetric](src/symmetric) directory contains AEAD encryption/decryption wit
 
 The [mnemonic](src/mnemonic) directory contains all the relevant to mnemonic generation functions.
 
-The [hash](src/hash) directory contains a sha512 hashing function, a Merkle root getter function, a Merkle
-proof artifacts getter and a verification function.
+The [hash](src/hash) directory contains a sha512 hashing function and an Argon2 with optional salt hashing function.
+
+The [merkle](src/merkle) directory contains a Merkle root getter function, a Merkle
+proof artifacts getter, a root from proof getter and a proof verification function.
 
 The [shamir](src/shamir) directory contains a WASM implementation of a cryptographic technique called [Shamir's secret
 sharing](https://en.wikipedia.org/wiki/Shamir%27s_Secret_Sharing), which allows one to split a secret into random shares that can only recreate it if a threshold of them is combined.

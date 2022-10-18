@@ -13,10 +13,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import sha512 from "./sha512";
-
 import dcryptoMemory from "./memory";
 
+import sha512 from "../hash/sha512";
 import isUint8Array from "../utils/isUint8Array";
 
 import dcryptoMethodsModule from "../c/build/dcryptoMethodsModule";
@@ -43,9 +42,10 @@ const getMerkleProof = async <T>(
   if (treeLen === 0) {
     throw new Error("Cannot calculate Merkle proof of element of empty tree.");
   } else if (treeLen === 1) {
-    throw new Error(
-      "No point in calculating proof of a tree with single leaf.",
-    );
+    return new Uint8Array(crypto_hash_sha512_BYTES + 1).fill(1);
+    // throw new Error(
+    //   "No point in calculating proof of a tree with single leaf.",
+    // );
   }
 
   const leavesAreUint8Arrays = isUint8Array(tree[0]);

@@ -13,12 +13,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import sha512 from "./sha512";
-import argon2 from "./argon2";
+import getMerkleRoot from "./getMerkleRoot";
+import getMerkleProof from "./getMerkleProof";
+import getMerkleRootFromProof from "./getMerkleRootFromProof";
+import verifyMerkleProof from "./verifyMerkleProof";
 import memory from "./memory";
 
 export default {
-  sha512,
-  argon2,
+  getMerkleRoot,
+  getMerkleProof,
+  getMerkleRootFromProof,
+  verifyMerkleProof,
   memory,
 };

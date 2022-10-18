@@ -705,6 +705,73 @@ get_merkle_proof(
 }
 
 __attribute__((used)) int
+get_merkle_root_from_proof(const int PROOF_LEN,
+                           const uint8_t element_hash[crypto_hash_sha512_BYTES],
+                           const uint8_t proof[PROOF_LEN],
+                           uint8_t root[crypto_hash_sha512_BYTES])
+{
+  if (PROOF_LEN % (crypto_hash_sha512_BYTES + 1) != 0) return -1;
+  int NODES_LEN = PROOF_LEN / (crypto_hash_sha512_BYTES + 1);
+
+  memcpy(root, element_hash, crypto_hash_sha512_BYTES);
+
+  if (NODES_LEN == 1)
+  {
+    bool isOne = true;
+    for (int i = 0; i < crypto_hash_sha512_BYTES + 1; i++)
+    {
+      if (proof[i] != 1)
+      {
+        isOne = false;
+        break;
+      }
+    }
+
+    // Single element tree
+    if (isOne) return 0;
+  }
+
+  size_t i, position;
+
+  uint8_t *concat_hashes = malloc(2 * crypto_hash_sha512_BYTES);
+
+  for (i = 0; i < NODES_LEN; i++)
+  {
+    position
+        = proof[i * (crypto_hash_sha512_BYTES + 1) + crypto_hash_sha512_BYTES];
+    if (position != 0 && position != 1)
+    {
+      free(concat_hashes);
+
+      return -1;
+    }
+
+    // Proof artifact goes to the left
+    if (position == 0)
+    {
+      memcpy(concat_hashes, &proof[i * (crypto_hash_sha512_BYTES + 1)],
+             crypto_hash_sha512_BYTES);
+      memcpy(&concat_hashes[crypto_hash_sha512_BYTES], root,
+             crypto_hash_sha512_BYTES);
+    }
+    else
+    {
+      memcpy(concat_hashes, root, crypto_hash_sha512_BYTES);
+      memcpy(&concat_hashes[crypto_hash_sha512_BYTES],
+             &proof[i * (crypto_hash_sha512_BYTES + 1)],
+             crypto_hash_sha512_BYTES);
+    }
+
+    int res
+        = crypto_hash_sha512(root, concat_hashes, 2 * crypto_hash_sha512_BYTES);
+  }
+
+  free(concat_hashes);
+
+  return 0;
+}
+
+__attribute__((used)) int
 verify_merkle_proof(const int PROOF_LEN,
                     const uint8_t element_hash[crypto_hash_sha512_BYTES],
                     const uint8_t root[crypto_hash_sha512_BYTES],
@@ -714,6 +781,30 @@ verify_merkle_proof(const int PROOF_LEN,
   int NODES_LEN = PROOF_LEN / (crypto_hash_sha512_BYTES + 1);
 
   size_t i, position;
+
+  if (NODES_LEN == 1)
+  {
+    bool isOne = true;
+    for (i = 0; i < crypto_hash_sha512_BYTES + 1; i++)
+    {
+      if (proof[i] != 1)
+      {
+        isOne = false;
+        break;
+      }
+    }
+
+    // Single element tree
+    if (isOne)
+    {
+      for (i = 0; i < crypto_hash_sha512_BYTES; i++)
+      {
+        if (element_hash[i] != root[i]) return 1;
+      }
+
+      return 0;
+    }
+  }
 
   uint8_t *hash = malloc(crypto_hash_sha512_BYTES);
   memcpy(hash, element_hash, crypto_hash_sha512_BYTES);

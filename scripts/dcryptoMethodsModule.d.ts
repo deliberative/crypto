@@ -115,6 +115,12 @@ export interface DCryptoMethodsModule extends EmscriptenModule {
     element_hash: number, // Uint8Array.byteOffset
     proof: number, // Uint8Array.byteOffset
   ): number;
+  _get_merkle_root_from_proof(
+    PROOF_LEN: number,
+    element_hash: number, // Uint8Array.byteOffset
+    proof: number, // Uint8Array.byteOffset
+    root: number, // Uint8Array.byteOffset
+  ): number;
   _verify_merkle_proof(
     PROOF_LEN: number,
     element_hash: number, // Uint8Array.byteOffset

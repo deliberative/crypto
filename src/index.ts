@@ -17,6 +17,7 @@ import asymmetric from "./asymmetric";
 import symmetric from "./symmetric";
 import mnemonic from "./mnemonic";
 import hash from "./hash";
+import merkle from "./merkle";
 import shamir from "./shamir";
 import utils from "./utils";
 
@@ -40,9 +41,12 @@ const dcrypto = {
   decryptSymmetricKey: symmetric.decrypt,
 
   sha512: hash.sha512,
-  getMerkleRoot: hash.getMerkleRoot,
-  getMerkleProof: hash.getMerkleProof,
-  verifyMerkleProof: hash.verifyMerkleProof,
+  argon2: hash.argon2,
+
+  getMerkleRoot: merkle.getMerkleRoot,
+  getMerkleProof: merkle.getMerkleProof,
+  getMerkleRootFromProof: merkle.getMerkleRootFromProof,
+  verifyMerkleProof: merkle.verifyMerkleProof,
 
   splitSecret: shamir.splitSecret,
   restoreSecret: shamir.restoreSecret,
@@ -77,9 +81,11 @@ const dcrypto = {
     decryptSymmetricKey: symmetric.memory.decryptMemory,
 
     sha512: hash.memory.sha512Memory,
-    getMerkleRoot: hash.memory.getMerkleRootMemory,
-    getMerkleProof: hash.memory.getMerkleProofMemory,
-    verifyMerkleProof: hash.memory.verifyMerkleProofMemory,
+    argon2: hash.memory.argon2Memory,
+
+    getMerkleRoot: merkle.memory.getMerkleRootMemory,
+    getMerkleProof: merkle.memory.getMerkleProofMemory,
+    verifyMerkleProof: merkle.memory.verifyMerkleProofMemory,
 
     splitSecret: shamir.memory.splitSecretMemory,
     restoreSecret: shamir.memory.restoreSecretMemory,
