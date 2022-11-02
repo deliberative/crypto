@@ -21,6 +21,8 @@ import merkle from "./merkle";
 import shamir from "./shamir";
 import utils from "./utils";
 
+import type { SignKeyPair, TypedArray } from "./utils/interfaces";
+
 import dcryptoMethodsModule from "./c/build/dcryptoMethodsModule";
 
 const dcrypto = {
@@ -115,5 +117,7 @@ const dcrypto = {
       utils.interfaces.crypto_sign_ed25519_SECRETKEYBYTES,
   },
 };
+
+export { SignKeyPair, TypedArray };
 
 export default dcrypto;
