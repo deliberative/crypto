@@ -60,7 +60,7 @@ const memory = `\
 -s MEMORY_GROWTH_LINEAR_STEP=64kb \
 -s INITIAL_MEMORY=2mb \
 -s MAXIMUM_MEMORY=1gb \
--s TOTAL_STACK=1mb \
+-s STACK_SIZE=1mb \
 -s SUPPORT_BIG_ENDIAN=1 \
 `;
 
