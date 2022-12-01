@@ -31,14 +31,14 @@ const generateMnemonic = async (
   //   throw new TypeError("Mnemonic strength needs to be multiple of 32.");
   // }
 
-  if (!wordlist) throw new Error("English wordlist could not be loaded.");
+  // if (!wordlist) throw new Error("English wordlist could not be loaded.");
 
+  // Between 16 and 32 and multiple of 4
   const entropy = await randomBytes(strength / 8);
 
-  // 128 <= ENT <= 256
-  if (entropy.length < 16) throw new TypeError("Entropy length too small.");
+  // if (entropy.length < 16) throw new TypeError("Entropy length too small.");
 
-  if (entropy.length > 32) throw new TypeError("Entropy length too large.");
+  // if (entropy.length > 32) throw new TypeError("Entropy length too large.");
 
   // if (entropy.length % 4 !== 0)
   //   throw new TypeError("Entropy length is not multiple of 4.");
@@ -56,10 +56,10 @@ const generateMnemonic = async (
 
   const bits = entropyBits + checksumBits;
 
-  const chunks = bits.match(/(.{1,11})/g);
+  const chunks = bits.match(/(.{1,11})/g) as RegExpMatchArray;
 
-  if (!chunks)
-    throw new Error("Did not find enough 1s and 11s in binary format.");
+  // if (!chunks)
+  //   throw new Error("Did not find enough 1s and 11s in binary format.");
 
   const words = chunks.map((binary: string): string => {
     const index = parseInt(binary, 2);

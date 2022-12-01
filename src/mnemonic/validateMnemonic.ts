@@ -18,11 +18,11 @@ import wordlist from "./wordlist.json";
 import sha512 from "../hash/sha512";
 
 const normalize = (str: string) => {
-  return (str || "").normalize("NFKD");
+  return str.normalize("NFKD");
 };
 
 const mnemonicToEntropy = async (mnemonic: string): Promise<boolean> => {
-  if (!wordlist) throw new Error("Could not load english wordlist");
+  // if (!wordlist) throw new Error("Could not load english wordlist");
 
   const words = normalize(mnemonic).split(" ");
   if (words.length % 3 !== 0)
@@ -47,9 +47,9 @@ const mnemonicToEntropy = async (mnemonic: string): Promise<boolean> => {
   const checksumBits = bits.slice(dividerIndex);
 
   // convert bits to entropy
-  const entropyBitsMatched = entropyBits.match(/(.{1,8})/g);
+  const entropyBitsMatched = entropyBits.match(/(.{1,8})/g) as RegExpMatchArray;
 
-  if (!entropyBitsMatched) throw new Error("Invalid entropy bits.");
+  // if (!entropyBitsMatched) throw new Error("Invalid entropy bits.");
 
   // calculate the checksum and compare
   const entropy = entropyBitsMatched.map((bin: string) => parseInt(bin, 2));
@@ -60,8 +60,9 @@ const mnemonicToEntropy = async (mnemonic: string): Promise<boolean> => {
   if (entropy.length > 32)
     throw new Error("Entropy length too large (more than 256 bits).");
 
-  if (entropy.length % 4 !== 0)
-    throw new Error("Entropy length must be a multiple of 4.");
+  // Can never happen because of :45 always divisible by 4
+  // if (entropy.length % 4 !== 0)
+  //   throw new Error("Entropy length must be a multiple of 4.");
 
   const CS = entropy.length / 4;
   const entropyHash = await sha512(Uint8Array.from([...entropy]));

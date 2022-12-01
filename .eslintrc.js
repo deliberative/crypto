@@ -1,4 +1,4 @@
-{
+module.exports = {
   "env": {
     "browser": true,
     "es2021": true,
@@ -7,17 +7,22 @@
   },
   "extends": [
     "prettier",
-    "eslint:recommended", 
+    "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:@typescript-eslint/recommended-requiring-type-checking",
     "plugin:jest/recommended"
   ],
-  "globals": { "Atomics": "readonly", "SharedArrayBuffer": "readonly" },
+  "globals": {
+    "Atomics": "readonly",
+    "SharedArrayBuffer": "readonly"
+  },
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
-    "project": ["tsconfig.json"],
+    "tsconfigRootDir": __dirname,
+    "project": "./tsconfig.json",
     "ecmaVersion": 2021,
-    "sourceType": "module"
+    "sourceType": "module",
+    "EXPERIMENTAL_useSourceOfProjectReferenceRedirect": true
   },
   "plugins": [
     "eslint-plugin-jsdoc",
