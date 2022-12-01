@@ -5,7 +5,6 @@
     "outDir": "lib",
     "moduleResolution": "node",
     "declaration": true,
-    "declarationDir": "lib/types",
     "declarationMap": true,
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
