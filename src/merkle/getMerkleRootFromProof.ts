@@ -48,11 +48,11 @@ const getMerkleRootFromProof = async (
     ptr1,
     crypto_hash_sha512_BYTES,
   );
-  elementHash.set([...hash]);
+  elementHash.set(hash);
 
   const ptr2 = module._malloc(proofLen);
   const proofArray = new Uint8Array(module.HEAP8.buffer, ptr2, proofLen);
-  proofArray.set([...proof]);
+  proofArray.set(proof);
 
   const ptr3 = module._malloc(crypto_hash_sha512_BYTES);
   const rootArray = new Uint8Array(
@@ -73,7 +73,7 @@ const getMerkleRootFromProof = async (
 
   switch (result) {
     case 0: {
-      const proof = Uint8Array.from([...rootArray]);
+      const proof = new Uint8Array(rootArray);
       module._free(ptr3);
 
       return proof;

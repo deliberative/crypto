@@ -68,7 +68,7 @@ const restoreSecret = async (
 
   switch (result) {
     case 0: {
-      return new Uint8Array([...secretArray]);
+      return new Uint8Array(secretArray);
     }
 
     case -1: {

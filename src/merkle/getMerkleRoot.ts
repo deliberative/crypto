@@ -80,7 +80,7 @@ const getMerkleRoot = async <T>(
       ? serializer(leaf as T)
       : new Uint8Array(32); // will never happen
     hash = await sha512(serialized, module);
-    leavesHashed.set([...hash], i * crypto_hash_sha512_BYTES);
+    leavesHashed.set(hash, i * crypto_hash_sha512_BYTES);
     i++;
   }
 
@@ -101,7 +101,7 @@ const getMerkleRoot = async <T>(
 
   switch (result) {
     case 0: {
-      const root = Uint8Array.from([...rootWasm]);
+      const root = new Uint8Array(rootWasm);
       module._free(ptr2);
 
       return root;

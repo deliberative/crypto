@@ -43,7 +43,7 @@ const verify = async (
     ptr1,
     len * Uint8Array.BYTES_PER_ELEMENT,
   );
-  dataArray.set([...message]);
+  dataArray.set(message);
 
   const ptr2 = dcryptoModule._malloc(crypto_sign_ed25519_BYTES);
   const sig = new Uint8Array(
@@ -51,7 +51,7 @@ const verify = async (
     ptr2,
     crypto_sign_ed25519_BYTES,
   );
-  sig.set([...signature]);
+  sig.set(signature);
 
   const ptr3 = dcryptoModule._malloc(crypto_sign_ed25519_PUBLICKEYBYTES);
   const key = new Uint8Array(
@@ -59,7 +59,7 @@ const verify = async (
     ptr3,
     crypto_sign_ed25519_PUBLICKEYBYTES,
   );
-  key.set([...publicKey]);
+  key.set(publicKey);
 
   const result = dcryptoModule._verify_data(
     len,

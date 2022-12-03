@@ -52,7 +52,7 @@ const randomBytes = async (
 
   dcryptoModule._free(ptr);
 
-  if (result === 0) return new Uint8Array([...bytes]);
+  if (result === 0) return new Uint8Array(bytes);
 
   throw new Error("Could not generate random data");
 };

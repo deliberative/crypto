@@ -55,8 +55,8 @@ const newKeyPair = async (
   );
 
   const keyPair = {
-    publicKey: new Uint8Array([...publicKey]),
-    secretKey: new Uint8Array([...secretKey]),
+    publicKey: new Uint8Array(publicKey),
+    secretKey: new Uint8Array(secretKey),
   };
 
   dcryptoModule._free(ptr1);
@@ -103,7 +103,7 @@ const keyPairFromSeed = async (
     ptr3,
     crypto_sign_ed25519_SEEDBYTES,
   );
-  seedBytes.set([...seed]);
+  seedBytes.set(seed);
 
   const result = dcryptoModule._keypair_from_seed(
     publicKey.byteOffset,
@@ -112,8 +112,8 @@ const keyPairFromSeed = async (
   );
 
   const keyPair = {
-    publicKey: new Uint8Array([...publicKey]),
-    secretKey: new Uint8Array([...secretKey]),
+    publicKey: new Uint8Array(publicKey),
+    secretKey: new Uint8Array(secretKey),
   };
 
   dcryptoModule._free(ptr1);
@@ -154,7 +154,7 @@ const keyPairFromSecretKey = async (
     ptr2,
     crypto_sign_ed25519_SECRETKEYBYTES,
   );
-  sk.set([...secretKey]);
+  sk.set(secretKey);
 
   const result = dcryptoModule._keypair_from_secret_key(
     publicKey.byteOffset,
@@ -162,7 +162,7 @@ const keyPairFromSecretKey = async (
   );
 
   const keyPair = {
-    publicKey: new Uint8Array([...publicKey]),
+    publicKey: new Uint8Array(publicKey),
     secretKey,
   };
 

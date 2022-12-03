@@ -32,8 +32,8 @@ const verifyMerkleProof = async (
   proof: Uint8Array,
 ): Promise<boolean> => {
   const proofLen = proof.length;
-  // if (proofLen % (crypto_hash_sha512_BYTES + 1) !== 0)
-  //   throw new Error("Proof length not multiple of 65.");
+  if (proofLen % (crypto_hash_sha512_BYTES + 1) !== 0)
+    throw new Error("Proof length not multiple of 65.");
 
   const wasmMemory = dcryptoMemory.verifyMerkleProofMemory(proofLen);
   const module = await dcryptoMethodsModule({
@@ -46,7 +46,7 @@ const verifyMerkleProof = async (
     ptr1,
     crypto_hash_sha512_BYTES,
   );
-  elementHash.set([...hash]);
+  elementHash.set(hash);
 
   const ptr2 = module._malloc(crypto_hash_sha512_BYTES);
   const rootArray = new Uint8Array(
@@ -54,11 +54,11 @@ const verifyMerkleProof = async (
     ptr2,
     crypto_hash_sha512_BYTES,
   );
-  rootArray.set([...root]);
+  rootArray.set(root);
 
   const ptr3 = module._malloc(proofLen);
   const proofArray = new Uint8Array(module.HEAP8.buffer, ptr3, proofLen);
-  proofArray.set([...proof]);
+  proofArray.set(proof);
 
   const result = module._verify_merkle_proof(
     proofLen,

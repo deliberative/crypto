@@ -45,7 +45,7 @@ const encrypt = async (
     ptr1,
     len * Uint8Array.BYTES_PER_ELEMENT,
   );
-  dataArray.set([...message]);
+  dataArray.set(message);
 
   const ptr2 = dcryptoModule._malloc(crypto_sign_ed25519_PUBLICKEYBYTES);
   const pub = new Uint8Array(
@@ -53,7 +53,7 @@ const encrypt = async (
     ptr2,
     crypto_sign_ed25519_PUBLICKEYBYTES,
   );
-  pub.set([...publicKey]);
+  pub.set(publicKey);
 
   const ptr3 = dcryptoModule._malloc(
     additionalLen * Uint8Array.BYTES_PER_ELEMENT,
@@ -63,7 +63,7 @@ const encrypt = async (
     ptr3,
     additionalLen * Uint8Array.BYTES_PER_ELEMENT,
   );
-  additional.set([...additionalData]);
+  additional.set(additionalData);
 
   const sealedBoxLen = getForwardSecretBoxEncryptedLen(len);
 
@@ -85,7 +85,7 @@ const encrypt = async (
     encrypted.byteOffset,
   );
 
-  const enc = new Uint8Array([...encrypted]);
+  const enc = new Uint8Array(encrypted);
 
   dcryptoModule._free(ptr1);
   dcryptoModule._free(ptr2);

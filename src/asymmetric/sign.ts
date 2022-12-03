@@ -46,7 +46,7 @@ const sign = async (
     ptr1,
     messageLen * Uint8Array.BYTES_PER_ELEMENT,
   );
-  dataArray.set([...message]);
+  dataArray.set(message);
 
   const ptr2 = dcryptoModule._malloc(crypto_sign_ed25519_BYTES);
   const signature = new Uint8Array(
@@ -61,7 +61,7 @@ const sign = async (
     ptr3,
     crypto_sign_ed25519_SECRETKEYBYTES,
   );
-  sk.set([...secretKey]);
+  sk.set(secretKey);
 
   dcryptoModule._sign_data(
     messageLen,
@@ -70,7 +70,7 @@ const sign = async (
     sk.byteOffset,
   );
 
-  const sig = new Uint8Array([...signature]);
+  const sig = new Uint8Array(signature);
 
   dcryptoModule._free(ptr1);
   dcryptoModule._free(ptr2);

@@ -79,7 +79,7 @@ const getMerkleProof = async <T>(
       ? serializer(leaf as T)
       : new Uint8Array(32); // will never happen
     hash = await sha512(serialized, module);
-    leavesHashed.set([...hash], i * crypto_hash_sha512_BYTES);
+    leavesHashed.set(hash, i * crypto_hash_sha512_BYTES);
     i++;
   }
 
@@ -95,7 +95,7 @@ const getMerkleProof = async <T>(
     ? serializer(element)
     : new Uint8Array(32); // will never happen
   hash = await sha512(elementSerialized);
-  elementHash.set([...hash]);
+  elementHash.set(hash);
 
   const ptr3 = module._malloc(treeLen * (crypto_hash_sha512_BYTES + 1));
   const proof = new Uint8Array(
@@ -120,7 +120,7 @@ const getMerkleProof = async <T>(
       throw new Error("Element not in tree.");
 
     default: {
-      const proofArray = Uint8Array.from([...proof.slice(0, result)]);
+      const proofArray = new Uint8Array(proof.slice(0, result));
       module._free(ptr3);
 
       return proofArray;

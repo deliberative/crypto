@@ -65,7 +65,7 @@ const argon2 = async (
     ptr2,
     mnemonicArrayLen * Uint8Array.BYTES_PER_ELEMENT,
   );
-  mnmnc.set([...mnemonicInt8Array]);
+  mnmnc.set(mnemonicInt8Array);
 
   const ptr3 = dcryptoModule._malloc(crypto_pwhash_argon2id_SALTBYTES);
   const saltArray = new Uint8Array(
@@ -73,7 +73,7 @@ const argon2 = async (
     ptr3,
     crypto_pwhash_argon2id_SALTBYTES,
   );
-  saltArray.set([...salt]);
+  saltArray.set(salt);
 
   const result = dcryptoModule._argon2(
     mnemonicArrayLen,
@@ -82,7 +82,7 @@ const argon2 = async (
     saltArray.byteOffset,
   );
 
-  const s = new Uint8Array([...seed]);
+  const s = new Uint8Array(seed);
 
   dcryptoModule._free(ptr1);
   dcryptoModule._free(ptr2);

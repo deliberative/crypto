@@ -43,7 +43,7 @@ const splitSecret = async (
     ptr1,
     secretLen * Uint8Array.BYTES_PER_ELEMENT,
   );
-  secretArray.set([...secret]);
+  secretArray.set(secret);
 
   const ptr2 = dcryptoModule._malloc(
     sharesLen * (secretLen + 1) * Uint8Array.BYTES_PER_ELEMENT,

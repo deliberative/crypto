@@ -104,7 +104,7 @@ const needleInHaystack = async <T>(
       arraySerialized.length === crypto_hash_sha512_BYTES
         ? arraySerialized
         : await sha512(arraySerialized, dcryptoHashModule);
-    arr.set([...hash], i * crypto_hash_sha512_BYTES);
+    arr.set(hash, i * crypto_hash_sha512_BYTES);
   }
 
   const ptr2 = dcryptoModule._malloc(
@@ -125,7 +125,7 @@ const needleInHaystack = async <T>(
       itemSerialized.length === crypto_hash_sha512_BYTES
         ? itemSerialized
         : await sha512(itemSerialized, dcryptoHashModule);
-    itms.set([...itemHash], i * crypto_hash_sha512_BYTES);
+    itms.set(itemHash, i * crypto_hash_sha512_BYTES);
   }
 
   const ptr3 = dcryptoModule._malloc(
