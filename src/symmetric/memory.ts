@@ -19,12 +19,57 @@ import {
   crypto_hash_sha512_BYTES,
   crypto_kx_SESSIONKEYBYTES,
   crypto_box_x25519_NONCEBYTES,
+  crypto_box_x25519_PUBLICKEYBYTES,
+  crypto_box_x25519_SECRETKEYBYTES,
   crypto_box_poly1305_AUTHTAGBYTES,
+  crypto_sign_ed25519_PUBLICKEYBYTES,
+  crypto_sign_ed25519_SECRETKEYBYTES,
   getEncryptedLen,
   getDecryptedLen,
+  getE2EEncryptedSecretBoxEncryptedLen,
+  getE2EEncryptedSecretBoxDecryptedLen,
 } from "../utils/interfaces";
 
 const encryptMemory = (
+  messageLen: number,
+  additionalDataLen: number,
+): WebAssembly.Memory => {
+  const sealedBoxLen = getE2EEncryptedSecretBoxEncryptedLen(messageLen);
+  const memoryLen =
+    (messageLen +
+      crypto_sign_ed25519_PUBLICKEYBYTES +
+      additionalDataLen +
+      sealedBoxLen +
+      1 * (messageLen + crypto_box_poly1305_AUTHTAGBYTES) + // malloc'd
+      2 * crypto_box_x25519_PUBLICKEYBYTES + // malloc'd
+      2 * crypto_box_x25519_SECRETKEYBYTES + // malloc'd
+      crypto_box_x25519_NONCEBYTES) * // malloc'd
+    Uint8Array.BYTES_PER_ELEMENT;
+  const pages = memoryLenToPages(memoryLen);
+
+  return new WebAssembly.Memory({ initial: pages, maximum: pages });
+};
+
+const decryptMemory = (
+  encryptedLen: number,
+  additionalDataLen: number,
+): WebAssembly.Memory => {
+  const decryptedLen = getE2EEncryptedSecretBoxDecryptedLen(encryptedLen);
+  const memoryLen =
+    (encryptedLen +
+      crypto_sign_ed25519_SECRETKEYBYTES +
+      additionalDataLen +
+      decryptedLen +
+      2 * crypto_box_x25519_PUBLICKEYBYTES + // malloc'd
+      crypto_box_x25519_NONCEBYTES + // malloc'd
+      crypto_box_x25519_SECRETKEYBYTES) * // malloc'd
+    Uint8Array.BYTES_PER_ELEMENT;
+  const pages = memoryLenToPages(memoryLen);
+
+  return new WebAssembly.Memory({ initial: pages, maximum: pages });
+};
+
+const encryptSymmetricKeyMemory = (
   messageLen: number,
   additionalDataLen: number,
 ): WebAssembly.Memory => {
@@ -43,7 +88,7 @@ const encryptMemory = (
   return new WebAssembly.Memory({ initial: pages, maximum: pages });
 };
 
-const decryptMemory = (
+const decryptSymmetricKeyMemory = (
   encryptedLen: number,
   additionalDataLen: number,
 ): WebAssembly.Memory => {
@@ -64,4 +109,6 @@ const decryptMemory = (
 export default {
   encryptMemory,
   decryptMemory,
+  encryptSymmetricKeyMemory,
+  decryptSymmetricKeyMemory,
 };

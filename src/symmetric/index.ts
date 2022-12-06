@@ -15,10 +15,14 @@
 
 import encrypt from "./encrypt";
 import decrypt from "./decrypt";
+import encryptSymmetricKey from "./encryptSymmetricKey";
+import decryptSymmetricKey from "./decryptSymmetricKey";
 import memory from "./memory";
 
 export default {
   encrypt,
   decrypt,
+  encryptSymmetricKey,
+  decryptSymmetricKey,
   memory,
 };

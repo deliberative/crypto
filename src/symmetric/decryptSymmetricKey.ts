@@ -20,20 +20,14 @@ import dcryptoMethodsModule from "../c/build/dcryptoMethodsModule";
 import type { DCryptoMethodsModule } from "../c/build/dcryptoMethodsModule";
 
 import {
-  crypto_sign_ed25519_PUBLICKEYBYTES,
-  crypto_sign_ed25519_SECRETKEYBYTES,
+  crypto_kx_SESSIONKEYBYTES,
   getDecryptedLen,
 } from "../utils/interfaces";
 
 /**
  * Function that decrypts a box with additional data using the
  * crypto_aead_chacha20poly1305_ietf_decrypt function from libsodium and
- * computes a symmetric key Uint8Array(32) from the sender's
- * Ed25519 public key and the receiver's Ed25519 secret key.
- * The X25519 key counterparts are computed in wasm from the libsodium provided
- * crypto_sign_ed25519_pk_to_curve25519 and crypto_sign_ed25519_sk_to_curve25519
- * functions.
- * The symmetric key for encryption is then computed by crypto_kx_client_session_keys.
+ * a provided symmetric key in Uint8Array(32) format.
  * The encrypted box is a Uint8Array[nonce 16 || encrypted_data || auth tag 12].
  *
  * If you need to perform bulk decryptions with predictable box
@@ -44,7 +38,7 @@ import {
  * const messageLen = message.length;
  * const additionalLen = additionalData.length;
  *
- * const wasmMemory = dcryptoMemory.decryptMemory(messageLen, additionalLen);
+ * const wasmMemory = dcryptoMemory.decryptSymmetricKeyMemory(messageLen, additionalLen);
  * const wasmModule = await dcryptoMethodsModule({ wasmMemory });
  * ```
  *
@@ -55,22 +49,17 @@ import {
  * import dcrypto from \"@deliberative/crypto\"
  *
  * const message = new Uint8Array(128).fill(1);
+ * const symmetricKey = new Uint8Array(32).fill(3);
  * const additionalData = new Uint8Array(64).fill(2);
  *
- * const aliceKeyPair = await dcrypto.keyPair();
- * const bobKeyPair = await dcrypto.keyPair();
- *
- * const box = await dcrypto.encrypt(
+ * const box = await dcrypto.encryptSymmetricKey(
  *    message,
- *    bobKeyPair.publicKey,
- *    aliceKeyPair.secretKey,
+ *    symmetricKey,
  *    additionalData
  * );
- *
- * const decrypted = await dcrypto.decrypt(
+ * const decrypted = await dcrypto.decryptSymmetricKey(
  *    box,
- *    aliceKeyPair.publicKey,
- *    bobKeyPair.secretKey,
+ *    symmetricKey,
  *    additionalData
  * );
  *
@@ -78,17 +67,15 @@ import {
  * ```
  *
  * @param encrypted - the encrypted box including nonce and auth tag
- * @param senderPublicKey - the sender public key
- * @param receiverSecretKey - the receiver secret key
+ * @param symmetricKey - the precomputed symmetric key
  * @param additionalData - the additional data for aead
  * @param module - wasm module in case of bulk decryptions
  *
  * @returns The decrypted message
  */
-const decrypt = async (
+const decryptSymmetricKey = async (
   encrypted: Uint8Array,
-  senderPublicKey: Uint8Array,
-  receiverSecretKey: Uint8Array,
+  symmetricKey: Uint8Array,
   additionalData: Uint8Array,
   module?: DCryptoMethodsModule,
 ): Promise<Uint8Array> => {
@@ -111,46 +98,37 @@ const decrypt = async (
   );
   encryptedArray.set(encrypted);
 
-  const ptr2 = dcryptoModule._malloc(crypto_sign_ed25519_PUBLICKEYBYTES);
-  const pk = new Uint8Array(
+  const ptr2 = dcryptoModule._malloc(crypto_kx_SESSIONKEYBYTES);
+  const k = new Uint8Array(
     dcryptoModule.HEAP8.buffer,
     ptr2,
-    crypto_sign_ed25519_PUBLICKEYBYTES,
+    crypto_kx_SESSIONKEYBYTES,
   );
-  pk.set(senderPublicKey);
+  k.set(symmetricKey);
 
-  const ptr3 = dcryptoModule._malloc(crypto_sign_ed25519_SECRETKEYBYTES);
-  const sk = new Uint8Array(
-    dcryptoModule.HEAP8.buffer,
-    ptr3,
-    crypto_sign_ed25519_SECRETKEYBYTES,
-  );
-  sk.set(receiverSecretKey);
-
-  const ptr4 = dcryptoModule._malloc(
+  const ptr3 = dcryptoModule._malloc(
     additionalLen * Uint8Array.BYTES_PER_ELEMENT,
   );
   const additional = new Uint8Array(
     dcryptoModule.HEAP8.buffer,
-    ptr4,
+    ptr3,
     additionalLen * Uint8Array.BYTES_PER_ELEMENT,
   );
   additional.set(additionalData);
 
-  const ptr5 = dcryptoModule._malloc(
+  const ptr4 = dcryptoModule._malloc(
     decryptedLen * Uint8Array.BYTES_PER_ELEMENT,
   );
   const decrypted = new Uint8Array(
     dcryptoModule.HEAP8.buffer,
-    ptr5,
+    ptr4,
     decryptedLen * Uint8Array.BYTES_PER_ELEMENT,
   );
 
-  const result = dcryptoModule._e2e_decrypt_data(
+  const result = dcryptoModule._decrypt_data(
     len,
     encryptedArray.byteOffset,
-    pk.byteOffset,
-    sk.byteOffset,
+    k.byteOffset,
     additionalLen,
     additional.byteOffset,
     decrypted.byteOffset,
@@ -173,4 +151,4 @@ const decrypt = async (
   }
 };
 
-export default decrypt;
+export default decryptSymmetricKey;

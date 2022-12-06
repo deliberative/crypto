@@ -233,6 +233,144 @@ calculate_forward_secret_nonce(
   free(nonce_sha512);
 }
 
+/* Returns (nonce || encrypted_data || auth tag) */
+__attribute__((used)) int
+e2e_encrypt_data(
+    const int DATA_LEN, const uint8_t data[DATA_LEN],
+    const uint8_t public_key[crypto_sign_ed25519_PUBLICKEYBYTES],
+    const uint8_t secret_key[crypto_sign_ed25519_SECRETKEYBYTES],
+    const int ADDITIONAL_DATA_LEN,
+    const uint8_t additional_data[ADDITIONAL_DATA_LEN],
+    uint8_t encrypted[crypto_aead_chacha20poly1305_ietf_NPUBBYTES + DATA_LEN
+                      + crypto_aead_chacha20poly1305_ietf_ABYTES])
+{
+  /* if (DATA_LEN > 2^12) return -2; // Encrypted data larger than expected
+   */
+
+  unsigned long long CIPHERTEXT_LEN
+      = DATA_LEN + crypto_aead_chacha20poly1305_ietf_ABYTES;
+  uint8_t *ciphertext = sodium_malloc(CIPHERTEXT_LEN);
+
+  uint8_t *sender_x25519_pk = malloc(crypto_aead_chacha20poly1305_KEYBYTES);
+  uint8_t *sender_x25519_sk = sodium_malloc(crypto_scalarmult_curve25519_BYTES);
+  crypto_sign_ed25519_sk_to_curve25519(sender_x25519_sk, secret_key);
+  crypto_scalarmult_curve25519_base(sender_x25519_pk, sender_x25519_sk);
+
+  uint8_t *receiver_x25519_pk = malloc(crypto_scalarmult_curve25519_BYTES);
+  int converted_pk
+      = crypto_sign_ed25519_pk_to_curve25519(receiver_x25519_pk, public_key);
+  if (converted_pk != 0)
+  {
+    free(receiver_x25519_pk);
+    free(sender_x25519_pk);
+    sodium_free(sender_x25519_sk);
+    sodium_free(ciphertext);
+
+    return -1;
+  }
+
+  uint8_t *server_tx = sodium_malloc(crypto_kx_SESSIONKEYBYTES);
+  int created = crypto_kx_server_session_keys(
+      NULL, server_tx, sender_x25519_pk, sender_x25519_sk, receiver_x25519_pk);
+  sodium_free(sender_x25519_sk);
+  if (created != 0)
+  {
+    free(receiver_x25519_pk);
+    free(sender_x25519_pk);
+    sodium_free(server_tx);
+    sodium_free(ciphertext);
+
+    return -2;
+  }
+
+  uint8_t *nonce = malloc(crypto_aead_chacha20poly1305_ietf_NPUBBYTES);
+  calculate_forward_secret_nonce(nonce, sender_x25519_pk, receiver_x25519_pk);
+  free(sender_x25519_pk);
+  free(receiver_x25519_pk);
+
+  crypto_aead_chacha20poly1305_ietf_encrypt(
+      ciphertext, &CIPHERTEXT_LEN, data, DATA_LEN, additional_data,
+      ADDITIONAL_DATA_LEN, NULL, nonce, server_tx);
+  sodium_free(server_tx);
+
+  memcpy(encrypted, nonce, crypto_aead_chacha20poly1305_ietf_NPUBBYTES);
+  free(nonce);
+
+  memcpy(encrypted + crypto_aead_chacha20poly1305_ietf_NPUBBYTES, ciphertext,
+         CIPHERTEXT_LEN);
+  sodium_free(ciphertext);
+
+  return 0;
+}
+
+__attribute__((used)) int
+e2e_decrypt_data(
+    const int ENCRYPTED_LEN, const uint8_t encrypted_data[ENCRYPTED_LEN],
+    const uint8_t public_key[crypto_sign_ed25519_PUBLICKEYBYTES],
+    const uint8_t secret_key[crypto_sign_ed25519_SECRETKEYBYTES],
+    const int ADDITIONAL_DATA_LEN,
+    const uint8_t additional_data[ADDITIONAL_DATA_LEN],
+    uint8_t data[ENCRYPTED_LEN - crypto_aead_chacha20poly1305_ietf_NPUBBYTES
+                 - crypto_aead_chacha20poly1305_ietf_ABYTES])
+{
+  unsigned long long DATA_LEN = ENCRYPTED_LEN
+                                - crypto_aead_chacha20poly1305_ietf_NPUBBYTES
+                                - crypto_aead_chacha20poly1305_ietf_ABYTES;
+
+  uint8_t *sender_x25519_pk = malloc(crypto_scalarmult_curve25519_BYTES);
+  int converted_pk
+      = crypto_sign_ed25519_pk_to_curve25519(sender_x25519_pk, public_key);
+  if (converted_pk != 0)
+  {
+    free(sender_x25519_pk);
+
+    return -1;
+  }
+
+  uint8_t *nonce = malloc(crypto_aead_chacha20poly1305_ietf_NPUBBYTES);
+  memcpy(nonce, encrypted_data, crypto_aead_chacha20poly1305_ietf_NPUBBYTES);
+
+  uint8_t *receiver_x25519_pk = malloc(crypto_aead_chacha20poly1305_KEYBYTES);
+  uint8_t *receiver_x25519_sk
+      = sodium_malloc(crypto_scalarmult_curve25519_BYTES);
+  crypto_sign_ed25519_sk_to_curve25519(receiver_x25519_sk, secret_key);
+  crypto_scalarmult_curve25519_base(receiver_x25519_pk, receiver_x25519_sk);
+
+  uint8_t *client_rx = sodium_malloc(crypto_kx_SESSIONKEYBYTES);
+  int created
+      = crypto_kx_client_session_keys(client_rx, NULL, receiver_x25519_pk,
+                                      receiver_x25519_sk, sender_x25519_pk);
+  free(receiver_x25519_pk);
+  sodium_free(receiver_x25519_sk);
+  free(sender_x25519_pk);
+  if (created != 0)
+  {
+    free(nonce);
+    sodium_free(client_rx);
+
+    return -1;
+  }
+
+  int CIPHERTEXT_LEN
+      = ENCRYPTED_LEN - crypto_aead_chacha20poly1305_ietf_NPUBBYTES;
+  uint8_t *ciphertext = malloc(CIPHERTEXT_LEN);
+  memcpy(ciphertext,
+         encrypted_data + crypto_aead_chacha20poly1305_ietf_NPUBBYTES,
+         CIPHERTEXT_LEN);
+
+  int decrypted = crypto_aead_chacha20poly1305_ietf_decrypt(
+      data, &DATA_LEN, NULL, ciphertext, CIPHERTEXT_LEN, additional_data,
+      ADDITIONAL_DATA_LEN, nonce, client_rx);
+
+  free(ciphertext);
+  sodium_free(client_rx);
+  free(nonce);
+
+  if (decrypted == 0) return 0;
+
+  return -2;
+}
+
 /* Returns (ephemeral_pk || nonce || encrypted_data || auth tag || signature of
  * ephemeral_pk)  */
 __attribute__((used)) int
@@ -313,9 +451,9 @@ forward_secretbox_decrypt_data(
     const uint8_t secret_key[crypto_sign_ed25519_SECRETKEYBYTES],
     const int ADDITIONAL_DATA_LEN,
     const uint8_t additional_data[ADDITIONAL_DATA_LEN],
-    uint8_t data[ENCRYPTED_LEN - crypto_aead_chacha20poly1305_ietf_NPUBBYTES
-                 - crypto_aead_chacha20poly1305_ietf_ABYTES
-                 - crypto_scalarmult_curve25519_BYTES])
+    uint8_t data[ENCRYPTED_LEN - crypto_scalarmult_curve25519_BYTES
+                 - crypto_aead_chacha20poly1305_ietf_NPUBBYTES
+                 - crypto_aead_chacha20poly1305_ietf_ABYTES])
 {
   int EPHEMERAL_NONCE_LEN = crypto_scalarmult_curve25519_BYTES
                             + crypto_aead_chacha20poly1305_ietf_NPUBBYTES;

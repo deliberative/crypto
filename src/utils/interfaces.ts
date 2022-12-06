@@ -83,6 +83,20 @@ export const getForwardSecretBoxDecryptedLen = (encryptedLen: number) => {
   );
 };
 
+export const getE2EEncryptedSecretBoxEncryptedLen = (dataLen: number) => {
+  return (
+    crypto_box_x25519_NONCEBYTES + dataLen + crypto_box_poly1305_AUTHTAGBYTES
+  );
+};
+
+export const getE2EEncryptedSecretBoxDecryptedLen = (encryptedLen: number) => {
+  return (
+    encryptedLen -
+    crypto_box_x25519_NONCEBYTES - // nonce
+    crypto_box_poly1305_AUTHTAGBYTES // authTag
+  );
+};
+
 export default {
   crypto_hash_sha512_BYTES,
   crypto_secretbox_KEYBYTES,
@@ -101,4 +115,6 @@ export default {
   getDecryptedLen,
   getForwardSecretBoxEncryptedLen,
   getForwardSecretBoxDecryptedLen,
+  getE2EEncryptedSecretBoxEncryptedLen,
+  getE2EEncryptedSecretBoxDecryptedLen,
 };

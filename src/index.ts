@@ -39,8 +39,11 @@ const dcrypto = {
   encryptForwardSecrecy: asymmetric.encrypt,
   decryptForwardSecrecy: asymmetric.decrypt,
 
-  encryptSymmetricKey: symmetric.encrypt,
-  decryptSymmetricKey: symmetric.decrypt,
+  encryptSymmetricKey: symmetric.encryptSymmetricKey,
+  decryptSymmetricKey: symmetric.decryptSymmetricKey,
+
+  encrypt: symmetric.encrypt,
+  decrypt: symmetric.decrypt,
 
   sha512: hash.sha512,
   argon2: hash.argon2,
@@ -79,8 +82,11 @@ const dcrypto = {
     encryptForwardSecret: asymmetric.memory.encryptMemory,
     decryptForwardSecret: asymmetric.memory.decryptMemory,
 
-    encryptSymmetricKey: symmetric.memory.encryptMemory,
-    decryptSymmetricKey: symmetric.memory.decryptMemory,
+    encryptSymmetricKey: symmetric.memory.encryptSymmetricKeyMemory,
+    decryptSymmetricKey: symmetric.memory.decryptSymmetricKeyMemory,
+
+    encrypt: symmetric.memory.encryptMemory,
+    decrypt: symmetric.memory.decryptMemory,
 
     sha512: hash.memory.sha512Memory,
     argon2: hash.memory.argon2Memory,

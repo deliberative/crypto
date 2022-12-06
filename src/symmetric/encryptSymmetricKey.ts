@@ -20,24 +20,17 @@ import dcryptoMethodsModule from "../c/build/dcryptoMethodsModule";
 import type { DCryptoMethodsModule } from "../c/build/dcryptoMethodsModule";
 
 import {
-  crypto_sign_ed25519_PUBLICKEYBYTES,
-  crypto_sign_ed25519_SECRETKEYBYTES,
-  getE2EEncryptedSecretBoxEncryptedLen,
+  crypto_kx_SESSIONKEYBYTES,
+  getEncryptedLen,
 } from "../utils/interfaces";
 
 /**
  * Function that encrypts a message with additional data using
  * the crypto_aead_chacha20poly1305_ietf_encrypt operation from
- * libsodium and computes a symmetric key Uint8Array(32) from the sender's
- * Ed25519 secret key and the receiver's Ed25519 public key.
- * The X25519 key counterparts are computed in wasm from the libsodium provided
- * crypto_sign_ed25519_pk_to_curve25519 and crypto_sign_ed25519_sk_to_curve25519
- * functions.
- * The symmetric key for encryption is then computed by crypto_kx_server_session_keys.
- * The nonce is calculated by taking the first half of the
- * sha512 hash of a Uint8Array(3 * 32) array with 32 random bytes, the X25519 public key
- * and the X25519 secret key.
- * The auth tag is generated using Poly1305.
+ * libsodium with a precomputed symmetric key Uint8Array(32).
+ * The nonce is calculated by taking the second half of the
+ * sha512 hash of a Uint8Array(64) random array that is produced
+ * in secure memory on wasm. The auth tag is generated using Poly1305.
  *
  * If you need to perform bulk encryptions with predictable message
  * and additional data sizes then it will be more efficient to preload
@@ -47,7 +40,7 @@ import {
  * const messageLen = message.length;
  * const additionalLen = additionalData.length;
  *
- * const wasmMemory = dcryptoMemory.encryptMemory(messageLen, additionalLen);
+ * const wasmMemory = dcryptoMemory.encryptSymmetricKeyMemory(messageLen, additionalLen);
  * const wasmModule = await dcryptoMethodsModule({ wasmMemory });
  * ```
  *
@@ -58,31 +51,26 @@ import {
  * import dcrypto from \"@deliberative/crypto\"
  *
  * const message = new Uint8Array(128).fill(1);
+ * const symmetricKey = new Uint8Array(32).fill(3);
  * const additionalData = new Uint8Array(64).fill(2);
  *
- * const aliceKeyPair = await dcrypto.keyPair();
- * const bobKeyPair = await dcrypto.keyPair();
- *
- * const box = await dcrypto.encrypt(
+ * const box = await dcrypto.encryptSymmetricKey(
  *    message,
- *    bobKeyPair.publicKey,
- *    aliceKeyPair.secretKey,
+ *    symmetricKey,
  *    additionalData
  * );
  * ```
  *
  * @param message - the message to encrypt
- * @param receiverPublicKey - the receiver's Ed25519 public key
- * @param senderSecretKey - the sender's Ed25519 secret key
+ * @param symmetricKey - the precomputed symmetric key
  * @param additionalData - the additional data for aead
  * @param module - wasm module in case of bulk encryptions
  *
  * @returns Encrypted box [nonce 16 || encrypted_data || auth tag 12]
  */
-const encrypt = async (
+const encryptSymmetricKey = async (
   message: Uint8Array,
-  receiverPublicKey: Uint8Array,
-  senderSecretKey: Uint8Array,
+  symmetricKey: Uint8Array,
   additionalData: Uint8Array,
   module?: DCryptoMethodsModule,
 ): Promise<Uint8Array> => {
@@ -91,7 +79,7 @@ const encrypt = async (
 
   const wasmMemory = module
     ? module.wasmMemory
-    : dcryptoMemory.encryptMemory(len, additionalLen);
+    : dcryptoMemory.encryptSymmetricKeyMemory(len, additionalLen);
 
   const dcryptoModule = module || (await dcryptoMethodsModule({ wasmMemory }));
 
@@ -103,48 +91,39 @@ const encrypt = async (
   );
   dataArray.set(message);
 
-  const ptr2 = dcryptoModule._malloc(crypto_sign_ed25519_PUBLICKEYBYTES);
-  const pk = new Uint8Array(
+  const ptr2 = dcryptoModule._malloc(crypto_kx_SESSIONKEYBYTES);
+  const k = new Uint8Array(
     dcryptoModule.HEAP8.buffer,
     ptr2,
-    crypto_sign_ed25519_PUBLICKEYBYTES,
+    crypto_kx_SESSIONKEYBYTES,
   );
-  pk.set(receiverPublicKey);
+  k.set(symmetricKey);
 
-  const ptr3 = dcryptoModule._malloc(crypto_sign_ed25519_SECRETKEYBYTES);
-  const sk = new Uint8Array(
-    dcryptoModule.HEAP8.buffer,
-    ptr3,
-    crypto_sign_ed25519_SECRETKEYBYTES,
-  );
-  sk.set(senderSecretKey);
-
-  const ptr4 = dcryptoModule._malloc(
+  const ptr3 = dcryptoModule._malloc(
     additionalLen * Uint8Array.BYTES_PER_ELEMENT,
   );
   const additional = new Uint8Array(
     dcryptoModule.HEAP8.buffer,
-    ptr4,
+    ptr3,
     additionalLen * Uint8Array.BYTES_PER_ELEMENT,
   );
   additional.set(additionalData);
 
-  const sealedBoxLen = getE2EEncryptedSecretBoxEncryptedLen(len);
+  const sealedBoxLen = getEncryptedLen(len);
 
-  const ptr5 = dcryptoModule._malloc(
+  const ptr4 = dcryptoModule._malloc(
     sealedBoxLen * Uint8Array.BYTES_PER_ELEMENT,
   );
   const encrypted = new Uint8Array(
     dcryptoModule.HEAP8.buffer,
-    ptr5,
+    ptr4,
     sealedBoxLen * Uint8Array.BYTES_PER_ELEMENT,
   );
 
-  const result = dcryptoModule._e2e_encrypt_data(
+  const result = dcryptoModule._encrypt_data(
     len,
     dataArray.byteOffset,
-    pk.byteOffset,
-    sk.byteOffset,
+    k.byteOffset,
     additionalLen,
     additional.byteOffset,
     encrypted.byteOffset,
@@ -167,4 +146,4 @@ const encrypt = async (
   }
 };
 
-export default encrypt;
+export default encryptSymmetricKey;
