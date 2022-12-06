@@ -120,7 +120,7 @@ const encryptSymmetricKey = async (
     sealedBoxLen * Uint8Array.BYTES_PER_ELEMENT,
   );
 
-  const result = dcryptoModule._encrypt_data(
+  const result = dcryptoModule._key_encrypt_data(
     len,
     dataArray.byteOffset,
     k.byteOffset,

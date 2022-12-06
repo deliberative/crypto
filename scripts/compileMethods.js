@@ -76,8 +76,12 @@ _keypair_from_seed,\
 _keypair_from_secret_key,\
 _sign_data,\
 _verify_data,\
-_encrypt_data,\
-_decrypt_data,\
+_key_encrypt_data,\
+_key_decrypt_data,\
+_e2e_encrypt_data,\
+_e2e_decrypt_data,\
+_forward_secretbox_encrypt_data,\
+_forward_secretbox_decrypt_data,\
 _split_secret,\
 _restore_secret,\
 _items_indexes_in_array,\

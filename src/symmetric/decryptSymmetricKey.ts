@@ -125,7 +125,7 @@ const decryptSymmetricKey = async (
     decryptedLen * Uint8Array.BYTES_PER_ELEMENT,
   );
 
-  const result = dcryptoModule._decrypt_data(
+  const result = dcryptoModule._key_decrypt_data(
     len,
     encryptedArray.byteOffset,
     k.byteOffset,

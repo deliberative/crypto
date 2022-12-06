@@ -42,7 +42,7 @@ export interface DCryptoMethodsModule extends EmscriptenModule {
     public_key: number, // Uint8Array,
   ): number;
 
-  _encrypt_data(
+  _key_encrypt_data(
     DATA_LEN: number,
     data: number, // Uint8Array,
     key: number, // Uint8Array,
@@ -50,7 +50,7 @@ export interface DCryptoMethodsModule extends EmscriptenModule {
     additional_data: number, // Uint8Array,
     encrypted: number, // Uint8Array,
   ): number;
-  _decrypt_data(
+  _key_decrypt_data(
     ENCRYPTED_LEN: number,
     encrypted_data: number, // Uint8Array,
     key: number, // Uint8Array,
