@@ -115,9 +115,11 @@ const getMerkleProof = async <T>(
   module._free(ptr2);
 
   switch (result) {
-    case -1:
+    case -1: {
       module._free(ptr3);
+
       throw new Error("Element not in tree.");
+    }
 
     default: {
       const proofArray = new Uint8Array(proof.slice(0, result));
