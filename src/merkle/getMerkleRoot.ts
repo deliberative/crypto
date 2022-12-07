@@ -101,7 +101,7 @@ const getMerkleRoot = async <T>(
 
   switch (result) {
     case 0: {
-      const root = new Uint8Array(rootWasm);
+      const root = Uint8Array.from(rootWasm);
       module._free(ptr2);
 
       return root;

@@ -75,7 +75,8 @@ bench(`X25519 sign/verify native crypto ${times} times`, (b) => {
 
 bench(`X25519 @deliberative/crypto ${times} times`, async (b) => {
   b.start();
-  const keyPair = await dcrypto.keyPair();
+  const aliceKeyPair = await dcrypto.keyPair();
+  const bobKeyPair = await dcrypto.keyPair();
 
   const wasmEncryptMemory = dcrypto.loadWasmMemory.encryptForwardSecret(
     256,
@@ -95,16 +96,18 @@ bench(`X25519 @deliberative/crypto ${times} times`, async (b) => {
 
   const additional = new Uint8Array(64).fill(2);
   for (let i = 0; i < times; i++) {
-    const encryptedWithModule = await dcrypto.encryptForwardSecrecy(
+    const encryptedWithModule = await dcrypto.encrypt(
       data[i],
-      keyPair.publicKey,
+      bobKeyPair.publicKey,
+      aliceKeyPair.secretKey,
       additional,
       wasmEncryptModule,
     );
 
-    const _decryptedWithModule = await dcrypto.decryptForwardSecrecy(
+    const _decryptedWithModule = await dcrypto.decrypt(
       encryptedWithModule,
-      keyPair.secretKey,
+      aliceKeyPair.publicKey,
+      bobKeyPair.secretKey,
       additional,
       wasmDecryptModule,
     );

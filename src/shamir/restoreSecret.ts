@@ -64,22 +64,30 @@ const restoreSecret = async (
   );
 
   dcryptoModule._free(ptr1);
-  dcryptoModule._free(ptr2);
 
   switch (result) {
     case 0: {
-      return new Uint8Array(secretArray);
+      const sec = Uint8Array.from(secretArray);
+      dcryptoModule._free(ptr2);
+
+      return sec;
     }
 
     case -1: {
+      dcryptoModule._free(ptr2);
+
       throw new Error("Need at most 255 shares.");
     }
 
     case -2: {
+      dcryptoModule._free(ptr2);
+
       throw new Error("Not enough shares provided.");
     }
 
     default: {
+      dcryptoModule._free(ptr2);
+
       throw new Error("An unexpected error occured.");
     }
   }

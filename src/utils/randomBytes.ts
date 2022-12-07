@@ -50,9 +50,14 @@ const randomBytes = async (
 
   const result = dcryptoModule._random_bytes(n, bytes.byteOffset);
 
-  dcryptoModule._free(ptr);
+  if (result === 0) {
+    const rb = new Uint8Array([...bytes]);
+    dcryptoModule._free(ptr);
 
-  if (result === 0) return new Uint8Array(bytes);
+    return rb;
+  }
+
+  dcryptoModule._free(ptr);
 
   throw new Error("Could not generate random data");
 };

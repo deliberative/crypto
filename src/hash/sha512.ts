@@ -53,7 +53,7 @@ const sha512 = async (
     hash.byteOffset,
   );
 
-  const h = new Uint8Array(hash);
+  const h = Uint8Array.from(hash);
 
   dcryptoModule._free(ptr1);
   dcryptoModule._free(ptr2);

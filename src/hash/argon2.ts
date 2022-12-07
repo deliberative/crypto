@@ -82,7 +82,7 @@ const argon2 = async (
     saltArray.byteOffset,
   );
 
-  const s = new Uint8Array(seed);
+  const s = Uint8Array.from(seed);
 
   dcryptoModule._free(ptr1);
   dcryptoModule._free(ptr2);

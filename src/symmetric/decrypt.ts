@@ -26,7 +26,7 @@ import {
 } from "../utils/interfaces";
 
 /**
- * Function that decrypts a box with additional data using the
+ * Decrypts a box with additional data using the
  * crypto_aead_chacha20poly1305_ietf_decrypt function from libsodium and
  * computes a symmetric key Uint8Array(32) from the sender's
  * Ed25519 public key and the receiver's Ed25519 secret key.
@@ -51,6 +51,7 @@ import {
  * If not all boxes and additional data are equal, you can always just use
  * the largest Uint8Arrays as inputs.
  *
+ * @example
  * ```ts
  * import dcrypto from \"@deliberative/crypto\"
  *
@@ -77,12 +78,11 @@ import {
  * \/\/ message should be equal to decrypted.
  * ```
  *
- * @param encrypted - the encrypted box including nonce and auth tag
- * @param senderPublicKey - the sender public key
- * @param receiverSecretKey - the receiver secret key
- * @param additionalData - the additional data for aead
- * @param module - wasm module in case of bulk decryptions
- *
+ * @param encrypted - The encrypted box including nonce and auth tag
+ * @param senderPublicKey - The sender public key
+ * @param receiverSecretKey - The receiver secret key
+ * @param additionalData - The additional data for aead
+ * @param module - The wasm module in case of bulk decryptions
  * @returns The decrypted message
  */
 const decrypt = async (
@@ -156,20 +156,30 @@ const decrypt = async (
     decrypted.byteOffset,
   );
 
-  const decr = new Uint8Array(decrypted);
-
   dcryptoModule._free(ptr1);
   dcryptoModule._free(ptr2);
   dcryptoModule._free(ptr3);
   dcryptoModule._free(ptr4);
 
   switch (result) {
-    case 0:
+    case 0: {
+      const decr = Uint8Array.from(decrypted);
+      dcryptoModule._free(ptr5);
+
       return decr;
-    case -1:
+    }
+
+    case -1: {
+      dcryptoModule._free(ptr5);
+
       throw new Error("Unsuccessful decryption attempt");
-    default:
+    }
+
+    default: {
+      dcryptoModule._free(ptr5);
+
       throw new Error("Unexpected error occured");
+    }
   }
 };
 

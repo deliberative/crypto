@@ -73,7 +73,7 @@ const getMerkleRootFromProof = async (
 
   switch (result) {
     case 0: {
-      const proof = new Uint8Array(rootArray);
+      const proof = Uint8Array.from(rootArray);
       module._free(ptr3);
 
       return proof;

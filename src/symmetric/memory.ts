@@ -38,12 +38,13 @@ const encryptMemory = (
   const memoryLen =
     (messageLen +
       crypto_sign_ed25519_PUBLICKEYBYTES +
+      crypto_sign_ed25519_SECRETKEYBYTES +
       additionalDataLen +
       sealedBoxLen +
-      1 * (messageLen + crypto_box_poly1305_AUTHTAGBYTES) + // malloc'd
-      2 * crypto_box_x25519_PUBLICKEYBYTES + // malloc'd
-      2 * crypto_box_x25519_SECRETKEYBYTES + // malloc'd
-      crypto_box_x25519_NONCEBYTES) * // malloc'd
+      1 * (messageLen + crypto_box_poly1305_AUTHTAGBYTES) + // ciphertext malloc'd
+      2 * crypto_box_x25519_PUBLICKEYBYTES + // x25519 pk's malloc'd
+      2 * crypto_box_x25519_SECRETKEYBYTES + // x25519 sk + shared malloc'd
+      crypto_box_x25519_NONCEBYTES) * // nonce malloc'd
     Uint8Array.BYTES_PER_ELEMENT;
   const pages = memoryLenToPages(memoryLen);
 

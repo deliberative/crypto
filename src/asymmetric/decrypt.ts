@@ -85,7 +85,7 @@ const decrypt = async (
     decrypted.byteOffset,
   );
 
-  const decr = new Uint8Array(decrypted);
+  const decr = Uint8Array.from(decrypted);
 
   dcryptoModule._free(ptr1);
   dcryptoModule._free(ptr2);

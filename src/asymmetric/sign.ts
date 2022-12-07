@@ -70,7 +70,7 @@ const sign = async (
     sk.byteOffset,
   );
 
-  const sig = new Uint8Array(signature);
+  const sig = Uint8Array.from(signature);
 
   dcryptoModule._free(ptr1);
   dcryptoModule._free(ptr2);

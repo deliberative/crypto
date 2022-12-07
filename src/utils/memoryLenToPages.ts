@@ -22,7 +22,7 @@ const memoryLenToPages = (
   minPages?: number,
   maxPages?: number,
 ): number => {
-  minPages = minPages || 32; // 2mb // 256; // 16mb // 6; // 384kb
+  minPages = minPages || 160; // 10mb // 256; // 16mb // 6; // 384kb
   maxPages = maxPages || 16384; // 1gb
   const pageSize = 64 * 1024;
   const ceil = Math.ceil(memoryLen / pageSize);

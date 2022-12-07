@@ -150,8 +150,6 @@ const encrypt = async (
     encrypted.byteOffset,
   );
 
-  const enc = new Uint8Array(encrypted);
-
   dcryptoModule._free(ptr1);
   dcryptoModule._free(ptr2);
   dcryptoModule._free(ptr3);
@@ -159,10 +157,33 @@ const encrypt = async (
 
   switch (result) {
     case 0: {
+      const enc = Uint8Array.from(encrypted);
+      dcryptoModule._free(ptr5);
+
       return enc;
     }
 
+    case -1: {
+      dcryptoModule._free(ptr5);
+
+      throw new Error("Failed to convert Ed25519 secret key to X25519.");
+    }
+
+    case -2: {
+      dcryptoModule._free(ptr5);
+
+      throw new Error("Failed to convert Ed25519 public key to X25519.");
+    }
+
+    case -3: {
+      dcryptoModule._free(ptr5);
+
+      throw new Error("Failed to create shared secret from the sender side.");
+    }
+
     default:
+      dcryptoModule._free(ptr5);
+
       throw new Error("An unexpected error occured.");
   }
 };
