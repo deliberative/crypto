@@ -85,22 +85,32 @@ const decrypt = async (
     decrypted.byteOffset,
   );
 
-  const decr = Uint8Array.from(decrypted);
-
   dcryptoModule._free(ptr1);
   dcryptoModule._free(ptr2);
   dcryptoModule._free(ptr3);
-  dcryptoModule._free(ptr4);
 
   switch (result) {
-    case 0:
+    case 0: {
+      const decr = Uint8Array.from(decrypted);
+      dcryptoModule._free(ptr4);
+
       return decr;
+    }
+
     // case -1:
     //   throw new Error("Could not create successful key exchange");
-    case -2:
+
+    case -2: {
+      dcryptoModule._free(ptr4);
+
       throw new Error("Unsuccessful decryption attempt");
-    default:
+    }
+
+    default: {
+      dcryptoModule._free(ptr4);
+
       throw new Error("Unexpected error occured");
+    }
   }
 };
 

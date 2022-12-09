@@ -53,12 +53,12 @@ const generateMnemonic = async (
 
   // if (!wordlist) throw new Error("English wordlist could not be loaded.");
 
-  // Between 16 and 32 and multiple of 4
+  // Between 16 and 64 and multiple of 4
   const entropy = await randomBytes(strength / 8);
 
   // if (entropy.length < 16) throw new TypeError("Entropy length too small.");
 
-  // if (entropy.length > 32) throw new TypeError("Entropy length too large.");
+  // if (entropy.length > 64) throw new TypeError("Entropy length too large.");
 
   // if (entropy.length % 4 !== 0)
   //   throw new TypeError("Entropy length is not multiple of 4.");

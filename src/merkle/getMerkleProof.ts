@@ -122,7 +122,7 @@ const getMerkleProof = async <T>(
     }
 
     default: {
-      const proofArray = new Uint8Array(proof.slice(0, result));
+      const proofArray = Uint8Array.from(proof.slice(0, result));
       module._free(ptr3);
 
       return proofArray;

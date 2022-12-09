@@ -111,21 +111,25 @@ const keyPairFromSeed = async (
     seedBytes.byteOffset,
   );
 
-  const keyPair = {
-    publicKey: Uint8Array.from(publicKey),
-    secretKey: Uint8Array.from(secretKey),
-  };
-
-  dcryptoModule._free(ptr1);
-  dcryptoModule._free(ptr2);
   dcryptoModule._free(ptr3);
 
   switch (result) {
     case 0: {
+      const keyPair = {
+        publicKey: Uint8Array.from(publicKey),
+        secretKey: Uint8Array.from(secretKey),
+      };
+
+      dcryptoModule._free(ptr1);
+      dcryptoModule._free(ptr2);
+
       return keyPair;
     }
 
     default: {
+      dcryptoModule._free(ptr1);
+      dcryptoModule._free(ptr2);
+
       throw new Error("An unexpected error occured.");
     }
   }
@@ -161,20 +165,23 @@ const keyPairFromSecretKey = async (
     sk.byteOffset,
   );
 
-  const keyPair = {
-    publicKey: Uint8Array.from(pk),
-    secretKey,
-  };
-
-  dcryptoModule._free(ptr1);
   dcryptoModule._free(ptr2);
 
   switch (result) {
     case 0: {
+      const keyPair = {
+        publicKey: Uint8Array.from(pk),
+        secretKey,
+      };
+
+      dcryptoModule._free(ptr1);
+
       return keyPair;
     }
 
     default: {
+      dcryptoModule._free(ptr1);
+
       throw new Error("An unexpected error occured.");
     }
   }

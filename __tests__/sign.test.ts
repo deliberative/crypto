@@ -1,4 +1,5 @@
 import dcrypto from "../src";
+import nacl from "tweetnacl";
 
 import {
   crypto_sign_ed25519_PUBLICKEYBYTES,
@@ -89,6 +90,20 @@ describe("Signing and verifying with Ed25519 keys test suite.", () => {
     expect(arraysAreEqual(signature, otherSignature)).toBe(true);
   });
 
+  test("Signing a Uint8Array message can be verified by tweetnacl.", async () => {
+    const keyPair = await dcrypto.keyPair();
+    const randomMessage = await dcrypto.randomBytes(256);
+    const signature = await dcrypto.sign(randomMessage, keyPair.secretKey);
+
+    const naclVerification = nacl.sign.detached.verify(
+      randomMessage,
+      signature,
+      keyPair.publicKey,
+    );
+
+    expect(naclVerification).toBe(true);
+  });
+
   test("Verifying the signature of a Uint8Array message works.", async () => {
     const mnemonic = await dcrypto.generateMnemonic();
     const keypair = await dcrypto.keyPairFromMnemonic(mnemonic);
@@ -111,6 +126,27 @@ describe("Signing and verifying with Ed25519 keys test suite.", () => {
 
     expect(verification).toBe(true);
     expect(otherVerification).toBe(true);
+  });
+
+  test("Verifying the signature of a Uint8Array message from tweetnacl works.", async () => {
+    const keyPair = await dcrypto.keyPair();
+    const randomMessage = await dcrypto.randomBytes(256);
+    const signature = nacl.sign.detached(randomMessage, keyPair.secretKey);
+
+    const naclVerification = nacl.sign.detached.verify(
+      randomMessage,
+      signature,
+      keyPair.publicKey,
+    );
+
+    const verification = await dcrypto.verify(
+      randomMessage,
+      signature,
+      keyPair.publicKey,
+    );
+
+    expect(naclVerification).toBe(true);
+    expect(verification).toBe(true);
   });
 
   test("Verifying signature with wrong key should return false.", async () => {
