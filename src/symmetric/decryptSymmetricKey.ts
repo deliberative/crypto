@@ -25,7 +25,7 @@ import {
 } from "../utils/interfaces";
 
 /**
- * Function that decrypts a box with additional data using the
+ * Decrypts a box with additional data using the
  * crypto_aead_chacha20poly1305_ietf_decrypt function from libsodium and
  * a provided symmetric key in Uint8Array(32) format.
  * The encrypted box is a Uint8Array[nonce 16 || encrypted_data || auth tag 12].

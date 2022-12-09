@@ -25,6 +25,17 @@ import {
   crypto_hash_sha512_BYTES,
 } from "../utils/interfaces";
 
+/**
+ * Generates an Ed25519 key pair from the provided mnemonic.
+ * Optionally, you can strenthen the generation with a password.
+ * The mnemonic is converted into a seed through the use of argon2id.
+ * The password is used as a salt for argon2id.
+ * From the generated seed we extract the key pair.
+ *
+ * @param mnemonic - Sequence of words from the predefined wordlist
+ * @param password - Optional salt for the seed derivation
+ * @returns An Ed25519 key pair
+ */
 const keyPairFromMnemonic = async (mnemonic: string, password?: string) => {
   const isValid = await validateMnemonic(mnemonic);
   if (!isValid) throw new Error("Invalid mnemonic.");
@@ -36,7 +47,6 @@ const keyPairFromMnemonic = async (mnemonic: string, password?: string) => {
   const salt = new Uint8Array(crypto_pwhash_argon2id_SALTBYTES);
 
   if (password) {
-    const encoder = new TextEncoder();
     const pwdBuffer = encoder.encode(password).buffer;
     const pwdHash = await sha512(new Uint8Array(pwdBuffer));
 

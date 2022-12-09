@@ -26,7 +26,7 @@ import {
 } from "../utils/interfaces";
 
 /**
- * Function that encrypts a message with additional data using
+ * Encrypts a message with additional data using
  * the crypto_aead_chacha20poly1305_ietf_encrypt operation from
  * libsodium and computes a symmetric key Uint8Array(32) from the sender's
  * Ed25519 secret key and the receiver's Ed25519 public key.

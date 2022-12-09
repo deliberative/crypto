@@ -28,6 +28,9 @@
           const mnemonic4 = await dcrypto.generateMnemonic(256);
           console.log(`Mnemonic with 256bit entropy => 24 words: ${mnemonic4}`);
 
+          // 48 Words from dictionary create random seed for Ed25519 private key.
+          const mnemonic5 = await dcrypto.generateMnemonic(512);
+
           // Keypair is an object representing an Ed25519 keypair with { publicKey: Uint8Array(32), secretKey: Uint8Array(64) }
           const keypair = await dcrypto.keyPairFromMnemonic(mnemonic);
 
@@ -93,8 +96,21 @@
   Original : ${uint8ToHex(message)}\n`,
           );
 
-          const aliceKeyPair = await dcrypto.keyPairFromMnemonic(mnemonic4);
-          const bobKeyPair = await dcrypto.keyPairFromMnemonic(mnemonic3);
+          const aliceKeyPair = await dcrypto.keyPairFromMnemonic(mnemonic5);
+          console.log(
+            `Alice keypair from mnemonic with 512bit entropy: {\n\
+  secretKey: ${uint8ToHex(aliceKeyPair.secretKey)}\n\
+  publicKey: ${uint8ToHex(aliceKeyPair.publicKey)}\n}\
+`,
+          );
+
+          const bobKeyPair = await dcrypto.keyPairFromMnemonic(mnemonic4);
+          console.log(
+            `Bob keypair from mnemonic with 256bit entropy: {\n\
+  secretKey: ${uint8ToHex(bobKeyPair.secretKey)}\n\
+  publicKey: ${uint8ToHex(bobKeyPair.publicKey)}\n}\
+`,
+          );
 
           const e2eencrypted = await dcrypto.encrypt(
             message,
@@ -105,12 +121,12 @@
 
           console.log(
             `AEAD e2e encrypted box for random message between alice and bob: ${uint8ToHex(
-              encrypted,
+              e2eencrypted,
             )}`,
           );
 
           const e2edecrypted = await dcrypto.decrypt(
-            encrypted,
+            e2eencrypted,
             aliceKeyPair.publicKey,
             bobKeyPair.secretKey,
             hash,

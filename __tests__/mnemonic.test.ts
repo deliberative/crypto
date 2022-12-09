@@ -23,6 +23,47 @@ describe("Signing and verifying with Ed25519 keys test suite.", () => {
     expect(validate).toBe(true);
   });
 
+  test("Mnemonic generation with different entropy works.", async () => {
+    const mnemonic1 = await dcrypto.generateMnemonic(128);
+    expect(mnemonic1.split(" ").length).toEqual(12);
+
+    const mnemonic2 = await dcrypto.generateMnemonic(160);
+    expect(mnemonic2.split(" ").length).toEqual(15);
+
+    const mnemonic3 = await dcrypto.generateMnemonic(192);
+    expect(mnemonic3.split(" ").length).toEqual(18);
+
+    const mnemonic4 = await dcrypto.generateMnemonic(224);
+    expect(mnemonic4.split(" ").length).toEqual(21);
+
+    const mnemonic5 = await dcrypto.generateMnemonic(256);
+    expect(mnemonic5.split(" ").length).toEqual(24);
+
+    const mnemonic6 = await dcrypto.generateMnemonic(288);
+    expect(mnemonic6.split(" ").length).toEqual(27);
+
+    const mnemonic7 = await dcrypto.generateMnemonic(320);
+    expect(mnemonic7.split(" ").length).toEqual(30);
+
+    const mnemonic8 = await dcrypto.generateMnemonic(352);
+    expect(mnemonic8.split(" ").length).toEqual(33);
+
+    const mnemonic9 = await dcrypto.generateMnemonic(384);
+    expect(mnemonic9.split(" ").length).toEqual(36);
+
+    const mnemonic10 = await dcrypto.generateMnemonic(416);
+    expect(mnemonic10.split(" ").length).toEqual(39);
+
+    const mnemonic11 = await dcrypto.generateMnemonic(448);
+    expect(mnemonic11.split(" ").length).toEqual(42);
+
+    const mnemonic12 = await dcrypto.generateMnemonic(480);
+    expect(mnemonic12.split(" ").length).toEqual(45);
+
+    const mnemonic13 = await dcrypto.generateMnemonic(512);
+    expect(mnemonic13.split(" ").length).toEqual(48);
+  });
+
   test("Generating a new keypair from mnemonic seed works.", async () => {
     const mnemonic = await dcrypto.generateMnemonic();
     const keypair = await dcrypto.keyPairFromMnemonic(mnemonic);

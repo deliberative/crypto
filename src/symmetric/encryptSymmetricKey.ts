@@ -25,7 +25,7 @@ import {
 } from "../utils/interfaces";
 
 /**
- * Function that encrypts a message with additional data using
+ * Encrypts a message with additional data using
  * the crypto_aead_chacha20poly1305_ietf_encrypt operation from
  * libsodium with a precomputed symmetric key Uint8Array(32).
  * The nonce is calculated by taking the second half of the

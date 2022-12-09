@@ -57,8 +57,8 @@ const mnemonicToEntropy = async (mnemonic: string): Promise<boolean> => {
   if (entropy.length < 16)
     throw new Error("Entropy length too small (less than 128 bits).");
 
-  if (entropy.length > 32)
-    throw new Error("Entropy length too large (more than 256 bits).");
+  if (entropy.length > 64)
+    throw new Error("Entropy length too large (more than 512 bits).");
 
   // Can never happen because of :45 always divisible by 4
   // if (entropy.length % 4 !== 0)

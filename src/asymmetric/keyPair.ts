@@ -55,8 +55,8 @@ const newKeyPair = async (
   );
 
   const keyPair = {
-    publicKey: new Uint8Array(publicKey),
-    secretKey: new Uint8Array(secretKey),
+    publicKey: Uint8Array.from(publicKey),
+    secretKey: Uint8Array.from(secretKey),
   };
 
   dcryptoModule._free(ptr1);
@@ -112,8 +112,8 @@ const keyPairFromSeed = async (
   );
 
   const keyPair = {
-    publicKey: new Uint8Array(publicKey),
-    secretKey: new Uint8Array(secretKey),
+    publicKey: Uint8Array.from(publicKey),
+    secretKey: Uint8Array.from(secretKey),
   };
 
   dcryptoModule._free(ptr1);

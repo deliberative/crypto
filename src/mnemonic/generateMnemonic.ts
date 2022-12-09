@@ -20,13 +20,33 @@ import randomBytes from "../utils/randomBytes";
 import sha512 from "../hash/sha512";
 
 /**
- * Generates a sequence of words that represents a random seed that
- * can be translated into a cryptographic keypair.
+ * Generates a sequence of words chosen from a prespecified wordlist
+ * that represents a random seed that
+ * can be translated later into a cryptographic keypair.
+ * With a strength of 128 bits of entropy you get 12 words.
+ * In every additional step you get 3 more words. The maximum is
+ * set to 512 bits of entropy, or 48 words!
+ *
+ * @param strength - Entropy bits
+ * @returns The mnemonic from the wordlist.
+ *
  */
 const generateMnemonic = async (
-  strength?: 128 | 160 | 192 | 224 | 256,
+  strength:
+    | 128
+    | 160
+    | 192
+    | 224
+    | 256
+    | 288
+    | 320
+    | 352
+    | 384
+    | 416
+    | 448
+    | 480
+    | 512 = 128,
 ): Promise<string> => {
-  strength = strength || 128;
   // if (strength % 32 !== 0) {
   //   throw new TypeError("Mnemonic strength needs to be multiple of 32.");
   // }
