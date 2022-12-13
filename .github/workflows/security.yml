@@ -70,12 +70,18 @@ jobs:
       uses: github/codeql-action/analyze@v2
       with:
         category: "/language:${{matrix.language}}"
-    
-    - name: Run DevSkim scanner
-      uses: microsoft/DevSkim-Action@v1
 
-    - name: Upload DevSkim scan results to GitHub Security tab
-      uses: github/codeql-action/upload-sarif@v2
+    - name: Flawfinder scan
+      uses: david-a-wheeler/flawfinder@2.0.19
       with:
-        sarif_file: devskim-results.sarif
+        arguments: '--sarif ./'
+        output: 'flawfinder_results.sarif'
+    
+    # - name: Run DevSkim scanner
+    #   uses: microsoft/DevSkim-Action@v1
+
+    # - name: Upload DevSkim scan results to GitHub Security tab
+    #   uses: github/codeql-action/upload-sarif@v2
+    #   with:
+    #     sarif_file: flawfinder-results.sarif
 
