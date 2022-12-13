@@ -239,6 +239,40 @@ npm run build:debug
 
 and everything will work in debug mode.
 
+## Benchmarks
+
+```
+> node benchmarks/hash/index.js
+# sha512 native crypto 10000 times
+ok ~48 ms (0 s + 48327358 ns)
+
+# sha512 @deliberative/crypto 10000 times
+ok ~52 ms (0 s + 52109240 ns)
+
+# sha512 tweetnacl 10000 times
+ok ~90 ms (0 s + 90342209 ns)
+
+> node benchmarks/symmetric/index.js
+# X25519 e2e encrypt/decrypt native crypto 10000 times
+ok ~103 ms (0 s + 103319810 ns)
+
+# X25519 @deliberative/crypto 10000 times
+ok ~6.32 s (6 s + 324049560 ns)
+
+# X25519 tweetnacl 10000 times
+ok ~13 s (13 s + 231362959 ns)
+
+> node benchmarks/asymmetric/index.js
+# Ed25519 sign/verify native crypto 10000 times
+ok ~1.47 s (1 s + 465459938 ns)
+
+# Ed25519 @deliberative/crypto 10000 times
+ok ~11 s (10 s + 645453115 ns)
+
+# Ed25519 tweetnacl 10000 times
+ok ~2.45 min (147 s + 790877018 ns)
+```
+
 ## Releases
 
 Releases are available on [Github](https://github.com/deliberative/crypto/releases)

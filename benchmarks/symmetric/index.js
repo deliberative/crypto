@@ -10,7 +10,7 @@ for (let i = 0; i < times; i++) {
   data.push(nacl.randomBytes(256));
 }
 
-bench(`X25519 sign/verify native crypto ${times} times`, (b) => {
+bench(`X25519 e2e encrypt/decrypt native crypto ${times} times`, (b) => {
   b.start();
 
   const aliceKeyPair = crypto.generateKeyPairSync("x25519");
