@@ -66,10 +66,10 @@
 #include "./hash/sha512.c"
 
 // Merkle
-#include "./hash/get_merkle_proof.c"
-#include "./hash/get_merkle_root.c"
-#include "./hash/get_merkle_root_from_proof.c"
-#include "./hash/verify_merkle_proof.c"
+#include "./merkle/get_merkle_proof.c"
+#include "./merkle/get_merkle_root.c"
+#include "./merkle/get_merkle_root_from_proof.c"
+#include "./merkle/verify_merkle_proof.c"
 
 // Shamir
 #include "./shamir/polynomial.c"

@@ -1,7 +1,7 @@
 {
   "name": "@deliberative/crypto",
   "description": "Libsodium and Shamir secret sharing wasm module for nodejs and the browser.",
-  "version": "0.7.7",
+  "version": "0.7.8",
   "repository": {
     "type": "git",
     "url": "https://github.com/deliberative/crypto.git"
@@ -84,7 +84,7 @@
     "docs": "typedoc --out docs --excludeInternal src/index.ts"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^23.0.0",
+    "@rollup/plugin-commonjs": "^24.0.0",
     "@rollup/plugin-json": "^6.0.0",
     "@rollup/plugin-node-resolve": "^15.0.0",
     "@rollup/plugin-replace": "^5.0.0",
@@ -97,9 +97,7 @@
     "@typescript-eslint/parser": "^5.9.0",
     "cross-env": "^7.0.3",
     "eslint": "^8.6.0",
-    "eslint-config-airbnb": "^19.0.4",
     "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-import": "^2.25.4",
     "eslint-plugin-jest": "^27.0.1",
     "eslint-plugin-jsdoc": "^39.2.0",
     "eslint-plugin-prefer-arrow": "^1.2.3",

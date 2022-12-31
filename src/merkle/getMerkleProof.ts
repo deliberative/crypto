@@ -71,7 +71,9 @@ const getMerkleProof = async <T>(
   let leafIsUint8Array = false;
   let hash: Uint8Array;
   let serialized: Uint8Array;
-  for (const leaf of tree) {
+  let leaf: T | Uint8Array;
+  for (let j = 0; j < treeLen; j++) {
+    leaf = tree[i];
     leafIsUint8Array = isUint8Array(leaf);
     serialized = leafIsUint8Array
       ? (leaf as Uint8Array)
