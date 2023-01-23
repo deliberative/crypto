@@ -24,14 +24,17 @@ import { crypto_hash_sha512_BYTES } from "../utils/interfaces";
 
 /**
  * @function
+ * getMerkleProof
+ *
+ * @description
  * Returns the Merkle proof of an element of a tree.
  * Can be used as a receipt of a transaction etc.
  *
- * @param tree: The tree.
- * @param element: The element.
- * @param serializer: Converts leaves into Uint8Array.
+ * @param {(T | Uint8Array)[]} tree: The tree.
+ * @param {T | Uint8Array} element: The element.
+ * @param {(i: T) => Uint8Array} serializer?: Converts leaves into Uint8Array.
  *
- * @returns Promise<Uint8Array>
+ * @returns {Promise<Uint8Array>}: The Merkle proof.
  */
 const getMerkleProof = async <T>(
   tree: (T | Uint8Array)[],
@@ -42,10 +45,8 @@ const getMerkleProof = async <T>(
   if (treeLen === 0) {
     throw new Error("Cannot calculate Merkle proof of element of empty tree.");
   } else if (treeLen === 1) {
+    // "No point in calculating proof of a tree with single leaf.",
     return new Uint8Array(crypto_hash_sha512_BYTES + 1).fill(1);
-    // throw new Error(
-    //   "No point in calculating proof of a tree with single leaf.",
-    // );
   }
 
   const leavesAreUint8Arrays = isUint8Array(tree[0]);
@@ -121,6 +122,12 @@ const getMerkleProof = async <T>(
       module._free(ptr3);
 
       throw new Error("Element not in tree.");
+    }
+
+    case -2: {
+      module._free(ptr3);
+
+      throw new Error("Could not calculate hash.");
     }
 
     default: {

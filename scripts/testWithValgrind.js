@@ -22,7 +22,7 @@ const {
   libsodiumIncludePrivatePath,
 } = require("./utils.js");
 
-const testFilename = "libsodium_methods";
+const testFilename = "dcrypto_methods";
 const testPath = path.join(process.cwd(), "examples", "c", `${testFilename}.c`);
 const outputPath = testPath.replace(`${testFilename}.c`, `${testFilename}.o`);
 const valgrindReportPath = outputPath.replace(
@@ -34,7 +34,7 @@ if (fs.existsSync(outputPath)) fs.rmSync(outputPath);
 if (fs.existsSync(valgrindReportPath)) fs.rmSync(valgrindReportPath);
 
 exec(
-  `clang -Werror -ggdb -g -fstandalone-debug -fsanitize=address -Og -lm \
+  `clang -Werror -ggdb -g -fstandalone-debug -Og -gdwarf-4 -lm \
 -I${libsodiumIncludePath} \
 -I${libsodiumIncludePrivatePath} \
 -o ${outputPath} \

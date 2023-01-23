@@ -18,7 +18,7 @@
 #include "../../../libsodium/src/libsodium/include/sodium/randombytes.h"
 
 __attribute__((used)) int
-random_bytes(const int SIZE, uint8_t array[SIZE])
+random_bytes(const unsigned int SIZE, uint8_t array[SIZE])
 {
   randombytes_buf(array, SIZE);
 

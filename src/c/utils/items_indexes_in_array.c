@@ -21,8 +21,8 @@
 __attribute__((used)) void
 items_indexes_in_array(
     const size_t ARRAY_LEN, const size_t ITEMS_ARRAY_LEN,
-    const uint8_t array[ARRAY_LEN * crypto_hash_sha512_BYTES],
-    const uint8_t items[ITEMS_ARRAY_LEN * crypto_hash_sha512_BYTES],
+    const uint8_t array[ARRAY_LEN][crypto_hash_sha512_BYTES],
+    const uint8_t items[ITEMS_ARRAY_LEN][crypto_hash_sha512_BYTES],
     int32_t indexes[ITEMS_ARRAY_LEN])
 {
   size_t i, j, k;
@@ -45,8 +45,7 @@ items_indexes_in_array(
       bool found = true;
       for (k = 0; k < crypto_hash_sha512_BYTES; k++)
       {
-        if (array[i * crypto_hash_sha512_BYTES + k]
-            != items[j * crypto_hash_sha512_BYTES + k])
+        if (array[i][k] != items[j][k])
         {
           found = false;
           break;

@@ -18,31 +18,27 @@
 
 #include "ring.c"
 
-int
-/* interpolate(const size_t sharesLen, const uint8_t points[sharesLen][2]) */
-interpolate(const size_t SHARES_LEN, const uint8_t points[SHARES_LEN * 2])
+unsigned int
+interpolate(const size_t SHARES_LEN, const uint8_t points[SHARES_LEN][2])
 {
   size_t i, j;
 
-  const int x = 0;
+  const unsigned int x = 0;
 
-  int result = 0;
+  unsigned int result = 0;
 
   for (i = 0; i < SHARES_LEN; i++)
   {
-    int weight = 1;
+    unsigned int weight = 1;
 
-    const int aX = points[i * 2];
-    /* const int aX = points[i][0]; */
-    const int aY = points[i * 2 + 1];
-    /* const int aY = points[i][1]; */
+    const unsigned int aX = points[i][0];
+    const unsigned int aY = points[i][1];
 
     for (j = 0; j < SHARES_LEN; j++)
     {
       if (i == j) continue;
 
-      const int bX = points[j * 2];
-      /* const int bX = points[j][0]; */
+      const unsigned int bX = points[j][0];
 
       weight = multiply(weight, divide(subtract(x, bX), subtract(aX, bX)));
     }
@@ -53,10 +49,10 @@ interpolate(const size_t SHARES_LEN, const uint8_t points[SHARES_LEN * 2])
   return result;
 };
 
-int
-degree(const size_t threshold, const uint8_t coefficients[threshold])
+unsigned int
+degree(const size_t THRESHOLD, const uint8_t coefficients[THRESHOLD])
 {
-  int i = threshold - 1;
+  int i = THRESHOLD - 1;
 
   do
   {
@@ -67,15 +63,15 @@ degree(const size_t threshold, const uint8_t coefficients[threshold])
 };
 
 // Compute y from x
-int
-evaluate(const size_t threshold, const uint8_t coefficients[threshold],
-         const int x)
+unsigned int
+evaluate(const size_t THRESHOLD, const uint8_t coefficients[THRESHOLD],
+         const unsigned int x)
 {
   if (x == 0) return coefficients[0];
 
-  const int d = degree(threshold, coefficients);
+  const unsigned int d = degree(THRESHOLD, coefficients);
 
-  int y = coefficients[d];
+  unsigned int y = coefficients[d];
 
   int i = d - 1;
   do

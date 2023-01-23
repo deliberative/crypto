@@ -86,31 +86,31 @@ const uint8_t EXP[510] = {
 };
 
 // XOR
-int
-add(const int a, const int b)
+unsigned int
+add(const unsigned int a, const unsigned int b)
 {
   return a ^ b;
 };
 
-int
-subtract(const int a, const int b)
+unsigned int
+subtract(const unsigned int a, const unsigned int b)
 {
   return add(a, b);
 }
 
-int
-multiply(const int a, const int b)
+unsigned int
+multiply(const unsigned int a, const unsigned int b)
 {
   if (a == 0 || b == 0) return 0;
 
-  const int sum = LOG[a] + LOG[b];
+  const unsigned int sum = LOG[a] + LOG[b];
 
   return EXP[sum];
 };
 
 // multiply by the inverse of b
-int
-divide(const int a, const int b)
+unsigned int
+divide(const unsigned int a, const unsigned int b)
 {
   if (a == 0) return 0;
   if (b == 0) return 0;

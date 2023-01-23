@@ -34,8 +34,9 @@ const getMerkleRootFromProof = async (
   proof: Uint8Array,
 ): Promise<Uint8Array> => {
   const proofLen = proof.length;
-  // if (proofLen % (crypto_hash_sha512_BYTES + 1) !== 0)
-  //   throw new Error("Proof length not multiple of 65.");
+  if (proofLen % (crypto_hash_sha512_BYTES + 1) !== 0)
+    throw new Error("Proof length not multiple of hash length + 1.");
+  const proofArtifactsLen = proofLen / (crypto_hash_sha512_BYTES + 1);
 
   const wasmMemory = dcryptoMemory.verifyMerkleProofMemory(proofLen);
   const module = await dcryptoMethodsModule({
@@ -62,7 +63,7 @@ const getMerkleRootFromProof = async (
   );
 
   const result = module._get_merkle_root_from_proof(
-    proofLen,
+    proofArtifactsLen,
     elementHash.byteOffset,
     proofArray.byteOffset,
     rootArray.byteOffset,
@@ -81,11 +82,19 @@ const getMerkleRootFromProof = async (
 
     case -1: {
       module._free(ptr3);
+
       throw new Error("Proof artifact position is neither left nor right.");
+    }
+
+    case -2: {
+      module._free(ptr3);
+
+      throw new Error("Could not calculate hash.");
     }
 
     default: {
       module._free(ptr3);
+
       throw new Error("Unexpected error occured.");
     }
   }

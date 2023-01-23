@@ -110,10 +110,16 @@ const getMerkleRoot = async <T>(
       return root;
     }
 
+    case -1: {
+      module._free(ptr2);
+
+      throw new Error("Could not calculate hash.");
+    }
+
     default: {
       module._free(ptr2);
 
-      throw new Error("Unexpected error occured");
+      throw new Error("Unexpected error occured.");
     }
   }
 };

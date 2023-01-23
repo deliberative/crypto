@@ -20,22 +20,24 @@
 #include "../../../libsodium/src/libsodium/include/sodium/crypto_hash_sha512.h"
 
 __attribute__((used)) int
-get_merkle_root_from_proof(const int PROOF_LEN,
-                           const uint8_t element_hash[crypto_hash_sha512_BYTES],
-                           const uint8_t proof[PROOF_LEN],
-                           uint8_t root[crypto_hash_sha512_BYTES])
+get_merkle_root_from_proof(
+    const unsigned int PROOF_ARTIFACTS_LEN,
+    const uint8_t element_hash[crypto_hash_sha512_BYTES],
+    const uint8_t proof[PROOF_ARTIFACTS_LEN][crypto_hash_sha512_BYTES + 1],
+    uint8_t root[crypto_hash_sha512_BYTES])
 {
-  if (PROOF_LEN % (crypto_hash_sha512_BYTES + 1) != 0) return -1;
-  int NODES_LEN = PROOF_LEN / (crypto_hash_sha512_BYTES + 1);
+  memcpy(&root[0], &element_hash[0], crypto_hash_sha512_BYTES);
 
-  memcpy(root, element_hash, crypto_hash_sha512_BYTES);
+  size_t i;
+  unsigned int position;
+  int res;
 
-  if (NODES_LEN == 1)
+  if (PROOF_ARTIFACTS_LEN == 1)
   {
     bool isOne = true;
-    for (int i = 0; i < crypto_hash_sha512_BYTES + 1; i++)
+    for (i = 0; i < crypto_hash_sha512_BYTES + 1; i++)
     {
-      if (proof[i] != 1)
+      if (proof[0][i] != 1)
       {
         isOne = false;
         break;
@@ -46,39 +48,39 @@ get_merkle_root_from_proof(const int PROOF_LEN,
     if (isOne) return 0;
   }
 
-  size_t i, position;
-
   uint8_t *concat_hashes = malloc(2 * crypto_hash_sha512_BYTES);
 
-  for (i = 0; i < NODES_LEN; i++)
+  for (i = 0; i < PROOF_ARTIFACTS_LEN; i++)
   {
-    position
-        = proof[i * (crypto_hash_sha512_BYTES + 1) + crypto_hash_sha512_BYTES];
-    if (position != 0 && position != 1)
+    position = proof[i][crypto_hash_sha512_BYTES];
+
+    // Proof artifact goes to the left
+    if (position == 0)
+    {
+      memcpy(&concat_hashes[0], &proof[i][0], crypto_hash_sha512_BYTES);
+      memcpy(&concat_hashes[crypto_hash_sha512_BYTES], &root[0],
+             crypto_hash_sha512_BYTES);
+    }
+    else if (position == 1)
+    {
+      memcpy(&concat_hashes[0], &root[0], crypto_hash_sha512_BYTES);
+      memcpy(&concat_hashes[crypto_hash_sha512_BYTES], &proof[i][0],
+             crypto_hash_sha512_BYTES);
+    }
+    else
     {
       free(concat_hashes);
 
       return -1;
     }
 
-    // Proof artifact goes to the left
-    if (position == 0)
+    res = crypto_hash_sha512(root, concat_hashes, 2 * crypto_hash_sha512_BYTES);
+    if (res != 0)
     {
-      memcpy(concat_hashes, &proof[i * (crypto_hash_sha512_BYTES + 1)],
-             crypto_hash_sha512_BYTES);
-      memcpy(&concat_hashes[crypto_hash_sha512_BYTES], root,
-             crypto_hash_sha512_BYTES);
-    }
-    else
-    {
-      memcpy(concat_hashes, root, crypto_hash_sha512_BYTES);
-      memcpy(&concat_hashes[crypto_hash_sha512_BYTES],
-             &proof[i * (crypto_hash_sha512_BYTES + 1)],
-             crypto_hash_sha512_BYTES);
-    }
+      free(concat_hashes);
 
-    int res
-        = crypto_hash_sha512(root, concat_hashes, 2 * crypto_hash_sha512_BYTES);
+      return -2;
+    }
   }
 
   free(concat_hashes);

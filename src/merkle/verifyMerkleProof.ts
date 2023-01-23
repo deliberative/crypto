@@ -33,7 +33,9 @@ const verifyMerkleProof = async (
 ): Promise<boolean> => {
   const proofLen = proof.length;
   if (proofLen % (crypto_hash_sha512_BYTES + 1) !== 0)
-    throw new Error("Proof length not multiple of 65.");
+    throw new Error("Proof length not multiple of hash length + 1.");
+
+  const proofArtifactsLen = proofLen / (crypto_hash_sha512_BYTES + 1);
 
   const wasmMemory = dcryptoMemory.verifyMerkleProofMemory(proofLen);
   const module = await dcryptoMethodsModule({
@@ -61,7 +63,7 @@ const verifyMerkleProof = async (
   proofArray.set(proof);
 
   const result = module._verify_merkle_proof(
-    proofLen,
+    proofArtifactsLen,
     elementHash.byteOffset,
     rootArray.byteOffset,
     proofArray.byteOffset,
@@ -79,10 +81,10 @@ const verifyMerkleProof = async (
       return false;
 
     case -1:
-      throw new Error("Proof length not multiple of 65.");
+      throw new Error("Proof artifact position is neither left nor right.");
 
     case -2:
-      throw new Error("Proof artifact position is neither left nor right.");
+      throw new Error("Could not calculate hash.");
 
     default:
       throw new Error("Unexpected error occured.");

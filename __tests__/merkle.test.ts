@@ -22,6 +22,7 @@ describe("Merkle test suite.", () => {
     const element = new Uint8Array(128);
     const elements = 201;
     const elementIndex = 99;
+    const anotherElementIndex = 168;
     for (let i = 0; i < elements; i++) {
       const rand = await dcrypto.randomBytes(128);
 
@@ -41,20 +42,24 @@ describe("Merkle test suite.", () => {
       proof,
     );
 
-    let arraysAreEqual = true;
-    for (let i = 0; i < dcrypto.constants.crypto_hash_sha512_BYTES; i++) {
-      if (root[i] !== rootCalculated[i]) {
-        arraysAreEqual = false;
-        break;
-      }
-    }
+    const anotherProof = await dcrypto.getMerkleProof(
+      tree,
+      tree[anotherElementIndex],
+    );
 
-    expect(arraysAreEqual).toBe(true);
+    const anotherElementHash = await dcrypto.sha512(tree[anotherElementIndex]);
 
-    const proofWrongPosition = Uint8Array.from([...proof]);
-    proofWrongPosition[dcrypto.constants.crypto_hash_sha512_BYTES] = 2;
+    const anotherRootCalculated = await dcrypto.getMerkleRootFromProof(
+      anotherElementHash,
+      anotherProof,
+    );
+
+    expect(root).toStrictEqual(rootCalculated);
+    expect(rootCalculated).toStrictEqual(anotherRootCalculated);
+
+    proof[dcrypto.constants.crypto_hash_sha512_BYTES] = 2;
     await expect(
-      dcrypto.getMerkleRootFromProof(elementHash, proofWrongPosition),
+      dcrypto.getMerkleRootFromProof(elementHash, proof),
     ).rejects.toThrow("Proof artifact position is neither left nor right.");
   });
 
@@ -62,7 +67,7 @@ describe("Merkle test suite.", () => {
     const tree: Uint8Array[] = [];
     const element = new Uint8Array(128);
     const elements = 201;
-    const elementIndex = 99;
+    const elementIndex = 139;
     for (let i = 0; i < elements; i++) {
       const rand = await dcrypto.randomBytes(128);
 
@@ -90,7 +95,7 @@ describe("Merkle test suite.", () => {
     const tree: Uint8Array[] = [];
     const element = new Uint8Array(128);
     const elements = 200;
-    const elementIndex = 99;
+    const elementIndex = 161;
     for (let i = 0; i < elements; i++) {
       const rand = await dcrypto.randomBytes(128);
 
@@ -137,7 +142,7 @@ describe("Merkle test suite.", () => {
         root,
         proof.slice(0, proof.length - 1),
       ),
-    ).rejects.toThrow("Proof length not multiple of 65.");
+    ).rejects.toThrow("Proof length not multiple of hash length + 1.");
 
     const proofWrongPosition = Uint8Array.from([...proof]);
     proofWrongPosition[dcrypto.constants.crypto_hash_sha512_BYTES] = 2;

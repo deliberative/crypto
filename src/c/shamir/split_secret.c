@@ -19,12 +19,12 @@
 
 #include "./shamir.h"
 
-#include "../../../libsodium/src/libsodium/include/sodium/randombytes.h"
+#include "../utils/utils.h"
 
 __attribute__((used)) int
-split_secret(const int SHARES_LEN, const int THRESHOLD, const int SECRET_LEN,
-             const uint8_t secret[SECRET_LEN],
-             uint8_t shares[SHARES_LEN * (SECRET_LEN + 1)])
+split_secret(const unsigned int SHARES_LEN, const unsigned int THRESHOLD,
+             const unsigned int SECRET_LEN, const uint8_t secret[SECRET_LEN],
+             uint8_t shares[SHARES_LEN][SECRET_LEN + 1])
 {
   size_t i, j;
 
@@ -36,19 +36,20 @@ split_secret(const int SHARES_LEN, const int THRESHOLD, const int SECRET_LEN,
 
   for (i = 0; i < SECRET_LEN; i++)
   {
-    randombytes_buf(coefficients, THRESHOLD);
+    random_bytes(THRESHOLD, coefficients);
     coefficients[0] = secret[i];
 
     for (j = 0; j < SHARES_LEN; j++)
     {
-      shares[j * (SECRET_LEN + 1) + i]
-          = evaluate(THRESHOLD, coefficients, j + 1);
-      /* shares[j][i] = evaluate(THRESHOLD, coefficients, j + 1); */
+      /* shares[j * (SECRET_LEN + 1) + i] */
+      /* = evaluate(THRESHOLD, coefficients, j + 1); */
+
+      shares[j][i] = evaluate(THRESHOLD, coefficients, j + 1);
 
       if (i == SECRET_LEN - 1)
       {
-        shares[j * (SECRET_LEN + 1) + SECRET_LEN] = j + 1;
-        /* shares[j][SECRET_LEN] = j + 1; */
+        /* shares[j * (SECRET_LEN + 1) + SECRET_LEN] = j + 1; */
+        shares[j][SECRET_LEN] = j + 1;
       }
     }
   }

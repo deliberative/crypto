@@ -1,7 +1,7 @@
 {
   "name": "@deliberative/crypto",
   "description": "Libsodium and Shamir secret sharing wasm module for nodejs and the browser.",
-  "version": "0.7.8",
+  "version": "0.8.1",
   "repository": {
     "type": "git",
     "url": "https://github.com/deliberative/crypto.git"
@@ -15,7 +15,7 @@
     {
       "name": "Dimitris Karoukis",
       "email": "dim@deliberative.io",
-      "url": "https://www.dkaroukis.com"
+      "url": "https://deliberative.io"
     }
   ],
   "license": "Apache-2.0",
@@ -63,6 +63,7 @@
     "wasm": "cross-env NODE_ENV=production node scripts/compileMethods.js",
     "wasm:debug": "cross-env NODE_ENV=development node scripts/compileMethods.js",
     "valgrind": "node scripts/testWithValgrind.js",
+    "postvalgrind": "./examples/c/dcrypto_methods.o && rm -rf examples/c/dcrypto_methods.o",
     "code": "cross-env NODE_ENV=production rollup --config rollup.config.ts --configPlugin typescript",
     "code:debug": "cross-env NODE_ENV=development rollup --config rollup.config.ts --configPlugin typescript",
     "build": "npm-run-all -s wasm code",
@@ -88,7 +89,7 @@
     "@rollup/plugin-json": "^6.0.0",
     "@rollup/plugin-node-resolve": "^15.0.0",
     "@rollup/plugin-replace": "^5.0.0",
-    "@rollup/plugin-typescript": "^10.0.1",
+    "@rollup/plugin-typescript": "^11.0.0",
     "@rollup/plugin-url": "^8.0.0",
     "@rollup/plugin-wasm": "^6.0.0",
     "@types/emscripten": "^1.39.6",
