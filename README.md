@@ -15,7 +15,7 @@
 [code-style-prettier-image]: https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square
 [code-style-prettier-url]: https://github.com/prettier/prettier
 
-This repository is part of the reference implementation of the Deliberative Ledger Protocol, the infrastructure for futuristic deliberative democracies.
+This repository is part of the reference implementation of the Deliberative Ledger Protocol, the infrastructure for futuristic democracies.
 
 It does not have any native dependencies and can be used in both Nodejs and the browser.
 
@@ -23,13 +23,13 @@ The API is not completely stable and the code has not undergone external securit
 
 ## Introduction
 
-This library relies heavily on the [libsodium](https://github.com/jedisct1/libsodium) library for the Curve25519 cryptographic operations, which is a battle-tested project, compiled to WebAssembly for speed. In comparison to [tweetnacl](https://github.com/dchest/tweetnacl-js) this library is much faster. Benchmarks will be posted when there is time.
+This library relies heavily on [libsodium](https://github.com/jedisct1/libsodium) for cryptographic operations, which is a battle-tested project, compiled to WebAssembly for speed. In comparison to [tweetnacl](https://github.com/dchest/tweetnacl-js) this library is much faster. You can see some [Benchmarks](#benchmarks) below.
 
-We have also introduced function that can split and restore a secret through the Shamir threshold sharing scheme because we could not find many well-tested open-source implementations of it and we use it heavily in the Deliberative Ledger protocol.
+We have also introduced [Shamir secret sharing](https://en.wikipedia.org/wiki/Shamir%27s_secret_sharing) functionality, where a user can split and restore a secret through the Shamir threshold sharing scheme. To our knowledge, there is not any well-tested open-source implementation of it in WebAssembly and we use it heavily on the Deliberative Ledger protocol.
 
-Another feature of the library is a mnemonic generation, validation and Ed25519 key pair from mnemonic that was inspired by [bip39](https://github.com/bitcoinjs/bip39) but instead of Blake2b we use Argon2 and instead of SHA256 we use SHA512, both of which can be found in libsodium.
+The library also has mnemonic generation, validation and Ed25519 key pair from mnemonic functionality that was inspired by [bip39](https://github.com/bitcoinjs/bip39) but instead of Blake2b we use Argon2 and instead of SHA256 we use SHA512, both of which can be found in libsodium.
 
-A last feature is the ability to calculare Merkle roots, proofs and validate proofs from trees of arbitrary types, as
+Finally, you can calculate [Merkle roots](https://en.wikipedia.org/wiki/Merkle_tree), proofs and validate proofs from trees of arbitrary types, as
 long as you provide a serializer.
 
 ## Files
@@ -284,4 +284,4 @@ The source code is licensed under the terms of the Apache License version 2.0 (s
 
 ## Copyright
 
-Copyright (C) 2022 Deliberative Technologies P.C.
+Copyright (C) 2022-2023 Deliberative Technologies P.C.
