@@ -18,13 +18,21 @@ To get an overview of the project, read the [README](README.md). Here are some r
 ## Getting started
 
 To get started you need to have [nodejs](https://github.com/nodejs/node) and [emsdk](https://github.com/emscripten-core/emsdk) installed on your machine and in your path.
-You also need to clone this repository and type in your terminal
+You also need to clone this repository and its submodule in order to be able to compile the library
 
 ```
-npm install
+git clone git@github.com:deliberative/crypto.git dcrypto
+cd dcrypto
+npm i
+git submodule update --init --recursive
 ```
 
-to download all the dependencies.
+To check that everything works as expected you can run
+
+```
+npm run valgrind
+npm test
+```
 
 ### Issues
 
@@ -54,7 +62,7 @@ If you want to make changes to the code, you also need to write a corresponding 
 - Using the command line:
   - [Fork the repo](https://docs.github.com/en/github/getting-started-with-github/fork-a-repo#fork-an-example-repository) so that you can make your changes without affecting the original project until you're ready to merge them.
 
-2. Install or update to **Node.js v18** and **emsdk v3.1.19** or later.
+2. Install or update to **Node.js v19** and **emsdk v3.1.28** or later.
 
 3. Create a working branch and start with your changes!
 
