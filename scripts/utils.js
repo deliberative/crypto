@@ -48,7 +48,6 @@ const withJS = ` \
 -s MODULARIZE=1 \
 -s MAIN_MODULE=2 \
 -s SINGLE_FILE=1 \
--s STRICT_JS=1 \
 -s POLYFILL=0 \
 `;
 
