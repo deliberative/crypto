@@ -47,6 +47,9 @@ const testing =
 -flto \
 -O3 \
 -s FILESYSTEM=0 \
+-s ASSERTIONS=0 \
+-s INVOKE_RUN=0 \
+-s USE_CLOSURE_COMPILER=1 \
 `
     : `\
 -O1 \
@@ -97,6 +100,12 @@ _verify_merkle_proof \
 -o ${wasmPath} \
 ${methodsPath}`,
   { stdio: "inherit" },
+);
+
+let content = fs.readFileSync(wasmPath, "utf8");
+fs.writeFileSync(
+  wasmPath,
+  "'use strict'" + content.replace('"use strict"', ""),
 );
 
 console.log("Successfully compiled dcrypto c methods to Wasm.");

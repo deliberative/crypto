@@ -48,8 +48,8 @@ const withJS = ` \
 -s MODULARIZE=1 \
 -s MAIN_MODULE=2 \
 -s SINGLE_FILE=1 \
--s STRICT_JS=1 \
 -s POLYFILL=0 \
+-s SUPPORT_BIG_ENDIAN=1 \
 `;
 
 const memory = `\
@@ -59,7 +59,6 @@ const memory = `\
 -s INITIAL_MEMORY=3mb \
 -s MAXIMUM_MEMORY=1gb \
 -s STACK_SIZE=2mb \
--s SUPPORT_BIG_ENDIAN=1 \
 `;
 
 const emcc = `\
