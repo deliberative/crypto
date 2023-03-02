@@ -52,7 +52,7 @@ const testing =
 -s USE_CLOSURE_COMPILER=1 \
 `
     : `\
--O1 \
+-O0 \
 -g3 \
 --profiling \
 -gsource-map \

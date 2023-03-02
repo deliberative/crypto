@@ -47,6 +47,7 @@ const withJS = ` \
 -s WASM_BIGINT=1 \
 -s MODULARIZE=1 \
 -s MAIN_MODULE=2 \
+-s BUILD_AS_WORKER=1 \
 -s SINGLE_FILE=1 \
 -s POLYFILL=0 \
 -s SUPPORT_BIG_ENDIAN=1 \
