@@ -56,9 +56,8 @@ const memory = `\
 -s IMPORTED_MEMORY=1 \
 -s ALLOW_MEMORY_GROWTH=1 \
 -s MEMORY_GROWTH_LINEAR_STEP=64kb \
--s INITIAL_MEMORY=3mb \
--s MAXIMUM_MEMORY=1gb \
--s STACK_SIZE=2mb \
+-s INITIAL_MEMORY=256kb \
+-s STACK_SIZE=128kb \
 `;
 
 const emcc = `\
