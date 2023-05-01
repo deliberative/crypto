@@ -17,8 +17,11 @@ import generateMnemonic from "./generateMnemonic";
 import validateMnemonic from "./validateMnemonic";
 import keyPairFromMnemonic from "./keyPairFromMnemonic";
 
+import wordlist from "./wordlist.json";
+
 export default {
   generateMnemonic,
   validateMnemonic,
   keyPairFromMnemonic,
+  wordlist,
 };

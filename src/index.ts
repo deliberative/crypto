@@ -35,6 +35,7 @@ const dcrypto = {
   generateMnemonic: mnemonic.generateMnemonic,
   validateMnemonic: mnemonic.validateMnemonic,
   keyPairFromMnemonic: mnemonic.keyPairFromMnemonic,
+  wordlist: mnemonic.wordlist,
 
   encryptForwardSecrecy: asymmetric.encrypt,
   decryptForwardSecrecy: asymmetric.decrypt,

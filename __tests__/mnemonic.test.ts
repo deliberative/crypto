@@ -17,6 +17,11 @@ const arraysAreEqual = (arr1: Uint8Array, arr2: Uint8Array): boolean => {
 };
 
 describe("Signing and verifying with Ed25519 keys test suite.", () => {
+  test("Loading the wordlist works", () => {
+    const wordlist = dcrypto.wordlist;
+    expect(wordlist[0]).toBe("abandon");
+  });
+
   test("Mnemonic generation works.", async () => {
     const mnemonic = await dcrypto.generateMnemonic();
     const validate = await dcrypto.validateMnemonic(mnemonic);
