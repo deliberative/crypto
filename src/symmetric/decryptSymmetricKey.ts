@@ -92,7 +92,7 @@ const decryptSymmetricKey = async (
 
   const ptr1 = dcryptoModule._malloc(len * Uint8Array.BYTES_PER_ELEMENT);
   const encryptedArray = new Uint8Array(
-    dcryptoModule.HEAP8.buffer,
+    dcryptoModule.HEAPU8.buffer,
     ptr1,
     len * Uint8Array.BYTES_PER_ELEMENT,
   );
@@ -100,7 +100,7 @@ const decryptSymmetricKey = async (
 
   const ptr2 = dcryptoModule._malloc(crypto_kx_SESSIONKEYBYTES);
   const k = new Uint8Array(
-    dcryptoModule.HEAP8.buffer,
+    dcryptoModule.HEAPU8.buffer,
     ptr2,
     crypto_kx_SESSIONKEYBYTES,
   );
@@ -110,7 +110,7 @@ const decryptSymmetricKey = async (
     additionalLen * Uint8Array.BYTES_PER_ELEMENT,
   );
   const additional = new Uint8Array(
-    dcryptoModule.HEAP8.buffer,
+    dcryptoModule.HEAPU8.buffer,
     ptr3,
     additionalLen * Uint8Array.BYTES_PER_ELEMENT,
   );
@@ -120,7 +120,7 @@ const decryptSymmetricKey = async (
     decryptedLen * Uint8Array.BYTES_PER_ELEMENT,
   );
   const decrypted = new Uint8Array(
-    dcryptoModule.HEAP8.buffer,
+    dcryptoModule.HEAPU8.buffer,
     ptr4,
     decryptedLen * Uint8Array.BYTES_PER_ELEMENT,
   );

@@ -37,14 +37,14 @@ const newKeyPair = async (
 
   const ptr1 = dcryptoModule._malloc(crypto_sign_ed25519_PUBLICKEYBYTES);
   const publicKey = new Uint8Array(
-    dcryptoModule.HEAP8.buffer,
+    dcryptoModule.HEAPU8.buffer,
     ptr1,
     crypto_sign_ed25519_PUBLICKEYBYTES,
   );
 
   const ptr2 = dcryptoModule._malloc(crypto_sign_ed25519_SECRETKEYBYTES);
   const secretKey = new Uint8Array(
-    dcryptoModule.HEAP8.buffer,
+    dcryptoModule.HEAPU8.buffer,
     ptr2,
     crypto_sign_ed25519_SECRETKEYBYTES,
   );
@@ -85,21 +85,21 @@ const keyPairFromSeed = async (
 
   const ptr1 = dcryptoModule._malloc(crypto_sign_ed25519_PUBLICKEYBYTES);
   const publicKey = new Uint8Array(
-    dcryptoModule.HEAP8.buffer,
+    dcryptoModule.HEAPU8.buffer,
     ptr1,
     crypto_sign_ed25519_PUBLICKEYBYTES,
   );
 
   const ptr2 = dcryptoModule._malloc(crypto_sign_ed25519_SECRETKEYBYTES);
   const secretKey = new Uint8Array(
-    dcryptoModule.HEAP8.buffer,
+    dcryptoModule.HEAPU8.buffer,
     ptr2,
     crypto_sign_ed25519_SECRETKEYBYTES,
   );
 
   const ptr3 = dcryptoModule._malloc(crypto_sign_ed25519_SEEDBYTES);
   const seedBytes = new Uint8Array(
-    dcryptoModule.HEAP8.buffer,
+    dcryptoModule.HEAPU8.buffer,
     ptr3,
     crypto_sign_ed25519_SEEDBYTES,
   );
@@ -147,14 +147,14 @@ const keyPairFromSecretKey = async (
 
   const ptr1 = dcryptoModule._malloc(crypto_sign_ed25519_PUBLICKEYBYTES);
   const pk = new Uint8Array(
-    dcryptoModule.HEAP8.buffer,
+    dcryptoModule.HEAPU8.buffer,
     ptr1,
     crypto_sign_ed25519_PUBLICKEYBYTES,
   );
 
   const ptr2 = dcryptoModule._malloc(crypto_sign_ed25519_SECRETKEYBYTES);
   const sk = new Uint8Array(
-    dcryptoModule.HEAP8.buffer,
+    dcryptoModule.HEAPU8.buffer,
     ptr2,
     crypto_sign_ed25519_SECRETKEYBYTES,
   );

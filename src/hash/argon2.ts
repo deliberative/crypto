@@ -52,7 +52,7 @@ const argon2 = async (
 
   const ptr1 = dcryptoModule._malloc(crypto_sign_ed25519_SEEDBYTES);
   const seed = new Uint8Array(
-    dcryptoModule.HEAP8.buffer,
+    dcryptoModule.HEAPU8.buffer,
     ptr1,
     crypto_sign_ed25519_SEEDBYTES,
   );
@@ -69,7 +69,7 @@ const argon2 = async (
 
   const ptr3 = dcryptoModule._malloc(crypto_pwhash_argon2id_SALTBYTES);
   const saltArray = new Uint8Array(
-    dcryptoModule.HEAP8.buffer,
+    dcryptoModule.HEAPU8.buffer,
     ptr3,
     crypto_pwhash_argon2id_SALTBYTES,
   );

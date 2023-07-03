@@ -44,7 +44,7 @@ const verifyMerkleProof = async (
 
   const ptr1 = module._malloc(crypto_hash_sha512_BYTES);
   const elementHash = new Uint8Array(
-    module.HEAP8.buffer,
+    module.HEAPU8.buffer,
     ptr1,
     crypto_hash_sha512_BYTES,
   );
@@ -52,14 +52,14 @@ const verifyMerkleProof = async (
 
   const ptr2 = module._malloc(crypto_hash_sha512_BYTES);
   const rootArray = new Uint8Array(
-    module.HEAP8.buffer,
+    module.HEAPU8.buffer,
     ptr2,
     crypto_hash_sha512_BYTES,
   );
   rootArray.set(root);
 
   const ptr3 = module._malloc(proofLen);
-  const proofArray = new Uint8Array(module.HEAP8.buffer, ptr3, proofLen);
+  const proofArray = new Uint8Array(module.HEAPU8.buffer, ptr3, proofLen);
   proofArray.set(proof);
 
   const result = module._verify_merkle_proof(

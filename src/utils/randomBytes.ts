@@ -42,7 +42,7 @@ const randomBytes = async (
 
   const ptr = dcryptoModule._malloc(n * Uint8Array.BYTES_PER_ELEMENT);
   const bytes = new Uint8Array(
-    dcryptoModule.HEAP8.buffer,
+    dcryptoModule.HEAPU8.buffer,
     ptr,
     n * Uint8Array.BYTES_PER_ELEMENT,
   );

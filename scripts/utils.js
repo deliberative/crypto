@@ -44,18 +44,14 @@ const licenseApache = `
 
 const withJS = ` \
 -s WASM=1 \
--s WASM_BIGINT=1 \
 -s MODULARIZE=1 \
 -s MAIN_MODULE=2 \
--s SINGLE_FILE=1 \
 -s POLYFILL=0 \
--s SUPPORT_BIG_ENDIAN=1 \
 `;
 
 const memory = `\
 -s IMPORTED_MEMORY=1 \
 -s ALLOW_MEMORY_GROWTH=1 \
--s MEMORY_GROWTH_LINEAR_STEP=64kb \
 -s INITIAL_MEMORY=256kb \
 -s STACK_SIZE=128kb \
 `;

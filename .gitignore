@@ -6,6 +6,7 @@ dist
 .npmrc
 deliberative*.tgz
 dcryptoMethodsModule.js
+emsdk
 
 # Logs
 logs

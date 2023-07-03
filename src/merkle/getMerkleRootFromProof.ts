@@ -45,19 +45,19 @@ const getMerkleRootFromProof = async (
 
   const ptr1 = module._malloc(crypto_hash_sha512_BYTES);
   const elementHash = new Uint8Array(
-    module.HEAP8.buffer,
+    module.HEAPU8.buffer,
     ptr1,
     crypto_hash_sha512_BYTES,
   );
   elementHash.set(hash);
 
   const ptr2 = module._malloc(proofLen);
-  const proofArray = new Uint8Array(module.HEAP8.buffer, ptr2, proofLen);
+  const proofArray = new Uint8Array(module.HEAPU8.buffer, ptr2, proofLen);
   proofArray.set(proof);
 
   const ptr3 = module._malloc(crypto_hash_sha512_BYTES);
   const rootArray = new Uint8Array(
-    module.HEAP8.buffer,
+    module.HEAPU8.buffer,
     ptr3,
     crypto_hash_sha512_BYTES,
   );

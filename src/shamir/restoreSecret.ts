@@ -41,7 +41,7 @@ const restoreSecret = async (
     sharesLen * (secretLen + 1) * Uint8Array.BYTES_PER_ELEMENT,
   );
   const sharesArray = new Uint8Array(
-    dcryptoModule.HEAP8.buffer,
+    dcryptoModule.HEAPU8.buffer,
     ptr1,
     sharesLen * (secretLen + 1) * Uint8Array.BYTES_PER_ELEMENT,
   );
@@ -51,7 +51,7 @@ const restoreSecret = async (
 
   const ptr2 = dcryptoModule._malloc(secretLen * Uint8Array.BYTES_PER_ELEMENT);
   const secretArray = new Uint8Array(
-    dcryptoModule.HEAP8.buffer,
+    dcryptoModule.HEAPU8.buffer,
     ptr2,
     secretLen * Uint8Array.BYTES_PER_ELEMENT,
   );

@@ -45,7 +45,7 @@ const testing =
   process.env.NODE_ENV === "production"
     ? `\
 -flto \
--O3 \
+-Os \
 -s FILESYSTEM=0 \
 -s ASSERTIONS=0 \
 -s INVOKE_RUN=0 \
@@ -72,29 +72,7 @@ ${emcc} \
 ${testing} \
 -s EXPORTED_FUNCTIONS=\
 _malloc,\
-_free,\
-_sha512,\
-_argon2,\
-_new_keypair,\
-_keypair_from_seed,\
-_keypair_from_secret_key,\
-_sign_data,\
-_verify_data,\
-_key_encrypt_data,\
-_key_decrypt_data,\
-_e2e_encrypt_data,\
-_e2e_decrypt_data,\
-_forward_secretbox_encrypt_data,\
-_forward_secretbox_decrypt_data,\
-_split_secret,\
-_restore_secret,\
-_items_indexes_in_array,\
-_random_bytes,\
-_random_number_in_range,\
-_get_merkle_root,\
-_get_merkle_proof,\
-_get_merkle_root_from_proof,\
-_verify_merkle_proof \
+_free \
 -s EXPORT_NAME=dcryptoMethodsModule \
 -I${libsodiumIncludePath} \
 -I${libsodiumIncludePrivatePath} \

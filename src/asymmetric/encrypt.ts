@@ -41,7 +41,7 @@ const encrypt = async (
 
   const ptr1 = dcryptoModule._malloc(len * Uint8Array.BYTES_PER_ELEMENT);
   const dataArray = new Uint8Array(
-    dcryptoModule.HEAP8.buffer,
+    dcryptoModule.HEAPU8.buffer,
     ptr1,
     len * Uint8Array.BYTES_PER_ELEMENT,
   );
@@ -49,7 +49,7 @@ const encrypt = async (
 
   const ptr2 = dcryptoModule._malloc(crypto_sign_ed25519_PUBLICKEYBYTES);
   const pub = new Uint8Array(
-    dcryptoModule.HEAP8.buffer,
+    dcryptoModule.HEAPU8.buffer,
     ptr2,
     crypto_sign_ed25519_PUBLICKEYBYTES,
   );
@@ -59,7 +59,7 @@ const encrypt = async (
     additionalLen * Uint8Array.BYTES_PER_ELEMENT,
   );
   const additional = new Uint8Array(
-    dcryptoModule.HEAP8.buffer,
+    dcryptoModule.HEAPU8.buffer,
     ptr3,
     additionalLen * Uint8Array.BYTES_PER_ELEMENT,
   );
@@ -71,7 +71,7 @@ const encrypt = async (
     sealedBoxLen * Uint8Array.BYTES_PER_ELEMENT,
   );
   const encrypted = new Uint8Array(
-    dcryptoModule.HEAP8.buffer,
+    dcryptoModule.HEAPU8.buffer,
     ptr4,
     sealedBoxLen * Uint8Array.BYTES_PER_ELEMENT,
   );

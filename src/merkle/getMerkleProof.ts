@@ -63,7 +63,7 @@ const getMerkleProof = async <T>(
 
   const ptr1 = module._malloc(treeLen * crypto_hash_sha512_BYTES);
   const leavesHashed = new Uint8Array(
-    module.HEAP8.buffer,
+    module.HEAPU8.buffer,
     ptr1,
     treeLen * crypto_hash_sha512_BYTES,
   );
@@ -88,7 +88,7 @@ const getMerkleProof = async <T>(
 
   const ptr2 = module._malloc(crypto_hash_sha512_BYTES);
   const elementHash = new Uint8Array(
-    module.HEAP8.buffer,
+    module.HEAPU8.buffer,
     ptr2,
     crypto_hash_sha512_BYTES,
   );
@@ -102,7 +102,7 @@ const getMerkleProof = async <T>(
 
   const ptr3 = module._malloc(treeLen * (crypto_hash_sha512_BYTES + 1));
   const proof = new Uint8Array(
-    module.HEAP8.buffer,
+    module.HEAPU8.buffer,
     ptr3,
     treeLen * (crypto_hash_sha512_BYTES + 1),
   );

@@ -77,7 +77,7 @@ const needleInHaystack = async <T>(
     arrayLen * crypto_hash_sha512_BYTES * Uint8Array.BYTES_PER_ELEMENT,
   );
   const arr = new Uint8Array(
-    dcryptoModule.HEAP8.buffer,
+    dcryptoModule.HEAPU8.buffer,
     ptr1,
     arrayLen * crypto_hash_sha512_BYTES * Uint8Array.BYTES_PER_ELEMENT,
   );
@@ -111,7 +111,7 @@ const needleInHaystack = async <T>(
     itemsArrayLen * crypto_hash_sha512_BYTES * Uint8Array.BYTES_PER_ELEMENT,
   );
   const itms = new Uint8Array(
-    dcryptoModule.HEAP8.buffer,
+    dcryptoModule.HEAPU8.buffer,
     ptr2,
     itemsArrayLen * crypto_hash_sha512_BYTES * Uint8Array.BYTES_PER_ELEMENT,
   );
