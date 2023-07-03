@@ -47,6 +47,7 @@ const withJS = ` \
 -s MODULARIZE=1 \
 -s MAIN_MODULE=2 \
 -s POLYFILL=0 \
+-s SINGLE_FILE=1 \
 `;
 
 const memory = `\
