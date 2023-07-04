@@ -6,6 +6,7 @@ import typescript from "@rollup/plugin-typescript";
 import url from "@rollup/plugin-url";
 // import { terser } from "rollup-plugin-terser";
 import analyzer from "rollup-plugin-analyzer";
+import copy from "rollup-plugin-copy";
 
 import pkg from "./package.json" assert { type: "json" };
 
@@ -40,8 +41,24 @@ const plugins = [
     sourceMap: true,
     inlineSources: !production,
     declarationMap: true,
-    exclude: ["__tests__", "__tests__/*.test.ts"],
+    exclude: [
+      "__tests__",
+      "__tests__/*.test.ts",
+      "__specs__",
+      "__specs__/*.spec.ts",
+      "playwright*",
+      "rollup*",
+    ],
     outDir: `${dir}`,
+  }),
+
+  copy({
+    targets: [
+      {
+        src: "src/c/build/dcryptoMethodsModule.wasm",
+        dest: `${dir}`,
+      },
+    ],
   }),
 
   analyzer(),
@@ -51,21 +68,7 @@ export default [
   // UMD
   {
     input,
-    plugins: [
-      ...plugins,
-
-      // terser({
-      //   ecma: 2020,
-      //   mangle: { toplevel: true },
-      //   compress: {
-      //     module: true,
-      //     toplevel: true,
-      //     unsafe_arrows: true,
-      //     drop_console: true,
-      //     drop_debugger: true,
-      // },
-      // }),
-    ],
+    plugins,
     output: {
       name: "dcrypto",
       file: pkg.browser,
