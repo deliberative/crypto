@@ -38,7 +38,7 @@ const sha512 = async (
     ptr1,
     dataLen * Uint8Array.BYTES_PER_ELEMENT,
   );
-  arr.set(new Uint8Array(data));
+  arr.set(data);
 
   const ptr2 = dcryptoModule._malloc(crypto_hash_sha512_BYTES);
   const hash = new Uint8Array(

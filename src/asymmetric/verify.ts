@@ -35,7 +35,7 @@ const verify = async (
     ? module.wasmMemory
     : dcryptoMemory.verifyMemory(len);
 
-  const dcryptoModule = await dcryptoMethodsModule({ wasmMemory });
+  const dcryptoModule = module || (await dcryptoMethodsModule({ wasmMemory }));
 
   const ptr1 = dcryptoModule._malloc(len * Uint8Array.BYTES_PER_ELEMENT);
   const dataArray = new Uint8Array(

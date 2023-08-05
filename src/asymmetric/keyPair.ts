@@ -33,7 +33,7 @@ const newKeyPair = async (
     ? module.wasmMemory
     : dcryptoMemory.newKeyPairMemory();
 
-  const dcryptoModule = await dcryptoMethodsModule({ wasmMemory });
+  const dcryptoModule = module || (await dcryptoMethodsModule({ wasmMemory }));
 
   const ptr1 = dcryptoModule._malloc(crypto_sign_ed25519_PUBLICKEYBYTES);
   const publicKey = new Uint8Array(
@@ -143,7 +143,7 @@ const keyPairFromSecretKey = async (
     ? module.wasmMemory
     : dcryptoMemory.keyPairFromSecretKeyMemory();
 
-  const dcryptoModule = await dcryptoMethodsModule({ wasmMemory });
+  const dcryptoModule = module || (await dcryptoMethodsModule({ wasmMemory }));
 
   const ptr1 = dcryptoModule._malloc(crypto_sign_ed25519_PUBLICKEYBYTES);
   const pk = new Uint8Array(

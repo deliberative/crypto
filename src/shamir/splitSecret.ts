@@ -63,17 +63,17 @@ const splitSecret = async (
   );
 
   dcryptoModule._free(ptr1);
-  dcryptoModule._free(ptr2);
-
-  const values: Uint8Array[] = [];
 
   switch (result) {
     case 0: {
+      const values: Uint8Array[] = [];
       for (let i = 0; i < sharesLen; i++) {
         values.push(
           sharesArray.slice(i * (secretLen + 1), (i + 1) * (secretLen + 1)),
         );
       }
+
+      dcryptoModule._free(ptr2);
 
       return values;
     }
@@ -91,6 +91,8 @@ const splitSecret = async (
     // }
 
     default: {
+      dcryptoModule._free(ptr2);
+
       throw new Error("Unexpected error occured");
     }
   }

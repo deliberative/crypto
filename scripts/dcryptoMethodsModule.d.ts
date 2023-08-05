@@ -146,6 +146,32 @@ export interface DCryptoMethodsModule extends EmscriptenModule {
     root: number, // Uint8Array.byteOffset
     proof: number, // Uint8Array.byteOffset
   ): number;
+
+  _generate_commitment_details(
+    IDENTITIES_LEN: number,
+    NONCE_LEN: number,
+    nonces: number,
+    public_keys: number,
+    secret_keys: number,
+    reversible_details: number,
+    irreversible_details: number,
+  ): number;
+  _generate_ownership_proof(
+    PROOF_LEN: number,
+    IDENTITIES_LEN: number,
+    NONCE_LEN: number,
+    commitment: number,
+    previousCommit: number,
+    nonces: number,
+    public_keys: number,
+    secret_key: number,
+    proof: number,
+  ): number;
+  _verify_ownership_proof(
+    PROOF_LEN: number,
+    commitment: number, // Uint8Array.byteOffset
+    proof: number, // Uint8Array.byteOffset
+  ): number;
 }
 
 declare const dcryptoMethodsModule: EmscriptenModuleFactory<DCryptoMethodsModule>;
