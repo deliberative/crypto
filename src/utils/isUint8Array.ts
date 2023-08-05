@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-const isUint8Array = (item: Uint8Array | unknown): item is Uint8Array => {
+const isUint8Array = (item: unknown): item is Uint8Array => {
   return (item as Uint8Array).byteOffset !== undefined;
 };
 
