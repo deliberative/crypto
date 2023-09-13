@@ -97,10 +97,55 @@ const decrypt = async (
       return decr;
     }
 
-    // case -1:
-    //   throw new Error("Could not create successful key exchange");
+    case -1: {
+      dcryptoModule._free(ptr4);
+
+      throw new Error(
+        "Could not allocate memory for the ephemeral public key array.",
+      );
+    }
 
     case -2: {
+      dcryptoModule._free(ptr4);
+
+      throw new Error("Could not allocate memory for the nonce helper array.");
+    }
+
+    case -3: {
+      dcryptoModule._free(ptr4);
+
+      throw new Error(
+        "Could not allocate memory for the ed25519 converted to x25519 public key array.",
+      );
+    }
+
+    case -4: {
+      dcryptoModule._free(ptr4);
+
+      throw new Error(
+        "Could not allocate memory for the ed25519 converted to x25519 secret key array.",
+      );
+    }
+
+    case -5: {
+      dcryptoModule._free(ptr4);
+
+      throw new Error("Could not allocate memory for the shared secret array.");
+    }
+
+    case -6: {
+      dcryptoModule._free(ptr4);
+
+      throw new Error("Could not successfully generate a shared secret.");
+    }
+
+    case -7: {
+      dcryptoModule._free(ptr4);
+
+      throw new Error("Could not allocate memory for the ciphertext array.");
+    }
+
+    case -8: {
       dcryptoModule._free(ptr4);
 
       throw new Error("Unsuccessful decryption attempt");

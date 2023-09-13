@@ -19,7 +19,8 @@
 #include "../../../libsodium/src/libsodium/include/sodium/crypto_sign_ed25519.h"
 
 __attribute__((used)) int
-argon2(const int MNEMONIC_LEN, uint8_t seed[crypto_sign_ed25519_SEEDBYTES],
+argon2(const unsigned int MNEMONIC_LEN,
+       uint8_t seed[crypto_sign_ed25519_SEEDBYTES],
        const char mnemonic[MNEMONIC_LEN],
        const uint8_t salt[crypto_pwhash_argon2id_SALTBYTES])
 {

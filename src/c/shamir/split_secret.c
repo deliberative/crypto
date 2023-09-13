@@ -33,6 +33,7 @@ split_secret(const unsigned int SHARES_LEN, const unsigned int THRESHOLD,
   if (THRESHOLD < 2) return -1;
 
   uint8_t *coefficients = malloc(THRESHOLD);
+  if (coefficients == NULL) return -4;
 
   for (i = 0; i < SECRET_LEN; i++)
   {

@@ -223,6 +223,14 @@ We have the `-s SINGLE_FILE=1` option for the `emcc` compiler, which converts th
 that will be compiled by the glue js code into a WebAssembly module. This was done for the purpose of interoperability
 and modularity.
 
+Clone the repo, download the libsodium submodule and install packages:
+
+```
+git clone https://github.com/deliberative/crypto.git
+git submodule init
+git submodule update
+npm i
+```
 Once you have all the dependencies installed, you can run
 
 ```

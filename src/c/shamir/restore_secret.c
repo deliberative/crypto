@@ -20,36 +20,23 @@
 #include "./shamir.h"
 
 __attribute__((used)) int
-restore_secret(const int SHARES_LEN, const int SECRET_LEN,
+restore_secret(const unsigned int SHARES_LEN, const unsigned int SECRET_LEN,
                const uint8_t shares[SHARES_LEN][SECRET_LEN + 1],
                uint8_t secret[SECRET_LEN])
 {
   size_t i, j;
 
-  if (SHARES_LEN < 2)
-    return -2; // throw new Error('Not enough shares provided');
-  if (SHARES_LEN > FIELD - 1)
-    return -1; // throw new Error(`Need at most ${utils.FIELD - 1}
-               // shares`);
+  if (SHARES_LEN < 2) return -1;
+  if (SHARES_LEN > FIELD - 1) return -2;
 
   uint8_t(*points)[2] = malloc(sizeof(uint8_t[SHARES_LEN][2]));
-  /* uint8_t *points = malloc(SHARES_LEN * 2); */
+  if (points == NULL) return -3;
 
   for (i = 0; i < SECRET_LEN; i++)
   {
     for (j = 0; j < SHARES_LEN; j++)
     {
-      /* points[j * 2] = shares[j * (SECRET_LEN + 1) + SECRET_LEN]; */
-      /* memcpy(&points[j * 2], &shares[j * (SECRET_LEN + 1) + SECRET_LEN], */
-      /*        sizeof(uint8_t)); */
-      /* memcpy(&points[j * 2], &shares[j][SECRET_LEN], sizeof(uint8_t)); */
-      /* points[j][0] = shares[j][SECRET_LEN]; */
       memcpy(&points[j][0], &shares[j][SECRET_LEN], sizeof(uint8_t));
-      /* points[j * 2 + 1] = shares[j * (SECRET_LEN + 1) + i]; */
-      /* memcpy(&points[j * 2 + 1], &shares[j * (SECRET_LEN + 1) + i], */
-      /*        sizeof(uint8_t)); */
-      /* memcpy(&points[j * 2 + 1], &shares[j][i], sizeof(uint8_t)); */
-      /* points[j][1] = shares[j][i]; */
       memcpy(&points[j][1], &shares[j][i], sizeof(uint8_t));
     }
 

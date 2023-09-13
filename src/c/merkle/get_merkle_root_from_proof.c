@@ -26,7 +26,7 @@ get_merkle_root_from_proof(
     const uint8_t proof[PROOF_ARTIFACTS_LEN][crypto_hash_sha512_BYTES + 1],
     uint8_t root[crypto_hash_sha512_BYTES])
 {
-  memcpy(&root[0], &element_hash[0], crypto_hash_sha512_BYTES);
+  memcpy(root, element_hash, crypto_hash_sha512_BYTES);
 
   size_t i;
   unsigned int position;
@@ -49,6 +49,7 @@ get_merkle_root_from_proof(
   }
 
   uint8_t *concat_hashes = malloc(2 * crypto_hash_sha512_BYTES);
+  if (concat_hashes == NULL) return -1;
 
   for (i = 0; i < PROOF_ARTIFACTS_LEN; i++)
   {
@@ -71,7 +72,7 @@ get_merkle_root_from_proof(
     {
       free(concat_hashes);
 
-      return -1;
+      return -2;
     }
 
     res = crypto_hash_sha512(root, concat_hashes, 2 * crypto_hash_sha512_BYTES);
@@ -79,7 +80,7 @@ get_merkle_root_from_proof(
     {
       free(concat_hashes);
 
-      return -2;
+      return -3;
     }
   }
 

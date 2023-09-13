@@ -24,12 +24,13 @@ random_number_in_range(const int MIN, const int MAX)
 {
   size_t i;
 
-  const int RANGE = MAX - MIN;
-  const int BYTES_NEEDED = ceil(log2(RANGE) / 8);
-  const int MAX_RANGE = pow(pow(2, 8), BYTES_NEEDED);
-  const int EXTENDED_RANGE = floor(MAX_RANGE / RANGE) * RANGE;
+  const unsigned int RANGE = MAX - MIN;
+  const unsigned int BYTES_NEEDED = ceil(log2(RANGE) / 8);
+  const unsigned int MAX_RANGE = pow(pow(2, 8), BYTES_NEEDED);
+  const unsigned int EXTENDED_RANGE = floor(MAX_RANGE / RANGE) * RANGE;
 
   uint8_t *randomBytes = malloc(BYTES_NEEDED);
+  if (randomBytes == NULL) return -1;
 
   int randomInteger = EXTENDED_RANGE;
   while (randomInteger >= EXTENDED_RANGE)

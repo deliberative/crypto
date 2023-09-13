@@ -36,10 +36,10 @@
 #include "../../libsodium/src/libsodium/crypto_sign/ed25519/ref10/keypair.c"
 #include "../../libsodium/src/libsodium/crypto_sign/ed25519/ref10/open.c"
 #include "../../libsodium/src/libsodium/crypto_sign/ed25519/ref10/sign.c"
-#include "../../libsodium/src/libsodium/crypto_verify/sodium/verify.c"
+#include "../../libsodium/src/libsodium/crypto_verify/verify.c"
 
 // AEAD Chacha20Poly1305
-#include "../../libsodium/src/libsodium/crypto_aead/chacha20poly1305/sodium/aead_chacha20poly1305.c"
+#include "../../libsodium/src/libsodium/crypto_aead/chacha20poly1305/aead_chacha20poly1305.c"
 #include "../../libsodium/src/libsodium/crypto_generichash/blake2b/ref/blake2b-compress-ref.c"
 #include "../../libsodium/src/libsodium/crypto_generichash/blake2b/ref/blake2b-ref.c"
 #include "../../libsodium/src/libsodium/crypto_generichash/blake2b/ref/generichash_blake2b.c"

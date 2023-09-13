@@ -76,13 +76,13 @@ const restoreSecret = async (
     case -1: {
       dcryptoModule._free(ptr2);
 
-      throw new Error("Need at most 255 shares.");
+      throw new Error("Not enough shares provided.");
     }
 
     case -2: {
       dcryptoModule._free(ptr2);
 
-      throw new Error("Not enough shares provided.");
+      throw new Error("Need at most 255 shares.");
     }
 
     default: {

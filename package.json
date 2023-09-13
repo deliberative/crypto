@@ -1,7 +1,7 @@
 {
   "name": "@deliberative/crypto",
   "description": "Libsodium, Merkle trees, Shamir secret sharing wasm module for nodejs and the browser.",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "repository": {
     "type": "git",
     "url": "https://github.com/deliberative/crypto.git"
@@ -97,7 +97,7 @@
     "@typescript-eslint/parser": "^6.1.0",
     "cross-env": "^7.0.3",
     "eslint": "^8.6.0",
-    "eslint-config-prettier": "^8.3.0",
+    "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-jest": "^27.0.1",
     "eslint-plugin-jsdoc": "^46.4.3",
     "eslint-plugin-prefer-arrow": "^1.2.3",
@@ -114,8 +114,8 @@
     "ts-jest": "^29.0.0-next.1",
     "tslib": "^2.3.1",
     "tweetnacl": "^1.0.3",
-    "typedoc": "^0.24.6",
-    "typescript": "^5.0.2"
+    "typedoc": "^0.25.1",
+    "typescript": "^5.2.2"
   },
   "engines": {
     "node": ">=16",

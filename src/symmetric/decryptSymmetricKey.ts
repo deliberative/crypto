@@ -149,6 +149,18 @@ const decryptSymmetricKey = async (
     case -1: {
       dcryptoModule._free(ptr4);
 
+      throw new Error("Could allocate memory for the nonce helper array.");
+    }
+
+    case -2: {
+      dcryptoModule._free(ptr4);
+
+      throw new Error("Could allocate memory for the ciphertext helper array.");
+    }
+
+    case -3: {
+      dcryptoModule._free(ptr4);
+
       throw new Error("Unsuccessful decryption attempt");
     }
 

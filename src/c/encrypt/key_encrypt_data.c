@@ -36,8 +36,16 @@ key_encrypt_data(
   unsigned long long CIPHERTEXT_LEN
       = DATA_LEN + crypto_aead_chacha20poly1305_ietf_ABYTES;
   uint8_t *ciphertext = sodium_malloc(CIPHERTEXT_LEN);
+  if (ciphertext == NULL) return -1;
 
   uint8_t *nonce = malloc(crypto_aead_chacha20poly1305_ietf_NPUBBYTES);
+  if (nonce == NULL)
+  {
+    sodium_free(ciphertext);
+
+    return -2;
+  }
+
   calculate_nonce(nonce);
 
   crypto_aead_chacha20poly1305_ietf_encrypt(

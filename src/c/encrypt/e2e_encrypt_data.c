@@ -35,15 +35,28 @@ e2e_encrypt_data(
     uint8_t encrypted[crypto_aead_chacha20poly1305_ietf_NPUBBYTES + DATA_LEN
                       + crypto_aead_chacha20poly1305_ietf_ABYTES])
 {
-  /* if (DATA_LEN > 2^12) return -2; // Encrypted data larger than expected
-   */
-
   unsigned long long CIPHERTEXT_LEN
       = DATA_LEN + crypto_aead_chacha20poly1305_ietf_ABYTES;
   uint8_t *ciphertext = sodium_malloc(CIPHERTEXT_LEN);
+  if (ciphertext == NULL) return -1;
 
   uint8_t *sender_x25519_pk = malloc(crypto_aead_chacha20poly1305_KEYBYTES);
+  if (sender_x25519_pk == NULL)
+  {
+    sodium_free(ciphertext);
+
+    return -2;
+  }
+
   uint8_t *sender_x25519_sk = sodium_malloc(crypto_scalarmult_curve25519_BYTES);
+  if (sender_x25519_sk == NULL)
+  {
+    sodium_free(ciphertext);
+    free(sender_x25519_pk);
+
+    return -3;
+  }
+
   int converted_sk
       = crypto_sign_ed25519_sk_to_curve25519(sender_x25519_sk, secret_key);
   if (converted_sk != 0)
@@ -52,12 +65,21 @@ e2e_encrypt_data(
     sodium_free(sender_x25519_sk);
     sodium_free(ciphertext);
 
-    return -1;
+    return -4;
   }
 
   crypto_scalarmult_curve25519_base(sender_x25519_pk, sender_x25519_sk);
 
   uint8_t *receiver_x25519_pk = malloc(crypto_scalarmult_curve25519_BYTES);
+  if (receiver_x25519_pk == NULL)
+  {
+    free(sender_x25519_pk);
+    sodium_free(sender_x25519_sk);
+    sodium_free(ciphertext);
+
+    return -5;
+  }
+
   int converted_pk
       = crypto_sign_ed25519_pk_to_curve25519(receiver_x25519_pk, public_key);
   if (converted_pk != 0)
@@ -67,10 +89,20 @@ e2e_encrypt_data(
     sodium_free(sender_x25519_sk);
     sodium_free(ciphertext);
 
-    return -2;
+    return -6;
   }
 
   uint8_t *server_tx = sodium_malloc(crypto_kx_SESSIONKEYBYTES);
+  if (server_tx == NULL)
+  {
+    free(receiver_x25519_pk);
+    free(sender_x25519_pk);
+    sodium_free(sender_x25519_sk);
+    sodium_free(ciphertext);
+
+    return -7;
+  }
+
   int created = crypto_kx_server_session_keys(
       NULL, server_tx, sender_x25519_pk, sender_x25519_sk, receiver_x25519_pk);
   free(sender_x25519_pk);
@@ -81,10 +113,18 @@ e2e_encrypt_data(
     sodium_free(server_tx);
     sodium_free(ciphertext);
 
-    return -3;
+    return -8;
   }
 
   uint8_t *nonce = malloc(crypto_aead_chacha20poly1305_ietf_NPUBBYTES);
+  if (nonce == NULL)
+  {
+    sodium_free(server_tx);
+    sodium_free(ciphertext);
+
+    return -9;
+  }
+
   calculate_nonce(nonce);
 
   memcpy(encrypted, nonce, crypto_aead_chacha20poly1305_ietf_NPUBBYTES);

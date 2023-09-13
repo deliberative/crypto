@@ -81,9 +81,17 @@ const verifyMerkleProof = async (
       return false;
 
     case -1:
-      throw new Error("Proof artifact position is neither left nor right.");
+      throw new Error(
+        "Could not allocate memory for hash concatenation helper array.",
+      );
 
     case -2:
+      throw new Error("Could not allocate memory for hashes helper array.");
+
+    case -3:
+      throw new Error("Proof artifact position is neither left nor right.");
+
+    case -4:
       throw new Error("Could not calculate hash.");
 
     default:

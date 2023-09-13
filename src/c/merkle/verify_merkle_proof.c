@@ -26,12 +26,8 @@ verify_merkle_proof(
     const uint8_t root[crypto_hash_sha512_BYTES],
     const uint8_t proof[PROOF_ARTIFACTS_LEN][crypto_hash_sha512_BYTES + 1])
 {
-  /* if (PROOF_LEN % (crypto_hash_sha512_BYTES + 1) != 0) return -1; */
-  /* int NODES_LEN = PROOF_LEN / (crypto_hash_sha512_BYTES + 1); */
-
   size_t i, position;
 
-  /* if (NODES_LEN == 1) */
   if (PROOF_ARTIFACTS_LEN == 1)
   {
     bool isOne = true;
@@ -57,8 +53,17 @@ verify_merkle_proof(
   }
 
   uint8_t *concat_hashes = malloc(2 * crypto_hash_sha512_BYTES);
+  if (concat_hashes == NULL) return -1;
+
   uint8_t *hash = malloc(crypto_hash_sha512_BYTES);
-  memcpy(&hash[0], &element_hash[0], crypto_hash_sha512_BYTES);
+  if (hash == NULL)
+  {
+    free(concat_hashes);
+
+    return -2;
+  }
+
+  memcpy(hash, element_hash, crypto_hash_sha512_BYTES);
 
   int res;
 
@@ -71,7 +76,7 @@ verify_merkle_proof(
       free(hash);
       free(concat_hashes);
 
-      return -1;
+      return -3;
     }
 
     // Proof artifact goes to the left
@@ -94,23 +99,15 @@ verify_merkle_proof(
       free(concat_hashes);
       free(hash);
 
-      return -2;
+      return -4;
     }
   }
 
-  for (i = 0; i < crypto_hash_sha512_BYTES; i++)
-  {
-    if (hash[i] != root[i])
-    {
-      free(hash);
-      free(concat_hashes);
-
-      return 1;
-    }
-  }
-
+  res = memcmp(hash, root, crypto_hash_sha512_BYTES);
   free(hash);
   free(concat_hashes);
+
+  if (res != 0) return 1;
 
   return 0;
 }

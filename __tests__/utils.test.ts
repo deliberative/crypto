@@ -42,9 +42,8 @@ describe("Starting the cryptographic random utils test suite.", () => {
 
   test("Random shuffling of array works.", async () => {
     const arrayOneElement = [1];
-    const arrayOneElementShuffled = await dcrypto.arrayRandomShuffle(
-      arrayOneElement,
-    );
+    const arrayOneElementShuffled =
+      await dcrypto.arrayRandomShuffle(arrayOneElement);
     expect(arrayOneElement[0] === arrayOneElementShuffled[0]).toBe(true);
 
     const someArray = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];

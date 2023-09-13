@@ -35,19 +35,41 @@ forward_secretbox_encrypt_data(
                       + crypto_aead_chacha20poly1305_ietf_NPUBBYTES + DATA_LEN
                       + crypto_aead_chacha20poly1305_ietf_ABYTES])
 {
-  /* if (DATA_LEN > 2^12) return -2; // Encrypted data larger than expected
-   */
-
   unsigned long long CIPHERTEXT_LEN
       = DATA_LEN + crypto_aead_chacha20poly1305_ietf_ABYTES;
-  uint8_t *ciphertext = (uint8_t *)sodium_malloc(CIPHERTEXT_LEN);
+  uint8_t *ciphertext = sodium_malloc(CIPHERTEXT_LEN);
+  if (ciphertext == NULL) return -1;
 
   uint8_t *ephemeral_x25519_pk = malloc(crypto_scalarmult_curve25519_BYTES);
+  if (ephemeral_x25519_pk == NULL)
+  {
+    sodium_free(ciphertext);
+
+    return -2;
+  }
+
   uint8_t *ephemeral_x25519_sk
       = sodium_malloc(crypto_scalarmult_curve25519_SCALARBYTES);
+  if (ephemeral_x25519_sk == NULL)
+  {
+    sodium_free(ciphertext);
+    free(ephemeral_x25519_pk);
+
+    return -3;
+  }
+
   crypto_kx_keypair(ephemeral_x25519_pk, ephemeral_x25519_sk);
 
   uint8_t *x25519_pk = malloc(crypto_scalarmult_curve25519_BYTES);
+  if (x25519_pk == NULL)
+  {
+    sodium_free(ciphertext);
+    free(ephemeral_x25519_pk);
+    sodium_free(ephemeral_x25519_sk);
+
+    return -4;
+  }
+
   int converted = crypto_sign_ed25519_pk_to_curve25519(x25519_pk, public_key);
   if (converted != 0)
   {
@@ -56,10 +78,20 @@ forward_secretbox_encrypt_data(
     free(ephemeral_x25519_pk);
     sodium_free(ephemeral_x25519_sk);
 
-    return -1;
+    return -5;
   }
 
   uint8_t *server_tx = sodium_malloc(crypto_kx_SESSIONKEYBYTES);
+  if (server_tx == NULL)
+  {
+    free(x25519_pk);
+    sodium_free(ciphertext);
+    free(ephemeral_x25519_pk);
+    sodium_free(ephemeral_x25519_sk);
+
+    return -6;
+  }
+
   int created = crypto_kx_server_session_keys(
       NULL, server_tx, ephemeral_x25519_pk, ephemeral_x25519_sk, x25519_pk);
   sodium_free(ephemeral_x25519_sk);
@@ -70,10 +102,20 @@ forward_secretbox_encrypt_data(
     free(ephemeral_x25519_pk);
     sodium_free(server_tx);
 
-    return -2;
+    return -7;
   }
 
   uint8_t *nonce = malloc(crypto_aead_chacha20poly1305_ietf_NPUBBYTES);
+  if (nonce == NULL)
+  {
+    free(x25519_pk);
+    sodium_free(ciphertext);
+    free(ephemeral_x25519_pk);
+    sodium_free(server_tx);
+
+    return -8;
+  }
+
   calculate_nonce(nonce);
   free(x25519_pk);
 

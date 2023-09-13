@@ -42,10 +42,17 @@ get_merkle_proof(
 
   uint8_t(*hashes)[crypto_hash_sha512_BYTES]
       = malloc(sizeof(uint8_t[LEAVES_LEN][crypto_hash_sha512_BYTES]));
-  memcpy(&hashes[0][0], &leaves_hashed[0][0],
-         LEAVES_LEN * crypto_hash_sha512_BYTES);
+  if (hashes == NULL) return -2;
+
+  memcpy(&hashes[0], &leaves_hashed[0], LEAVES_LEN * crypto_hash_sha512_BYTES);
 
   uint8_t *concat_hashes = malloc(2 * crypto_hash_sha512_BYTES);
+  if (concat_hashes == NULL)
+  {
+    free(hashes);
+
+    return -3;
+  }
 
   unsigned int leaves = LEAVES_LEN;
   int res;
@@ -67,15 +74,15 @@ get_merkle_proof(
       // number of leaves.
       if (odd_leaves && i + 1 == leaves)
       {
-        memcpy(&concat_hashes[0], &hashes[i][0], crypto_hash_sha512_BYTES);
+        memcpy(concat_hashes, &hashes[i], crypto_hash_sha512_BYTES);
         // Concat leaf hash with itself.
-        memcpy(&concat_hashes[crypto_hash_sha512_BYTES], &hashes[i][0],
+        memcpy(&concat_hashes[crypto_hash_sha512_BYTES], &hashes[i],
                crypto_hash_sha512_BYTES);
 
         if (i == element_of_interest)
         {
           // Copy required hash of interest in the proof.
-          memcpy(&proof[k][0], &hashes[i][0], crypto_hash_sha512_BYTES);
+          memcpy(&proof[k], &hashes[i], crypto_hash_sha512_BYTES);
           // We do not care if left(0) or right(1) since hash of itself
           proof[k][crypto_hash_sha512_BYTES] = 0;
 
@@ -86,23 +93,23 @@ get_merkle_proof(
       }
       else
       {
-        memcpy(&concat_hashes[0], &hashes[i][0], crypto_hash_sha512_BYTES);
+        memcpy(concat_hashes, &hashes[i], crypto_hash_sha512_BYTES);
         // In any other case concat leaf hash with the one on its right.
-        memcpy(&concat_hashes[crypto_hash_sha512_BYTES], &hashes[i + 1][0],
+        memcpy(&concat_hashes[crypto_hash_sha512_BYTES], &hashes[i + 1],
                crypto_hash_sha512_BYTES);
 
         if (i == element_of_interest || i + 1 == element_of_interest)
         {
           if (i == element_of_interest)
           {
-            memcpy(&proof[k][0], &hashes[i + 1][0], crypto_hash_sha512_BYTES);
+            memcpy(&proof[k], &hashes[i + 1], crypto_hash_sha512_BYTES);
             // Proof artifact needs to go to the right when concatenated with
             // element.
             proof[k][crypto_hash_sha512_BYTES] = 1;
           }
           else if (i + 1 == element_of_interest)
           {
-            memcpy(&proof[k][0], &hashes[i][0], crypto_hash_sha512_BYTES);
+            memcpy(&proof[k], &hashes[i], crypto_hash_sha512_BYTES);
             // Proof artifact needs to go to the left when concatenated with
             // element.
             proof[k][crypto_hash_sha512_BYTES] = 0;
@@ -121,7 +128,7 @@ get_merkle_proof(
         free(hashes);
         free(concat_hashes);
 
-        return -2;
+        return -4;
       }
     }
 

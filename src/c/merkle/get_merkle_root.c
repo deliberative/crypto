@@ -30,10 +30,17 @@ get_merkle_root(
 
   uint8_t(*hashes)[crypto_hash_sha512_BYTES]
       = malloc(sizeof(uint8_t[LEAVES_LEN][crypto_hash_sha512_BYTES]));
-  memcpy(&hashes[0][0], &leaves_hashed[0][0],
-         LEAVES_LEN * crypto_hash_sha512_BYTES);
+  if (hashes == NULL) return -1;
+
+  memcpy(&hashes[0], &leaves_hashed[0], LEAVES_LEN * crypto_hash_sha512_BYTES);
 
   uint8_t *concat_hashes = malloc(2 * crypto_hash_sha512_BYTES);
+  if (concat_hashes == NULL)
+  {
+    free(hashes);
+
+    return -2;
+  }
 
   unsigned int leaves = LEAVES_LEN;
   int res;
@@ -72,7 +79,7 @@ get_merkle_root(
         free(hashes);
         free(concat_hashes);
 
-        return -1;
+        return -3;
       }
     }
 
@@ -81,7 +88,7 @@ get_merkle_root(
     leaves = ceil((double)leaves / 2);
   }
 
-  memcpy(&root[0], &hashes[0][0], crypto_hash_sha512_BYTES);
+  memcpy(root, &hashes[0], crypto_hash_sha512_BYTES);
 
   free(hashes);
   free(concat_hashes);

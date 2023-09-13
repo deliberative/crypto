@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import utilsMemory from "./memory";
+import dcryptoMemory from "./memory";
 
 import dcryptoMethodsModule from "../c/build/dcryptoMethodsModule";
 
@@ -21,7 +21,7 @@ import type { DCryptoMethodsModule } from "../c/build/dcryptoMethodsModule";
 
 /**
  * @function
- * Returns a cryptographically random number between min and max.
+ * Returns a cryptographically random number between two positive integers.
  *
  * @param min: The minimum number.
  * @param max: The maximum number.
@@ -34,13 +34,20 @@ const randomNumberInRange = async (
   max: number,
   module?: DCryptoMethodsModule,
 ): Promise<number> => {
-  if (module) return module._random_number_in_range(min, max);
+  if (min < 0 || max < 0) throw new Error("Only positive integers allowed.");
+  if (min === max) return min;
 
-  const wasmMemory = utilsMemory.randomNumberInRange(min, max);
+  const wasmMemory = module
+    ? module.wasmMemory
+    : dcryptoMemory.randomNumberInRange(min, max);
 
-  const dcryptoModule = await dcryptoMethodsModule({ wasmMemory });
+  const dcryptoModule = module || (await dcryptoMethodsModule({ wasmMemory }));
 
-  return dcryptoModule._random_number_in_range(min, max);
+  const res = dcryptoModule._random_number_in_range(min, max);
+
+  if (res < 0) throw new Error("Could not allocate memory for random bytes.");
+
+  return res;
 };
 
 export default randomNumberInRange;

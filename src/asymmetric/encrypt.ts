@@ -100,11 +100,56 @@ const encrypt = async (
     case -1: {
       dcryptoModule._free(ptr4);
 
+      throw new Error("Could not allocate memory for the ciphertext array.");
+    }
+
+    case -2: {
+      dcryptoModule._free(ptr4);
+
+      throw new Error(
+        "Could not allocate memory for the ephemeral x25519 public key array.",
+      );
+    }
+
+    case -3: {
+      dcryptoModule._free(ptr4);
+
+      throw new Error(
+        "Could not allocate memory for the ephemeral x25519 secret key array.",
+      );
+    }
+
+    case -4: {
+      dcryptoModule._free(ptr4);
+
+      throw new Error(
+        "Could not allocate memory for the receiver's ed25519 converted to x25519 public key array.",
+      );
+    }
+
+    case -5: {
+      dcryptoModule._free(ptr4);
+
       throw new Error("Could not convert Ed25519 public key to X25519.");
     }
 
-    // case -2:
-    //   throw new Error("Could not create a shared secret.");
+    case -6: {
+      dcryptoModule._free(ptr4);
+
+      throw new Error("Could not allocate memory for the shared secret array.");
+    }
+
+    case -7: {
+      dcryptoModule._free(ptr4);
+
+      throw new Error("Could not create a shared secret.");
+    }
+
+    case -8: {
+      dcryptoModule._free(ptr4);
+
+      throw new Error("Could not allocate memory for the nonce helper array.");
+    }
 
     default: {
       dcryptoModule._free(ptr4);

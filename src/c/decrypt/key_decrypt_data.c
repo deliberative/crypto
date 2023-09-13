@@ -34,11 +34,20 @@ key_decrypt_data(
                                 - crypto_aead_chacha20poly1305_ietf_ABYTES;
 
   uint8_t *nonce = malloc(crypto_aead_chacha20poly1305_ietf_NPUBBYTES);
+  if (nonce == NULL) return -1;
+
   memcpy(nonce, encrypted_data, crypto_aead_chacha20poly1305_ietf_NPUBBYTES);
 
   int CIPHERTEXT_LEN
       = ENCRYPTED_LEN - crypto_aead_chacha20poly1305_ietf_NPUBBYTES;
   uint8_t *ciphertext = malloc(CIPHERTEXT_LEN);
+  if (ciphertext == NULL)
+  {
+    free(nonce);
+
+    return -2;
+  }
+
   memcpy(ciphertext,
          encrypted_data + crypto_aead_chacha20poly1305_ietf_NPUBBYTES,
          CIPHERTEXT_LEN);
@@ -52,5 +61,5 @@ key_decrypt_data(
 
   if (decrypted == 0) return 0;
 
-  return -1;
+  return -3;
 }
