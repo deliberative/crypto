@@ -252,33 +252,33 @@ and everything will work in debug mode.
 ```
 > node benchmarks/hash/index.js
 # sha512 native crypto 10000 times
-ok ~32 ms (0 s + 32024078 ns)
+ok ~33 ms
 
 # sha512 @deliberative/crypto 10000 times
-ok ~39 ms (0 s + 39395335 ns)
+ok ~37 ms
 
 # sha512 tweetnacl 10000 times
-ok ~80 ms (0 s + 80000567 ns)
+ok ~84 ms
 
 > node benchmarks/symmetric/index.js
 # X25519 e2e encrypt/decrypt native crypto 10000 times
-ok ~83 ms (0 s + 83345021 ns)
+ok ~83 ms
 
 # X25519 @deliberative/crypto 10000 times
-ok ~5.73 s (5 s + 728155520 ns)
+ok ~5.73 s
 
 # X25519 tweetnacl 10000 times
-ok ~12 s (12 s + 241594730 ns)
+ok ~12 s
 
 > node benchmarks/asymmetric/index.js
 # Ed25519 sign/verify native crypto 10000 times
-ok ~1.27 s (1 s + 270298441 ns)
+ok ~1.34 s
 
 # Ed25519 @deliberative/crypto 10000 times
-ok ~8.96 s (8 s + 962150787 ns)
+ok ~1.91 s
 
 # Ed25519 tweetnacl 10000 times
-ok ~1.93 min (116 s + 409065848 ns)
+ok ~1.65 min
 ```
 
 ## Releases
