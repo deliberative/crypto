@@ -26,7 +26,7 @@ const libsodiumIncludePrivatePath = path.join(
 const libraryPath = path.join(process.cwd(), "src", "emscriptenLibrary.js");
 
 const licenseApache = `
-// Copyright (C) 2022 Deliberative Technologies P.C.
+// Copyright (C) 2023 Deliberative Technologies P.C.
 // SPDX-License-Identifier: Apache-2.0
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -47,6 +47,7 @@ const withJS = ` \
 -s MODULARIZE=1 \
 -s MAIN_MODULE=2 \
 -s POLYFILL=0 \
+-s SINGLE_FILE=1 \
 `;
 
 const memory = `\

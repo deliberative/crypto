@@ -50,7 +50,6 @@ const testing =
 -s ASSERTIONS=0 \
 -s INVOKE_RUN=0 \
 -s USE_CLOSURE_COMPILER=1 \
--s MALLOC=emmalloc \
 `
     : `\
 -O0 \

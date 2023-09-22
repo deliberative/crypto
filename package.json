@@ -1,7 +1,7 @@
 {
   "name": "@deliberative/crypto",
   "description": "Libsodium, Merkle trees, Shamir secret sharing wasm module for nodejs and the browser.",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "repository": {
     "type": "git",
     "url": "https://github.com/deliberative/crypto.git"
