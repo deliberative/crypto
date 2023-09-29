@@ -49,16 +49,14 @@ const testing =
 -s FILESYSTEM=0 \
 -s ASSERTIONS=0 \
 -s INVOKE_RUN=0 \
--s USE_CLOSURE_COMPILER=1 \
 `
     : `\
--O0 \
+-Og \
 -g3 \
 --profiling \
 -gsource-map \
 -fsanitize=undefined \
 -s ASSERTIONS=2 \
--s RUNTIME_LOGGING=1 \
 -s RUNTIME_DEBUG=1 \
 -s SAFE_HEAP=2 \
 -s STACK_OVERFLOW_CHECK=2 \

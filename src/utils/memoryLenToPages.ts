@@ -13,6 +13,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+const MIN_PAGES =
+  process.env.NODE_ENV === "production"
+    ? 4 // 256kb
+    : 160; // 10mb
+
 /**
  * Webassembly Memory is separated into 64kb contiguous memory "pages".
  * This function takes memory length in bytes and converts it to pages.
@@ -22,7 +27,7 @@ const memoryLenToPages = (
   minPages?: number,
   maxPages?: number,
 ): number => {
-  minPages = minPages || 4; // 256kb // 48 = 3mb // 256 = 16mb // 6 = 384kb
+  minPages = minPages || MIN_PAGES;
   maxPages = maxPages || 32768; // 2gb // 16384 = 1gb
   const pageSize = 64 * 1024;
   const ceil = Math.ceil(memoryLen / pageSize);

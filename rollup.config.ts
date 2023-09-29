@@ -7,10 +7,12 @@ import url from "@rollup/plugin-url";
 // import { terser } from "rollup-plugin-terser";
 import analyzer from "rollup-plugin-analyzer";
 import copy from "rollup-plugin-copy";
+import fs from "node:fs";
 
 import pkg from "./package.json" assert { type: "json" };
 
 const production = process.env.NODE_ENV === "production";
+const browser = process.env.NODE_OR_BROWSER === "browser";
 const dir = "lib";
 const input = "src/index.ts";
 
@@ -52,14 +54,15 @@ const plugins = [
     outDir: `${dir}`,
   }),
 
-  copy({
-    targets: [
-      {
-        src: "src/c/build/dcryptoMethodsModule.wasm",
-        dest: `${dir}`,
-      },
-    ],
-  }),
+  fs.existsSync("src/c/build/dcryptoMethodsModule.wasm") &&
+    copy({
+      targets: [
+        {
+          src: "src/c/build/dcryptoMethodsModule.wasm",
+          dest: `${dir}`,
+        },
+      ],
+    }),
 
   analyzer(),
 ];
@@ -85,31 +88,42 @@ export default [
     input,
     plugins,
     external: ["module"],
-    output: [
-      {
-        file: pkg.module,
-        format: "es",
-        esModule: true,
-        interop: "esModule",
-        exports: "named",
-        sourcemap: true,
-      },
-      {
-        file: pkg.module.replace(".mjs", ".node.mjs"),
-        format: "es",
-        esModule: true,
-        interop: "esModule",
-        exports: "named",
-        sourcemap: true,
-      },
-      {
-        file: pkg.main,
-        format: "cjs",
-        esModule: false,
-        interop: "defaultOnly",
-        exports: "default",
-        sourcemap: true,
-      },
-    ],
+    output: browser
+      ? [
+          {
+            file: pkg.module,
+            format: "es",
+            esModule: true,
+            interop: "esModule",
+            exports: "named",
+            sourcemap: true,
+          },
+          {
+            file: pkg.main,
+            format: "cjs",
+            esModule: false,
+            interop: "defaultOnly",
+            exports: "default",
+            sourcemap: true,
+          },
+        ]
+      : [
+          {
+            file: pkg.module.replace(".mjs", ".node.mjs"),
+            format: "es",
+            esModule: true,
+            interop: "esModule",
+            exports: "named",
+            sourcemap: true,
+          },
+          {
+            file: pkg.main.replace(".cjs", ".node.cjs"),
+            format: "cjs",
+            esModule: false,
+            interop: "defaultOnly",
+            exports: "default",
+            sourcemap: true,
+          },
+        ],
   },
 ];

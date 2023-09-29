@@ -1,7 +1,7 @@
 {
   "name": "@deliberative/crypto",
   "description": "Libsodium, Merkle trees, Shamir secret sharing wasm module for nodejs and the browser.",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "repository": {
     "type": "git",
     "url": "https://github.com/deliberative/crypto.git"
@@ -48,8 +48,9 @@
         "import": "./lib/index.node.mjs"
       },
       "browser": {
-        "import": "./lib/index.mjs",
-        "require": "./lib/index.cjs"
+        "module": "./lib/index.mjs",
+        "require": "./lib/index.cjs",
+        "import": "./lib/index.mjs"
       },
       "default": "./lib/index.min.js"
     },
@@ -66,9 +67,12 @@
     "postvalgrind": "./examples/c/dcrypto_methods.o && rm -rf examples/c/dcrypto_methods.o",
     "code": "cross-env NODE_ENV=production rollup --config rollup.config.ts --configPlugin typescript",
     "code:debug": "cross-env NODE_ENV=development rollup --config rollup.config.ts --configPlugin typescript",
-    "build": "npm-run-all -s wasm code",
+    "build:browser": "cross-env NODE_OR_BROWSER=browser npm-run-all -s wasm code",
+    "build:node": "cross-env NODE_OR_BROWSER=node npm-run-all -s wasm code",
+    "build": "npm-run-all -s build:browser build:node",
     "postbuild": "node scripts/post.js",
-    "build:debug": "npm-run-all -s wasm:debug code:debug postbuild",
+    "build:browser:debug": "cross-env NODE_OR_BROWSER=browser npm-run-all -s wasm:debug code:debug postbuild",
+    "build:node:debug": "cross-env NODE_OR_BROWSER=node npm-run-all -s wasm:debug code:debug postbuild",
     "jest": "jest --config jest.config.json",
     "test": "npm-run-all -s wasm jest",
     "bench1": "node benchmarks/asymmetric/index.js",
@@ -77,7 +81,7 @@
     "prebench": "npm run build",
     "bench": "npm-run-all -s bench3 bench2 bench1",
     "preformat": "clang-format-all src/",
-    "format": "prettier --write src examples/js __tests__",
+    "format": "prettier --write rollup.config.ts src examples/js __tests__",
     "postformat": "clang-format-all examples/",
     "lint": "eslint --ext .js,.ts src __tests__",
     "prepublishOnly": "npm-run-all -s lint test build",

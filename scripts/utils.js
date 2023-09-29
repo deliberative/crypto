@@ -47,14 +47,20 @@ const withJS = ` \
 -s MODULARIZE=1 \
 -s MAIN_MODULE=2 \
 -s POLYFILL=0 \
--s SINGLE_FILE=1 \
+-s BUILD_AS_WORKER=1 \
 `;
+
+const browser = process.env.NODE_OR_BROWSER === "browser" ? ` \
+-s SINGLE_FILE=1 \
+-s ENVIRONMENT=\'webview\' \
+` : "";
 
 const memory = `\
 -s IMPORTED_MEMORY=1 \
 -s ALLOW_MEMORY_GROWTH=1 \
--s INITIAL_MEMORY=256kb \
--s STACK_SIZE=128kb \
+-s INITIAL_MEMORY=${process.env.NODE_ENV === "production" ? "256kb" : "10mb" } \
+-s STACK_SIZE=${process.env.NODE_ENV === "production" ? "128kb" : "5mb" } \
+-s MALLOC=emmalloc-memvalidate \
 `;
 
 const emcc = `\
@@ -63,6 +69,7 @@ emcc \
 -s STRICT \
 ${memory} \
 ${withJS} \
+${browser} \
 -s NODEJS_CATCH_EXIT=0 \
 -s NODEJS_CATCH_REJECTION=0 \
 `;
