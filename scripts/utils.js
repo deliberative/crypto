@@ -47,7 +47,7 @@ const withJS = ` \
 -s MODULARIZE=1 \
 -s MAIN_MODULE=2 \
 -s POLYFILL=0 \
--s BUILD_AS_WORKER=1 \
+-s NO_DYNAMIC_EXECUTION=1 \
 `;
 
 const browser = process.env.NODE_OR_BROWSER === "browser" ? ` \

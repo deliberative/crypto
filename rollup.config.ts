@@ -5,7 +5,7 @@ import replace from "@rollup/plugin-replace";
 import typescript from "@rollup/plugin-typescript";
 import url from "@rollup/plugin-url";
 // import { terser } from "rollup-plugin-terser";
-import analyzer from "rollup-plugin-analyzer";
+// import analyzer from "rollup-plugin-analyzer";
 import copy from "rollup-plugin-copy";
 import fs from "node:fs";
 
@@ -22,15 +22,15 @@ const plugins = [
     "process.env.NODE_ENV": JSON.stringify(production),
   }),
 
-  commonjs(),
-
   resolve({
     // jsnext: true,
     // main: true,
     // module: true,
-    browser: true,
-    preferBuiltins: false,
+    browser,
+    preferBuiltins: !browser,
   }),
+
+  commonjs(),
 
   url(),
 
@@ -64,7 +64,7 @@ const plugins = [
       ],
     }),
 
-  analyzer(),
+  // analyzer(),
 ];
 
 export default [

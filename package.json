@@ -1,7 +1,7 @@
 {
   "name": "@deliberative/crypto",
   "description": "Libsodium, Merkle trees, Shamir secret sharing wasm module for nodejs and the browser.",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "repository": {
     "type": "git",
     "url": "https://github.com/deliberative/crypto.git"
@@ -44,7 +44,7 @@
     ".": {
       "node": {
         "module": "./lib/index.node.mjs",
-        "require": "./lib/index.cjs",
+        "require": "./lib/index.node.cjs",
         "import": "./lib/index.node.mjs"
       },
       "browser": {
@@ -69,7 +69,7 @@
     "code:debug": "cross-env NODE_ENV=development rollup --config rollup.config.ts --configPlugin typescript",
     "build:browser": "cross-env NODE_OR_BROWSER=browser npm-run-all -s wasm code",
     "build:node": "cross-env NODE_OR_BROWSER=node npm-run-all -s wasm code",
-    "build": "npm-run-all -s build:browser build:node",
+    "build": "npm-run-all -s build:node build:browser",
     "postbuild": "node scripts/post.js",
     "build:browser:debug": "cross-env NODE_OR_BROWSER=browser npm-run-all -s wasm:debug code:debug postbuild",
     "build:node:debug": "cross-env NODE_OR_BROWSER=node npm-run-all -s wasm:debug code:debug postbuild",
