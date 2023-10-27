@@ -1,6 +1,6 @@
 const bench = require("nanobench");
 const crypto = require("crypto");
-const dcrypto = require("../../lib/index.cjs");
+const dcrypto = require("../../lib/index.node.cjs");
 const nacl = require("tweetnacl");
 
 const times = 10000;

@@ -15,7 +15,9 @@
 
 #include <stdint.h>
 
-#include "../../../libsodium/src/libsodium/include/sodium/crypto_hash_sha512.h"
+#include "../../../libsodium/src/libsodium/include/sodium.h"
+// #include
+// "../../../libsodium/src/libsodium/include/sodium/crypto_hash_sha512.h"
 
 __attribute__((used)) int
 sha512(const unsigned int DATA_LEN, const uint8_t data[DATA_LEN],

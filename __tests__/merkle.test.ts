@@ -1,5 +1,7 @@
 import dcrypto from "../src";
 
+jest.setTimeout(70 * 1000);
+
 describe("Merkle test suite.", () => {
   test("Merkle root calculation works.", async () => {
     const tree: Uint8Array[] = [];

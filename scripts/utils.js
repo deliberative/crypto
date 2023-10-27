@@ -46,14 +46,29 @@ const withJS = ` \
 -s WASM=1 \
 -s MODULARIZE=1 \
 -s MAIN_MODULE=2 \
+-s INCOMING_MODULE_JS_API=\[\"wasmMemory\"\] \
 -s POLYFILL=0 \
 -s NO_DYNAMIC_EXECUTION=1 \
+-s WEBSOCKET_SUBPROTOCOL=null \
+-s GL_EMULATE_GLES_VERSION_STRING_FORMAT=0 \
+-s GL_EXTENSIONS_IN_PREFIXED_FORMAT=0 \
+-s GL_SUPPORT_AUTOMATIC_ENABLE_EXTENSIONS=0 \
+-s GL_SUPPORT_SIMPLE_ENABLE_EXTENSIONS=0 \
+-s GL_TRACK_ERRORS=0 \
+-s GL_POOL_TEMP_BUFFERS=0 \
+-s MIN_WEBGL_VERSION=2 \
+-s MAX_WEBGL_VERSION=2 \
+-s GL_WORKAROUND_SAFARI_GETCONTEXT_BUG=0 \
+-s SUPPORT_LONGJMP=0 \
 `;
 
-const browser = process.env.NODE_OR_BROWSER === "browser" ? ` \
+const browser =
+  process.env.NODE_OR_BROWSER === "browser" ? ` \
 -s SINGLE_FILE=1 \
--s ENVIRONMENT=\'webview\' \
-` : "";
+-s ENVIRONMENT=\'web\' \
+` : `\
+-s ENVIRONMENT=\'node\' \
+`;
 
 const memory = `\
 -s IMPORTED_MEMORY=1 \
@@ -61,11 +76,26 @@ const memory = `\
 -s INITIAL_MEMORY=${process.env.NODE_ENV === "production" ? "256kb" : "10mb" } \
 -s STACK_SIZE=${process.env.NODE_ENV === "production" ? "128kb" : "5mb" } \
 -s MALLOC=emmalloc-memvalidate \
+-s MEMORY_GROWTH_LINEAR_STEP=128kb \
+-s GLOBAL_BASE=4096 \
 `;
 
 const emcc = `\
 emcc \
 --no-entry \
+-fno-exceptions \
+-fno-PIC \
+-fPIE \
+-fno-common \
+-ffunction-sections \
+-fdata-sections \
+-fdelete-null-pointer-checks \
+-fno-asm \
+-ffinite-loops \
+-fjump-tables \
+-fno-keep-static-consts \
+-fvectorize \
+-fwasm-exceptions \
 -s STRICT \
 ${memory} \
 ${withJS} \

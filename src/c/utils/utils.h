@@ -4,7 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "../../../libsodium/src/libsodium/include/sodium/crypto_hash_sha512.h"
+#include "../../../libsodium/src/libsodium/include/sodium.h"
 
 void items_indexes_in_array(
     const unsigned int ARRAY_LEN, const unsigned int ITEMS_ARRAY_LEN,
@@ -13,5 +13,10 @@ void items_indexes_in_array(
     int32_t indexes[ITEMS_ARRAY_LEN]);
 
 int random_bytes(const unsigned int SIZE, uint8_t array[SIZE]);
+
+int random_number_in_range(const int MIN, const int MAX);
+
+void
+calculate_nonce(uint8_t nonce[crypto_aead_chacha20poly1305_ietf_NPUBBYTES]);
 
 #endif

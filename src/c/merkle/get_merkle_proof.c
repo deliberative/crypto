@@ -44,9 +44,10 @@ get_merkle_proof(
       = malloc(sizeof(uint8_t[LEAVES_LEN][crypto_hash_sha512_BYTES]));
   if (hashes == NULL) return -2;
 
-  memcpy(&hashes[0], &leaves_hashed[0], LEAVES_LEN * crypto_hash_sha512_BYTES);
+  memcpy(hashes, leaves_hashed, LEAVES_LEN * crypto_hash_sha512_BYTES);
 
-  uint8_t *concat_hashes = malloc(2 * crypto_hash_sha512_BYTES);
+  uint8_t(*concat_hashes)[crypto_hash_sha512_BYTES]
+      = malloc(sizeof(uint8_t[2][crypto_hash_sha512_BYTES]));
   if (concat_hashes == NULL)
   {
     free(hashes);
@@ -74,10 +75,9 @@ get_merkle_proof(
       // number of leaves.
       if (odd_leaves && i + 1 == leaves)
       {
-        memcpy(concat_hashes, &hashes[i], crypto_hash_sha512_BYTES);
+        memcpy(&concat_hashes[0], &hashes[i], crypto_hash_sha512_BYTES);
         // Concat leaf hash with itself.
-        memcpy(&concat_hashes[crypto_hash_sha512_BYTES], &hashes[i],
-               crypto_hash_sha512_BYTES);
+        memcpy(&concat_hashes[1], &hashes[i], crypto_hash_sha512_BYTES);
 
         if (i == element_of_interest)
         {
@@ -93,10 +93,9 @@ get_merkle_proof(
       }
       else
       {
-        memcpy(concat_hashes, &hashes[i], crypto_hash_sha512_BYTES);
+        memcpy(&concat_hashes[0], &hashes[i], crypto_hash_sha512_BYTES);
         // In any other case concat leaf hash with the one on its right.
-        memcpy(&concat_hashes[crypto_hash_sha512_BYTES], &hashes[i + 1],
-               crypto_hash_sha512_BYTES);
+        memcpy(&concat_hashes[1], &hashes[i + 1], crypto_hash_sha512_BYTES);
 
         if (i == element_of_interest || i + 1 == element_of_interest)
         {
@@ -121,7 +120,7 @@ get_merkle_proof(
         }
       }
 
-      res = crypto_hash_sha512(hashes[j], concat_hashes,
+      res = crypto_hash_sha512(hashes[j], *concat_hashes,
                                2 * crypto_hash_sha512_BYTES);
       if (res != 0)
       {

@@ -16,13 +16,8 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "./encrypt.h"
-
-#include "../../../libsodium/src/libsodium/include/sodium/crypto_aead_chacha20poly1305.h"
-#include "../../../libsodium/src/libsodium/include/sodium/crypto_kx.h"
-#include "../../../libsodium/src/libsodium/include/sodium/crypto_scalarmult_curve25519.h"
-#include "../../../libsodium/src/libsodium/include/sodium/crypto_sign_ed25519.h"
-#include "../../../libsodium/src/libsodium/include/sodium/utils.h"
+#include "../../../libsodium/src/libsodium/include/sodium.h"
+#include "../utils/utils.h"
 
 /* Returns (ephemeral_pk || nonce || encrypted_data || auth tag)  */
 __attribute__((used)) int
@@ -37,22 +32,23 @@ forward_secretbox_encrypt_data(
 {
   unsigned long long CIPHERTEXT_LEN
       = DATA_LEN + crypto_aead_chacha20poly1305_ietf_ABYTES;
-  uint8_t *ciphertext = sodium_malloc(CIPHERTEXT_LEN);
+  uint8_t *ciphertext = malloc(sizeof(uint8_t[CIPHERTEXT_LEN]));
   if (ciphertext == NULL) return -1;
 
-  uint8_t *ephemeral_x25519_pk = malloc(crypto_scalarmult_curve25519_BYTES);
+  uint8_t *ephemeral_x25519_pk
+      = malloc(sizeof(uint8_t[crypto_scalarmult_curve25519_BYTES]));
   if (ephemeral_x25519_pk == NULL)
   {
-    sodium_free(ciphertext);
+    free(ciphertext);
 
     return -2;
   }
 
-  uint8_t *ephemeral_x25519_sk
-      = sodium_malloc(crypto_scalarmult_curve25519_SCALARBYTES);
+  uint8_t *ephemeral_x25519_sk = sodium_malloc(
+      sizeof(uint8_t[crypto_scalarmult_curve25519_SCALARBYTES]));
   if (ephemeral_x25519_sk == NULL)
   {
-    sodium_free(ciphertext);
+    free(ciphertext);
     free(ephemeral_x25519_pk);
 
     return -3;
@@ -60,10 +56,11 @@ forward_secretbox_encrypt_data(
 
   crypto_kx_keypair(ephemeral_x25519_pk, ephemeral_x25519_sk);
 
-  uint8_t *x25519_pk = malloc(crypto_scalarmult_curve25519_BYTES);
+  uint8_t *x25519_pk
+      = malloc(sizeof(uint8_t[crypto_scalarmult_curve25519_BYTES]));
   if (x25519_pk == NULL)
   {
-    sodium_free(ciphertext);
+    free(ciphertext);
     free(ephemeral_x25519_pk);
     sodium_free(ephemeral_x25519_sk);
 
@@ -74,18 +71,19 @@ forward_secretbox_encrypt_data(
   if (converted != 0)
   {
     free(x25519_pk);
-    sodium_free(ciphertext);
+    free(ciphertext);
     free(ephemeral_x25519_pk);
     sodium_free(ephemeral_x25519_sk);
 
     return -5;
   }
 
-  uint8_t *server_tx = sodium_malloc(crypto_kx_SESSIONKEYBYTES);
+  uint8_t *server_tx
+      = sodium_malloc(sizeof(uint8_t[crypto_kx_SESSIONKEYBYTES]));
   if (server_tx == NULL)
   {
     free(x25519_pk);
-    sodium_free(ciphertext);
+    free(ciphertext);
     free(ephemeral_x25519_pk);
     sodium_free(ephemeral_x25519_sk);
 
@@ -98,18 +96,19 @@ forward_secretbox_encrypt_data(
   if (created != 0)
   {
     free(x25519_pk);
-    sodium_free(ciphertext);
+    free(ciphertext);
     free(ephemeral_x25519_pk);
     sodium_free(server_tx);
 
     return -7;
   }
 
-  uint8_t *nonce = malloc(crypto_aead_chacha20poly1305_ietf_NPUBBYTES);
+  uint8_t *nonce
+      = malloc(sizeof(uint8_t[crypto_aead_chacha20poly1305_ietf_NPUBBYTES]));
   if (nonce == NULL)
   {
     free(x25519_pk);
-    sodium_free(ciphertext);
+    free(ciphertext);
     free(ephemeral_x25519_pk);
     sodium_free(server_tx);
 
@@ -134,7 +133,7 @@ forward_secretbox_encrypt_data(
   int KEY_NONCE_LEN = crypto_scalarmult_curve25519_BYTES
                       + crypto_aead_chacha20poly1305_ietf_NPUBBYTES;
   memcpy(encrypted + KEY_NONCE_LEN, ciphertext, CIPHERTEXT_LEN);
-  sodium_free(ciphertext);
+  free(ciphertext);
 
   return 0;
 }

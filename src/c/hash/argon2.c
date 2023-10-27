@@ -15,8 +15,11 @@
 
 #include <stdint.h>
 
-#include "../../../libsodium/src/libsodium/include/sodium/crypto_pwhash_argon2id.h"
-#include "../../../libsodium/src/libsodium/include/sodium/crypto_sign_ed25519.h"
+#include "../../../libsodium/src/libsodium/include/sodium.h"
+// #include
+// "../../../libsodium/src/libsodium/include/sodium/crypto_pwhash_argon2id.h"
+// #include
+// "../../../libsodium/src/libsodium/include/sodium/crypto_sign_ed25519.h"
 
 __attribute__((used)) int
 argon2(const unsigned int MNEMONIC_LEN,

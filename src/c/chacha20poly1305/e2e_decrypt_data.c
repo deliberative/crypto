@@ -16,11 +16,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "../../../libsodium/src/libsodium/include/sodium/crypto_aead_chacha20poly1305.h"
-#include "../../../libsodium/src/libsodium/include/sodium/crypto_kx.h"
-#include "../../../libsodium/src/libsodium/include/sodium/crypto_scalarmult_curve25519.h"
-#include "../../../libsodium/src/libsodium/include/sodium/crypto_sign_ed25519.h"
-#include "../../../libsodium/src/libsodium/include/sodium/utils.h"
+#include "../../../libsodium/src/libsodium/include/sodium.h"
 
 __attribute__((used)) int
 e2e_decrypt_data(
@@ -36,7 +32,8 @@ e2e_decrypt_data(
                                 - crypto_aead_chacha20poly1305_ietf_NPUBBYTES
                                 - crypto_aead_chacha20poly1305_ietf_ABYTES;
 
-  uint8_t *sender_x25519_pk = malloc(crypto_scalarmult_curve25519_BYTES);
+  uint8_t *sender_x25519_pk
+      = malloc(sizeof(uint8_t[crypto_scalarmult_curve25519_BYTES]));
   if (sender_x25519_pk == NULL) return -1;
 
   int converted_pk
@@ -48,7 +45,8 @@ e2e_decrypt_data(
     return -2;
   }
 
-  uint8_t *nonce = malloc(crypto_aead_chacha20poly1305_ietf_NPUBBYTES);
+  uint8_t *nonce
+      = malloc(sizeof(uint8_t[crypto_aead_chacha20poly1305_ietf_NPUBBYTES]));
   if (nonce == NULL)
   {
     free(sender_x25519_pk);
@@ -58,7 +56,8 @@ e2e_decrypt_data(
 
   memcpy(nonce, encrypted_data, crypto_aead_chacha20poly1305_ietf_NPUBBYTES);
 
-  uint8_t *receiver_x25519_pk = malloc(crypto_aead_chacha20poly1305_KEYBYTES);
+  uint8_t *receiver_x25519_pk
+      = malloc(sizeof(uint8_t[crypto_aead_chacha20poly1305_KEYBYTES]));
   if (receiver_x25519_pk == NULL)
   {
     free(sender_x25519_pk);
@@ -68,7 +67,7 @@ e2e_decrypt_data(
   }
 
   uint8_t *receiver_x25519_sk
-      = sodium_malloc(crypto_scalarmult_curve25519_BYTES);
+      = sodium_malloc(sizeof(uint8_t[crypto_scalarmult_curve25519_BYTES]));
   if (receiver_x25519_sk == NULL)
   {
     free(sender_x25519_pk);
@@ -81,7 +80,8 @@ e2e_decrypt_data(
   crypto_sign_ed25519_sk_to_curve25519(receiver_x25519_sk, secret_key);
   crypto_scalarmult_curve25519_base(receiver_x25519_pk, receiver_x25519_sk);
 
-  uint8_t *client_rx = sodium_malloc(crypto_kx_SESSIONKEYBYTES);
+  uint8_t *client_rx
+      = sodium_malloc(sizeof(uint8_t[crypto_kx_SESSIONKEYBYTES]));
   if (client_rx == NULL)
   {
     free(sender_x25519_pk);
@@ -108,7 +108,7 @@ e2e_decrypt_data(
 
   int CIPHERTEXT_LEN
       = ENCRYPTED_LEN - crypto_aead_chacha20poly1305_ietf_NPUBBYTES;
-  uint8_t *ciphertext = malloc(CIPHERTEXT_LEN);
+  uint8_t *ciphertext = malloc(sizeof(uint8_t[CIPHERTEXT_LEN]));
   if (ciphertext == NULL)
   {
     free(nonce);

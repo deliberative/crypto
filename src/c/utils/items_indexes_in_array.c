@@ -15,7 +15,7 @@
 
 #include <stdbool.h>
 
-#include "../../../libsodium/src/libsodium/include/sodium/crypto_hash_sha512.h"
+#include "../../../libsodium/src/libsodium/include/sodium.h"
 
 // Output is an array of indexes of the elements
 __attribute__((used)) void

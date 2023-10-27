@@ -16,13 +16,8 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "./encrypt.h"
-
-#include "../../../libsodium/src/libsodium/include/sodium/crypto_aead_chacha20poly1305.h"
-#include "../../../libsodium/src/libsodium/include/sodium/crypto_kx.h"
-#include "../../../libsodium/src/libsodium/include/sodium/crypto_scalarmult_curve25519.h"
-#include "../../../libsodium/src/libsodium/include/sodium/crypto_sign_ed25519.h"
-#include "../../../libsodium/src/libsodium/include/sodium/utils.h"
+#include "../../../libsodium/src/libsodium/include/sodium.h"
+#include "../utils/utils.h"
 
 /* Returns (nonce || encrypted_data || auth tag) */
 __attribute__((used)) int
@@ -35,13 +30,14 @@ key_encrypt_data(
 {
   unsigned long long CIPHERTEXT_LEN
       = DATA_LEN + crypto_aead_chacha20poly1305_ietf_ABYTES;
-  uint8_t *ciphertext = sodium_malloc(CIPHERTEXT_LEN);
+  uint8_t *ciphertext = malloc(sizeof(uint8_t[CIPHERTEXT_LEN]));
   if (ciphertext == NULL) return -1;
 
-  uint8_t *nonce = malloc(crypto_aead_chacha20poly1305_ietf_NPUBBYTES);
+  uint8_t *nonce
+      = malloc(sizeof(uint8_t[crypto_aead_chacha20poly1305_ietf_NPUBBYTES]));
   if (nonce == NULL)
   {
-    sodium_free(ciphertext);
+    free(ciphertext);
 
     return -2;
   }
@@ -57,7 +53,7 @@ key_encrypt_data(
 
   memcpy(encrypted + crypto_aead_chacha20poly1305_ietf_NPUBBYTES, ciphertext,
          CIPHERTEXT_LEN);
-  sodium_free(ciphertext);
+  free(ciphertext);
 
   return 0;
 }
