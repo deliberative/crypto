@@ -15,8 +15,8 @@
 
 #include <assert.h>
 #include <emscripten.h>
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 
 uint32_t
 randombytes_random(void)

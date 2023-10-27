@@ -18,10 +18,10 @@
 
 #include "../../../libsodium/src/libsodium/include/sodium/utils.h"
 
-#include "../../../libsodium/src/libsodium/include/sodium/crypto_sign_ed25519.h"
 #include "../../../libsodium/src/libsodium/include/sodium/crypto_aead_chacha20poly1305.h"
-#include "../../../libsodium/src/libsodium/include/sodium/crypto_scalarmult_curve25519.h"
 #include "../../../libsodium/src/libsodium/include/sodium/crypto_kx.h"
+#include "../../../libsodium/src/libsodium/include/sodium/crypto_scalarmult_curve25519.h"
+#include "../../../libsodium/src/libsodium/include/sodium/crypto_sign_ed25519.h"
 
 __attribute__((used)) int
 e2e_decrypt_data(
