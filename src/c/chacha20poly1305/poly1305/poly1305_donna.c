@@ -1,5 +1,6 @@
-#include "../../../../libsodium/src/libsodium/crypto_onetimeauth/poly1305/donna/poly1305_donna32.h"
 #include "../../../../libsodium/src/libsodium/include/sodium.h"
+
+#include "./poly1305_donna32.h"
 
 static void
 poly1305_update(poly1305_state_internal_t *st, const unsigned char *m,

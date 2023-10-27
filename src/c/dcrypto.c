@@ -13,7 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "../../libsodium/src/libsodium/sodium/codecs.c"
 #include "../../libsodium/src/libsodium/sodium/core.c"
 #include "../../libsodium/src/libsodium/sodium/utils.c"
 

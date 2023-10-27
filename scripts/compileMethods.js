@@ -67,9 +67,7 @@ execSync(
   `\
 ${emcc} \
 ${testing} \
--s EXPORTED_FUNCTIONS=\
-_malloc,\
-_free \
+-s EXPORTED_FUNCTIONS=_malloc,_free \
 -s EXPORT_NAME=dcryptoMethodsModule \
 -I${libsodiumIncludePath} \
 -I${libsodiumIncludePrivatePath} \
