@@ -1,5 +1,3 @@
-#include "../../../libsodium/src/libsodium/include/sodium.h"
-
 #include "../../../libsodium/src/libsodium/crypto_hash/sha512/cp/hash_sha512_cp.c"
 
 #include "../../../libsodium/src/libsodium/crypto_pwhash/argon2/argon2-core.c"
