@@ -1,4 +1,4 @@
-// Copyright (C) 2022 Deliberative Technologies P.C.
+// Copyright (C) 2023 Deliberative Technologies P.C.
 // SPDX-License-Identifier: Apache-2.0
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,8 +17,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../../../../libsodium/src/libsodium/include/sodium/crypto_aead_chacha20poly1305.h"
-#include "../../../../libsodium/src/libsodium/include/sodium/crypto_kx.h"
+#include "../../../libsodium/src/libsodium/include/sodium/crypto_aead_chacha20poly1305.h"
+#include "../../../libsodium/src/libsodium/include/sodium/crypto_kx.h"
 
 __attribute__((used)) int
 key_decrypt_data(

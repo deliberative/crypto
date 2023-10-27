@@ -18,7 +18,7 @@
 
 #include "../utils/utils.h"
 
-#include "../../../../libsodium/src/libsodium/include/sodium/crypto_kx.h"
+#include "../../../libsodium/src/libsodium/include/sodium/crypto_kx.h"
 
 /* Returns (nonce || encrypted_data || auth tag) */
 __attribute__((used)) int

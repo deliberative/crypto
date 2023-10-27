@@ -1,4 +1,4 @@
-// Copyright (C) 2022 Deliberative Technologies P.C.
+// Copyright (C) 2023 Deliberative Technologies P.C.
 // SPDX-License-Identifier: Apache-2.0
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,11 +18,11 @@
 
 #include "../utils/utils.h"
 
-#include "../../../../libsodium/src/libsodium/include/sodium/utils.h"
+#include "../../../libsodium/src/libsodium/include/sodium/utils.h"
 
-#include "../../../../libsodium/src/libsodium/include/sodium/crypto_sign_ed25519.h"
-#include "../../../../libsodium/src/libsodium/include/sodium/crypto_scalarmult_curve25519.h"
-#include "../../../../libsodium/src/libsodium/include/sodium/crypto_kx.h"
+#include "../../../libsodium/src/libsodium/include/sodium/crypto_sign_ed25519.h"
+#include "../../../libsodium/src/libsodium/include/sodium/crypto_scalarmult_curve25519.h"
+#include "../../../libsodium/src/libsodium/include/sodium/crypto_kx.h"
 
 /* Returns (ephemeral_pk || nonce || encrypted_data || auth tag)  */
 __attribute__((used)) int

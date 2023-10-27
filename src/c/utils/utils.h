@@ -4,8 +4,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "../../../../libsodium/src/libsodium/include/sodium/crypto_hash_sha512.h"
-#include "../../../../libsodium/src/libsodium/include/sodium/crypto_aead_chacha20poly1305.h"
+#include "../../../libsodium/src/libsodium/include/sodium/crypto_hash_sha512.h"
+#include "../../../libsodium/src/libsodium/include/sodium/crypto_aead_chacha20poly1305.h"
 
 void items_indexes_in_array(
     const unsigned int ARRAY_LEN, const unsigned int ITEMS_ARRAY_LEN,

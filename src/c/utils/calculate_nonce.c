@@ -18,7 +18,7 @@
 
 #include "./utils.h"
 
-#include "../../../../libsodium/src/libsodium/include/sodium/utils.h"
+#include "../../../libsodium/src/libsodium/include/sodium/utils.h"
 
 __attribute__((used)) void
 calculate_nonce(uint8_t nonce[crypto_aead_chacha20poly1305_ietf_NPUBBYTES])

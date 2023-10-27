@@ -1,6 +1,6 @@
 #include <stdint.h>
 
-#include "../../../../libsodium/src/libsodium/include/sodium/crypto_sign_ed25519.h"
+#include "../../../libsodium/src/libsodium/include/sodium/crypto_sign_ed25519.h"
 
 #include "../../../libsodium/src/libsodium/crypto_core/ed25519/ref10/ed25519_ref10.c"
 #include "../../../libsodium/src/libsodium/crypto_sign/ed25519/ref10/keypair.c"
