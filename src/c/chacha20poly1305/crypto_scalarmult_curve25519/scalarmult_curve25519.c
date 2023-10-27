@@ -1,3 +1,5 @@
+#include "../../../../libsodium/src/libsodium/include/sodium/crypto_scalarmult_curve25519.h"
+
 #include "./x25519_ref10.c"
 
 int

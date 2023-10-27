@@ -1,4 +1,4 @@
-// Copyright (C) 2022 Deliberative Technologies P.C.
+// Copyright (C) 2023 Deliberative Technologies P.C.
 // SPDX-License-Identifier: Apache-2.0
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,11 +15,8 @@
 
 #include <stdint.h>
 
-#include "../../../libsodium/src/libsodium/include/sodium.h"
-// #include
-// "../../../libsodium/src/libsodium/include/sodium/crypto_pwhash_argon2id.h"
-// #include
-// "../../../libsodium/src/libsodium/include/sodium/crypto_sign_ed25519.h"
+#include "../../../libsodium/src/libsodium/include/sodium/crypto_pwhash_argon2id.h"
+#include "../../../libsodium/src/libsodium/include/sodium/crypto_sign_ed25519.h"
 
 __attribute__((used)) int
 argon2(const unsigned int MNEMONIC_LEN,

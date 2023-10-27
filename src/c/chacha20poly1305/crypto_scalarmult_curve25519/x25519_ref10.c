@@ -1,7 +1,11 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "../../../../libsodium/src/libsodium/include/sodium.h"
+// #include "../../../../libsodium/src/libsodium/include/sodium.h"
+#include "../../../../libsodium/src/libsodium/include/sodium/export.h"
+#include "../../../../libsodium/src/libsodium/include/sodium/utils.h"
+#include "../../../../libsodium/src/libsodium/include/sodium/private/common.h"
+#include "../../../../libsodium/src/libsodium/include/sodium/private/ed25519_ref10.h"
 
 /*
  * Reject small order points early to mitigate the implications of

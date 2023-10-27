@@ -1,5 +1,3 @@
-#include "../../../libsodium/src/libsodium/include/sodium.h"
-
 #include "../../../libsodium/src/libsodium/crypto_aead/chacha20poly1305/aead_chacha20poly1305.c"
 #include "../../../libsodium/src/libsodium/crypto_generichash/blake2b/ref/blake2b-ref.c"
 #include "../../../libsodium/src/libsodium/crypto_generichash/blake2b/ref/generichash_blake2b.c"

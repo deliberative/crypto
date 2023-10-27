@@ -1,4 +1,4 @@
-// Copyright (C) 2022 Deliberative Technologies P.C.
+// Copyright (C) 2023 Deliberative Technologies P.C.
 // SPDX-License-Identifier: Apache-2.0
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,8 +16,9 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "../../../libsodium/src/libsodium/include/sodium.h"
 #include "../utils/utils.h"
+
+#include "../../../../libsodium/src/libsodium/include/sodium/crypto_kx.h"
 
 /* Returns (nonce || encrypted_data || auth tag) */
 __attribute__((used)) int

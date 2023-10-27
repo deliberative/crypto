@@ -14,9 +14,11 @@
 // limitations under the License.
 
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 
-#include "../../../libsodium/src/libsodium/include/sodium.h"
+#include "../../../../libsodium/src/libsodium/include/sodium/crypto_aead_chacha20poly1305.h"
+#include "../../../../libsodium/src/libsodium/include/sodium/crypto_kx.h"
 
 __attribute__((used)) int
 key_decrypt_data(

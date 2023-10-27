@@ -1,4 +1,4 @@
-// Copyright (C) 2022 Deliberative Technologies P.C.
+// Copyright (C) 2023 Deliberative Technologies P.C.
 // SPDX-License-Identifier: Apache-2.0
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,8 +16,7 @@
 #include <assert.h>
 #include <emscripten.h>
 #include <stdint.h>
-
-#include "../../../libsodium/src/libsodium/include/sodium.h"
+#include <stddef.h>
 
 uint32_t
 randombytes_random(void)

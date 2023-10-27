@@ -1,5 +1,3 @@
-#include "../../../../libsodium/src/libsodium/include/sodium.h"
-
 #include "./poly1305_donna32.h"
 
 static void

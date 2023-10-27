@@ -16,8 +16,13 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "../../../libsodium/src/libsodium/include/sodium.h"
 #include "../utils/utils.h"
+
+#include "../../../../libsodium/src/libsodium/include/sodium/utils.h"
+
+#include "../../../../libsodium/src/libsodium/include/sodium/crypto_sign_ed25519.h"
+#include "../../../../libsodium/src/libsodium/include/sodium/crypto_scalarmult_curve25519.h"
+#include "../../../../libsodium/src/libsodium/include/sodium/crypto_kx.h"
 
 /* Returns (ephemeral_pk || nonce || encrypted_data || auth tag)  */
 __attribute__((used)) int

@@ -1,4 +1,4 @@
-// Copyright (C) 2022 Deliberative Technologies P.C.
+// Copyright (C) 2023 Deliberative Technologies P.C.
 // SPDX-License-Identifier: Apache-2.0
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,8 +14,9 @@
 // limitations under the License.
 
 #include <stdbool.h>
+#include <stdint.h>
 
-#include "../../../libsodium/src/libsodium/include/sodium.h"
+#include "./utils.h"
 
 // Output is an array of indexes of the elements
 __attribute__((used)) void

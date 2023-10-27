@@ -1,4 +1,4 @@
-// Copyright (C) 2022 Deliberative Technologies P.C.
+// Copyright (C) 2023 Deliberative Technologies P.C.
 // SPDX-License-Identifier: Apache-2.0
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,9 +15,7 @@
 
 #include <stdint.h>
 
-#include "../../../libsodium/src/libsodium/include/sodium.h"
-// #include
-// "../../../libsodium/src/libsodium/include/sodium/crypto_hash_sha512.h"
+#include "../../../libsodium/src/libsodium/include/sodium/crypto_hash_sha512.h"
 
 __attribute__((used)) int
 sha512(const unsigned int DATA_LEN, const uint8_t data[DATA_LEN],
